@@ -10,4 +10,20 @@ Known SDK diagnostic: WebKit reports `Wrong protocol for WebSocket '[object Obje
 
 Build/typecheck and all 29 unit/socket tests passed. All 18 existing browser regressions passed on the redesign, including complete rounds, reconnect/rematch, clipboard, accessibility and responsive layout. After gesture hardening, the final focused Chromium run passed all nine tests (four phone-size readability tests plus accessibility, sound and tap-flow). The 430px readability scenario also passed three consecutive repeats. This is not a claim that the earlier full 22-test run passed; its swipe failures were investigated and fixed before the final focused run.
 
-Release evidence will be added after WebKit checks and frontend-only publication. The backend bundle remains unchanged, allowing active multiplayer sessions to continue without a PM2 restart; versioned assets from existing releases are retained for already-open clients.
+Final local WebKit checks passed all four sizes. On Tencent, all four Chromium and all four WebKit readability checks passed again, including navigation through the complete hand, preview, resize and absence of horizontal page overflow. The isolated caught SDK probe diagnostic remains recorded as described above; other page errors fail the tests.
+
+## Tencent release
+
+Application source commit `9581ee52bb5a2f2fc210fd73fbb4b382b3bd71ef` was pushed to GitHub and published to `http://43.156.11.241/Cariasec/`. New versioned assets were copied before atomic HTML replacement; older assets remain available for already-open clients. Server hash and PM2 PID `3457889` remained unchanged. Nginx was not edited; all configured public protected routes passed before/after publication.
+
+The online SQLite backup `/var/lib/cariasec/cariasec-pre-iphone-cards-1791902576716.sqlite` passed integrity validation. The preflight found no connected players. Prior frontend files are backed up at `/var/backups/Cariasec-iphone-ui-20261013225147`.
+
+Both live gameplay and sound scripts passed after publication (`tencent-live-smoke.json`, `tencent-sound-smoke.json`), checking Colyseus requests, private-hand refresh recovery, sound synchronization, mute/volume persistence and retained character-free UI. The live 375px board and 390px WebKit preview screenshots were visually inspected. This remains browser emulation, not physical iPhone/Safari or physical speaker verification.
+
+Local/deployed SHA-256 values match:
+
+- HTML: `b3095c189b48dc779ab8f4fb7e2f789f2fda741ab8af9b2f1c35b1041fa52302`
+- `index-Dt9OzLVP.js`: `4434bc1f65a365801466736ce8b946f3a4bc0bccfc5283cf7b1fd927be73dd53`
+- `PhaserBoard-CkjPozhI.js`: `e86ce1fe5d45cae363cb7f2ea44a04cf8c5c88cdcd92e0a70f1f10f3e0545ac5`
+
+The follow-up commit contains verification reports/documentation only.
