@@ -1,6 +1,6 @@
 # CARIASEC playful game UI
 
-Local implementation, 13 October 2026. Work is based on the existing GitHub-linked checkout. No commit, push or Tencent deployment is included in this change.
+Implemented and released on 13 October 2026. Application source commit `d5fa327e408af4f363e039f620bcc8a0edad28d5` was pushed to GitHub `main` and deployed at http://43.156.11.241/Cariasec/. The user's subsequent release instruction authorized publishing this work and set the standing implementation → checks → GitHub push → Tencent deploy → live verification workflow.
 
 ## Changes
 
@@ -25,5 +25,21 @@ Production build/typecheck passed. All 29 engine/socket/localization/data tests 
 Evidence is in the Playwright report and `docs/screenshots/ui-upgrade-*`. The regression suite exercises the real local Colyseus server, including complete rounds, network recovery, refresh, winner audio and rematch. New coverage checks shared avatars, actual Phaser first-frame readiness, tap requests, persistent motion preferences and a deliberately interrupted Phaser module request. Six-player layout and accessibility are checked at 320px as well as desktop.
 
 Production smoke testing uses the built local HTTP server and verifies both boards reach rendered-ready state, a request synchronizes, refresh restores the hand, CSP remains present, and no page errors or failed requests occur. This is not Tencent or physical iPhone/Safari verification.
+
+## Tencent release verification
+
+The release ran through the existing guarded deployment script. No rooms were active at preflight. An online SQLite backup at `/var/lib/cariasec/cariasec-pre-ui-1791899802844.sqlite` passed `PRAGMA integrity_check`. The prior application version remains in the deployment backup directory for rollback. Nginx configuration validation and all configured public protected-route checks passed before and after release; internal survivor status codes were unchanged.
+
+Both `node scripts/verify-live.mjs` and `npx.cmd tsx scripts/verify-live-sound.ts` passed against Tencent. Reports are `docs/tencent-live-smoke.json` and `docs/tencent-sound-smoke.json`. They verify two real browser clients over Colyseus WebSockets, rendered Phaser boards, shared girl-student/robot avatar choices, tap card requests, mobile action visibility, six progress badges, refresh recovery, persisted motion settings, real sound-source playback, gain/mute preferences and matching original WAV assets. No page errors or failed requests occurred. Layout checks covered 320/375/390/430px. `docs/screenshots/tencent-ui-upgrade-375.png` was visually inspected; screenshots remain local and are excluded from Git.
+
+The deployed server and main/Phaser bundles match the local release artifacts byte for byte:
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `dist/server.js` | `2e9876b2994f46ab9ba4c743feea429b86a83cb13bbf07e770a5cbf61fe20794` |
+| `index-D7oQxxJU.js` | `e2d1ff8a67ab41bf9aa8e243fdef826a7d778f7771b2cba124056b14b03118e9` |
+| `PhaserBoard-D7bIjQ8B.js` | `2c947b7e7013db3ab659e46ce5bac131c2dec801ef960646a98c1c005cf3aebb` |
+
+Live checks use Chromium desktop and mobile emulation. Physical speakers and actual Safari/iPhone devices remain untested. The verification follow-up commit contains reports/documentation and test-script improvements only; the deployed application code is the source commit above.
 
 Known build warning: Phaser's lazy chunk is larger than Vite's default 500kB advisory limit; it remains separately loaded from the main application. No additional art/audio/game dependencies were installed.

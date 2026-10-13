@@ -2,6 +2,8 @@
 
 Disediakan pada 13 Oktober 2026. Integrasi ini hanya untuk pembangunan setempat; tiada perubahan kod aplikasi, deploy, commit atau push dilakukan.
 
+Nota release: ayat di atas merekodkan skop task RTK asal. Selepas user mengarahkan push/deploy untuk release UI, fail konfigurasi pembangunan RTK turut dimasukkan dalam GitHub commit `d5fa327`. Binary RTK kekal pada komputer pembangunan dan tidak dipasang ke Tencent. Standing release workflow baharu direkodkan dalam AGENTS.md; arahan khusus no-push/no-deploy tetap diutamakan.
+
 ## Pemasangan dan persekitaran
 
 - Root: `C:\Users\User\Desktop\Cariasec`; Git branch `main` menjejak `origin/main`. Worktree bersih sebelum integrasi.

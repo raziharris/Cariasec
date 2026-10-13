@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-11T13:10:20.714Z",
+  "date": "2026-10-13T13:59:31.840Z",
   "url": "http://43.156.11.241/Cariasec/",
   "assets": [
     "click",
@@ -17,6 +17,11 @@
   "preferencesPersist": true,
   "phaserDealAndRequestAudio": true,
   "twoPlayerMultiplayer": true,
+  "sharedChosenAvatars": true,
+  "stickyMobileAction": true,
+  "sixFamilyProgressBadges": true,
+  "motionPreferencePersists": true,
+  "actualPhaserFrameReady": true,
   "reconnectSilent": true,
   "noDuplicateOrOverlappingSources": true,
   "errors": [],
