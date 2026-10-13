@@ -13,6 +13,9 @@ import type { BoardState } from "../game/boardTypes";
 import { soundManager, type SoundCue } from "../audio/SoundManager";
 import { LoadingCards } from './LoadingCards';
 import { useI18n } from '../i18n';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+interface HandLayout { page: number; pages: number; cardWidth: number; cardHeight: number; cardIds: string[] }
 
 export interface PhaserBoardRef {
   game: Phaser.Game | null;
@@ -37,6 +40,7 @@ export const PhaserBoard = forwardRef<PhaserBoardRef, PhaserBoardProps>(
     const [progress, setProgress] = useState(0);
     const [slow, setSlow] = useState(false);
     const [retry, setRetry] = useState(0);
+    const [handLayout, setHandLayout] = useState<HandLayout>({ page: 0, pages: 1, cardWidth: 0, cardHeight: 0, cardIds: [] });
     const parentId = `cariasec-phaser-${generatedId}`;
     const gameRef = useRef<Phaser.Game | null>(null);
     const sceneRef = useRef<Phaser.Scene | null>(null);
@@ -51,6 +55,8 @@ export const PhaserBoard = forwardRef<PhaserBoardRef, PhaserBoardProps>(
       const loading = (value: number, game: Phaser.Game) => { if (game === gameRef.current) setProgress(value); };
       EventBus.on('board-rendered', shown);
       EventBus.on('board-loading', loading);
+      const layout = (value: HandLayout, game: Phaser.Game) => { if (game === gameRef.current) setHandLayout(value); };
+      EventBus.on('hand-layout', layout);
       const slowTimer = window.setTimeout(() => setSlow(true), 10000);
       const sound = (cue: SoundCue) => soundManager.playSound(cue.name, cue.key);
       EventBus.on("game-sound", sound);
@@ -74,6 +80,7 @@ export const PhaserBoard = forwardRef<PhaserBoardRef, PhaserBoardProps>(
         window.clearTimeout(slowTimer);
         EventBus.off('board-rendered', shown);
         EventBus.off('board-loading', loading);
+        EventBus.off('hand-layout', layout);
         window.clearInterval(clockTimer);
         EventBus.off("current-scene-ready", ready);
         EventBus.emit("destroy-board");
@@ -105,7 +112,7 @@ export const PhaserBoard = forwardRef<PhaserBoardRef, PhaserBoardProps>(
     }, [onInspectCard, onSelectFamily, onSelectTarget]);
 
     return (
-      <div className={`board-container ${rendered ? 'board-ready' : ''}`} data-testid="board-container" aria-busy={!rendered}>
+      <div className={`board-container ${rendered ? 'board-ready' : ''}`} data-testid="board-container" aria-busy={!rendered} data-hand-page={handLayout.page} data-hand-cards={handLayout.cardIds.join(',')} data-card-width={handLayout.cardWidth} data-card-height={handLayout.cardHeight}>
       <div
         id={parentId}
         className="phaser-board"
@@ -113,6 +120,11 @@ export const PhaserBoard = forwardRef<PhaserBoardRef, PhaserBoardProps>(
         aria-label={`${state.labels.activeRound}. ${state.latestText}`}
         onPointerDownCapture={() => gameRef.current?.loop.wake()}
       />
+      {rendered && <div className="hand-pagination" aria-label={t('Navigasi kad anda')}>
+        <button aria-label={t('Kad sebelumnya')} disabled={handLayout.page === 0} onClick={() => EventBus.emit('hand-page', -1, gameRef.current)}><ChevronLeft size={20} /></button>
+        <span><b>{t('Kad anda')} · {handLayout.page + 1}/{handLayout.pages}</b><small>{t('Swipe untuk lihat · Tap untuk besarkan')}</small></span>
+        <button aria-label={t('Kad seterusnya')} disabled={handLayout.page === handLayout.pages - 1} onClick={() => EventBus.emit('hand-page', 1, gameRef.current)}><ChevronRight size={20} /></button>
+      </div>}
       {!rendered && <><LoadingCards progress={progress} />{slow && <button className="board-retry secondary" onClick={() => setRetry(n => n + 1)}>{t('Cuba muatkan papan semula')}</button>}</>}
       </div>
     );

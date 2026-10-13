@@ -1,4 +1,4 @@
-import { GameObjects, Geom, Scene } from "phaser";
+import { GameObjects, Geom, Scene, type Input } from "phaser";
 import { colors } from "../../cards/presentation";
 import { EventBus } from "../EventBus";
 import type { BoardCard, BoardState } from "../boardTypes";
@@ -22,12 +22,39 @@ export class CardTableScene extends Scene {
   private pendingState?: BoardState;
   private previousSoundKey?: string;
   private rendered = false;
+  private handPage = 0;
+  private handPages = 1;
+  private handTop = 0;
+  private selectedFamily?: BoardState['selectedFamily'];
+
+  private get density() { return this.game.registry.get('pixel-density') as number || 1; }
+
+  private endHandGesture(pointer: Input.Pointer) {
+    // Use the pointer's own down position so a redraw/resize cannot discard a
+    // gesture half-way through. The camera is origin-zero with density zoom.
+    const startY = pointer.downY / this.density;
+    if (startY < this.handTop || startY >= this.scale.height / this.density - 32) return;
+    const dx = (pointer.x - pointer.downX) / this.density;
+    const dy = (pointer.y - pointer.downY) / this.density;
+    if (Math.abs(dx) > 32 && Math.abs(dx) > Math.abs(dy) * 1.2) this.changeHandPage(dx < 0 ? 1 : -1, this.game);
+  }
+
+  private changeHandPage(delta: number, game: unknown) {
+    if (game !== this.game) return;
+    const next = Math.max(0, Math.min(this.handPages - 1, this.handPage + delta));
+    if (next === this.handPage) return;
+    this.handPage = next;
+    this.redraw();
+  }
 
   constructor() {
     super("CardTable");
   }
 
   create() {
+    this.cameras.main.setOrigin(0, 0).setZoom(this.density);
+    this.input.on('pointerup', this.endHandGesture, this);
+    EventBus.on('hand-page', this.changeHandPage, this);
     EventBus.on("board-state", this.receiveState, this);
     EventBus.on("board-clock", this.tickClock, this);
     EventBus.on("destroy-board", this.shutdown, this);
@@ -70,6 +97,8 @@ export class CardTableScene extends Scene {
     EventBus.off("board-state", this.receiveState, this);
     EventBus.off("board-clock", this.tickClock, this);
     EventBus.off("destroy-board", this.shutdown, this);
+    EventBus.off('hand-page', this.changeHandPage, this);
+    this.input?.off('pointerup', this.endHandGesture, this);
     this.scale.off("resize", this.redraw, this);
     if (this.restTimer) window.clearTimeout(this.restTimer);
     this.clock = undefined;
@@ -114,16 +143,26 @@ export class CardTableScene extends Scene {
     if (!this.state) return;
     this.game.loop.wake();
     this.scheduleRest(100);
+    const width = this.scale.width / this.density;
+    const height = this.scale.height / this.density;
+    // Route/viewport transitions may briefly collapse the parent; don't draw
+    // rounded rectangles with negative dimensions during that transient frame.
+    if (width < 96 || height < 240) return;
     this.layer?.destroy(true);
     this.layer = this.add.container(0, 0);
-    const width = this.scale.width;
-    const height = this.scale.height;
     const compact = width < 720;
     this.drawTable(width, height);
     this.drawStatus(width, compact);
     this.drawOpponents(width, compact);
     this.drawCenter(width, height, compact);
     this.drawHand(width, height, compact);
+    const sharpen = (objects: GameObjects.GameObject[]) => {
+      for (const object of objects) {
+        if (object instanceof GameObjects.Text) object.setResolution(this.density);
+        if (object instanceof GameObjects.Container) sharpen(object.list);
+      }
+    };
+    sharpen(this.layer.list);
     if (!this.rendered) {
       this.rendered = true;
       this.game.events.once('postrender', () => EventBus.emit('board-rendered', this.game));
@@ -226,7 +265,7 @@ export class CardTableScene extends Scene {
 
   private drawCenter(width: number, height: number, compact: boolean) {
     const state = this.state!;
-    const centerY = compact ? height * (state.players.length > 4 ? 0.53 : 0.45) : height * 0.42;
+    const centerY = compact ? (state.players.length > 4 ? 212 : 153) : height * 0.35;
     const deckX = compact ? width * 0.22 : width * 0.3;
     const deckW = compact ? 64 : 82;
     const deckH = deckW * 1.38;
@@ -313,23 +352,31 @@ export class CardTableScene extends Scene {
 
   private drawHand(width: number, height: number, compact: boolean) {
     const state = this.state!;
-    if (!state.hand.length) return;
-    const hand = state.hand.length > (compact ? 8 : 12)
-      ? state.hand.filter(card => card.category === state.selectedFamily)
-      : state.hand;
-    const cardW = compact ? 76 : 112;
-    const cardH = cardW * 1.34;
-    const maxSpread = width - (compact ? 30 : 70);
-    const step = Math.min(cardW * 0.76, (maxSpread - cardW) / Math.max(1, hand.length - 1));
+    const gap = compact ? 12 : 18;
+    const perPage = compact ? 2 : Math.max(2, Math.floor((width - 48) / 172));
+    this.handPages = Math.max(1, Math.ceil(state.hand.length / perPage));
+    if (this.selectedFamily !== state.selectedFamily) {
+      const first = state.hand.findIndex(card => card.category === state.selectedFamily);
+      if (first >= 0) this.handPage = Math.floor(first / perPage);
+      this.selectedFamily = state.selectedFamily;
+    }
+    this.handPage = Math.min(this.handPage, this.handPages - 1);
+    const hand = state.hand.slice(this.handPage * perPage, (this.handPage + 1) * perPage);
+    const cardW = Math.min(compact ? 144 : 154, (width - 28 - gap * (perPage - 1)) / perPage);
+    const cardH = Math.max(202, cardW * 1.55);
+    const step = cardW + gap;
     const total = cardW + step * (hand.length - 1);
     const startX = (width - total) / 2 + cardW / 2;
-    const baseY = height - cardH / 2 - (compact ? 15 : 20);
+    const baseY = height - cardH / 2 - 42;
+    this.handTop = baseY - cardH / 2 - 12;
+    EventBus.emit('hand-layout', { page: this.handPage, pages: this.handPages, cardWidth: cardW, cardHeight: cardH, cardIds: hand.map(card => card.id) }, this.game);
+    if (!hand.length) return;
     const newHand = new Set(state.hand.map((card) => card.id));
     hand.forEach((card, index) => {
       const selected = card.category === state.selectedFamily;
       const targetX = startX + index * step;
-      const targetY = baseY - (selected ? 12 : 0) - Math.sin((index / Math.max(1, hand.length - 1)) * Math.PI) * 8;
-      const rotation = (index - (hand.length - 1) / 2) * (compact ? 0.018 : 0.025);
+      const targetY = baseY - (selected ? 6 : 0);
+      const rotation = 0;
       const container = this.makeCard(card, cardW, cardH, selected);
       container.setPosition(targetX, targetY).setRotation(rotation).setDepth(index + (selected ? 50 : 0));
       container.setInteractive(
@@ -350,7 +397,8 @@ export class CardTableScene extends Scene {
         this.input.setDefaultCursor("default");
         if (!state.reducedMotion) this.tweens.add({ targets: container, y: targetY, duration: 120 });
       });
-      container.on("pointerdown", () => {
+      container.on("pointerup", (pointer: Input.Pointer) => {
+        if (Math.abs(pointer.x - pointer.downX) > 10 * this.density || Math.abs(pointer.y - pointer.downY) > 10 * this.density) return;
         EventBus.emit("game-sound", { name: "card" });
         EventBus.emit("select-family", card.category);
         EventBus.emit("inspect-card", card.id);
@@ -386,15 +434,15 @@ export class CardTableScene extends Scene {
     frame.lineStyle(selected ? 4 : 2, selected ? 0xf1c15f : hex(colors[card.category]), 1);
     frame.strokeRoundedRect(-width / 2, -height / 2, width, height, 11);
     frame.fillStyle(hex(colors[card.category]), 1);
-    frame.fillRoundedRect(-width / 2 + 5, -height / 2 + 5, width - 10, height * 0.22, 7);
-    const art = this.add.image(0, -height * 0.04, card.id);
+    frame.fillRoundedRect(-width / 2 + 5, -height / 2 + 5, width - 10, 26, 7);
+    const art = this.add.image(0, -height * 0.025, card.id);
     const maxArtW = width * 0.86;
-    const maxArtH = height * 0.55;
+    const maxArtH = height * 0.60;
     art.setScale(Math.min(maxArtW / art.width, maxArtH / art.height));
     const family = this.add
       .text(-width / 2 + 11, -height / 2 + 10, card.category, {
         fontFamily: "Nunito Sans, Arial",
-        fontSize: `${Math.max(12, width * 0.14)}px`,
+        fontSize: '15px',
         fontStyle: "bold",
         color: "#ffffff",
       })
@@ -402,7 +450,7 @@ export class CardTableScene extends Scene {
     const title = this.add
       .text(0, height * 0.34, card.title, {
         fontFamily: "Nunito Sans, Arial",
-        fontSize: `${Math.max(9, width * 0.095)}px`,
+        fontSize: `${width < 130 ? 12 : 14}px`,
         fontStyle: "bold",
         color: "#17352d",
         align: "center",
@@ -415,8 +463,8 @@ export class CardTableScene extends Scene {
 
   private playEventEffect(state: BoardState) {
     if (state.reducedMotion || !state.latest) return;
-    const width = this.scale.width;
-    const height = this.scale.height;
+    const width = this.scale.width / this.density;
+    const height = this.scale.height / this.density;
     if (state.latest.kind === "transfer" && state.latest.card && this.textures.exists(state.latest.card)) {
       const flying = this.add.image(width * 0.5, height * 0.22, state.latest.card).setDepth(500).setAlpha(0).setScale(0.12);
       this.tweens.add({

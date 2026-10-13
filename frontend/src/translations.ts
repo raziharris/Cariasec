@@ -1,5 +1,9 @@
 // Malay source strings are explicit translation keys; player names are never translated.
 export const english: Record<string, string> = {
+  'Navigasi kad anda': 'Your card navigation',
+  'Kad sebelumnya': 'Previous cards',
+  'Kad seterusnya': 'Next cards',
+  'Swipe untuk lihat · Tap untuk besarkan': 'Swipe to browse · Tap to enlarge',
   'Browser menyekat salinan automatik. Pilih kod dan salin secara manual.': 'Your browser blocked automatic copying. Select the code and copy it manually.',
   'Papan belum berjaya dimuatkan. Sesi anda masih disimpan.': 'The board could not load. Your session is still saved.',
   'Muat semula halaman': 'Reload page',

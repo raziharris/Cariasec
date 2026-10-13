@@ -1,0 +1,13 @@
+# iPhone-first card readability
+
+The former phone hand used 76px overlapping cards with ~56px artwork and 9px labels. It now presents two complete, upright cards per page, 116–144px wide and at least 202px tall, with ~121–134px artwork and 12–14px job labels. All hand cards remain reachable; large hands are no longer silently restricted to the selected family. Horizontal gestures and 44px previous/next controls browse the hand. A tap opens the existing larger card preview; a swipe does not open it. Card movements, sounds, reduced motion and the accessible React hand mirror remain intact.
+
+The Phaser canvas uses a device-density backing buffer capped at 2x, a CSS-pixel camera and matching high-resolution text textures. A ResizeObserver tracks real container sizes and disconnects at game teardown. Guards avoid negative drawing dimensions while route/viewport transitions temporarily collapse the container. Phone request-card choices also use two larger columns. Preview artwork uses contain sizing, and its modal now sits above the fixed request dock. Existing occupation images and all multiplayer rules remain unchanged.
+
+Browser coverage targets 320/375/390/430px at simulated DPR 3, full hand navigation, touch swipes (Chromium), preview tap/close and portrait-to-landscape resizing. WebKit coverage uses mouse-drag browsing and touchscreen taps in mobile emulation; this is not physical iPhone Safari testing.
+
+Known SDK diagnostic: WebKit reports `Wrong protocol for WebSocket '[object Object]'` when Colyseus 0.18.5 probes the Node WebSocket constructor signature. An isolated `try/catch` reproduced this pageerror even though the exception is caught. The SDK subsequently connects through its normal browser fallback. Tests retain this exact diagnostic separately in attachments while still failing on any other page errors. No transport/gameplay code or dependency was modified to suppress it.
+
+Build/typecheck and all 29 unit/socket tests passed. All 18 existing browser regressions passed on the redesign, including complete rounds, reconnect/rematch, clipboard, accessibility and responsive layout. After gesture hardening, the final focused Chromium run passed all nine tests (four phone-size readability tests plus accessibility, sound and tap-flow). The 430px readability scenario also passed three consecutive repeats. This is not a claim that the earlier full 22-test run passed; its swipe failures were investigated and fixed before the final focused run.
+
+Release evidence will be added after WebKit checks and frontend-only publication. The backend bundle remains unchanged, allowing active multiplayer sessions to continue without a PM2 restart; versioned assets from existing releases are retained for already-open clients.
