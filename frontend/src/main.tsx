@@ -75,7 +75,6 @@ import type { BoardState } from "./game/boardTypes";
 import { SoundProvider, useSound } from "./audio/SoundProvider";
 import { SoundSettings } from "./audio/SoundSettings";
 import { useGameSound } from "./audio/useGameSound";
-import { Avatar, AvatarPicker } from './components/AvatarPicker';
 import { LoadingCards } from './components/LoadingCards';
 import { GameControls } from './components/GameControls';
 import { GameHud } from './components/GameHud';
@@ -109,7 +108,6 @@ function App() {
     language,
     setLanguage,
     rememberName,
-    setAvatar,
     setReducedMotion,
     message,
     logText,
@@ -559,7 +557,7 @@ function App() {
                   <div className="lobby-players">
                     {room.players.map((p, i) => (
                       <div className="lobby-player" key={p.id}>
-                        <span className={`avatar avatar-${i}`}><Avatar id={p.avatar} /></span>
+                        <span className={`avatar avatar-${i}`} aria-hidden="true">{short(p.name)}</span>
                         <div>
                           <b>
                             {p.name}{" "}
@@ -900,7 +898,7 @@ function App() {
                         key={p.id}
                         className={room.winners.includes(p.id) ? "winner" : ""}
                       >
-                        <span className="avatar"><Avatar id={p.avatar} /></span>
+                        <span className="avatar" aria-hidden="true">{short(p.name)}</span>
                         <div>
                           <b>
                             {p.name}{" "}
@@ -973,7 +971,6 @@ function App() {
             <h2 id="settings-title">{t("Tetapan")}</h2>
             <SoundSettings />
             <label className="motion-setting"><input type="checkbox" checked={profile.reducedMotion} onChange={e => setReducedMotion(e.target.checked)} />{t('Kurangkan animasi')}</label>
-            {!room && <AvatarPicker value={profile.avatar} onChange={setAvatar} />}
           </section>
         </div>
       )}
@@ -1015,13 +1012,11 @@ function App() {
                       ? {
                           type: "create",
                           nickname,
-                          avatar: profile.avatar,
                           settings: { turnSeconds: seconds, maxActions: limit },
                         }
                       : {
                           type: "join",
                           nickname,
-                          avatar: profile.avatar,
                           code: code.toUpperCase().trim(),
                         },
                   );

@@ -3,11 +3,10 @@ import { ArrowRight, Check } from "lucide-react";
 import { useI18n } from "../i18n";
 import { assetUrl } from "../cards/presentation";
 import { useSound } from "../audio/SoundProvider";
-import { AvatarPicker } from './AvatarPicker';
 
 export function Welcome() {
   const { playSound } = useSound();
-  const { profile, language, setLanguage, setAvatar, finishSetup, t } = useI18n();
+  const { profile, language, setLanguage, finishSetup, t } = useI18n();
   const [name, setName] = useState(profile.name);
   const [invalid, setInvalid] = useState(false);
   return (
@@ -50,7 +49,6 @@ export function Welcome() {
               {t("2–20 aksara: huruf, nombor, ruang, titik, _ atau -.")}
             </p>
           )}
-          <AvatarPicker value={profile.avatar} onChange={setAvatar} />
           <fieldset className="language-options">
             <legend>
               {language === "ms" ? "Bahasa / Language" : "Language / Bahasa"}

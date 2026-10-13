@@ -1,6 +1,5 @@
 import type { Category, LogEntry } from "../../../shared/game";
 import type { SoundCue } from "../audio/SoundManager";
-import type { AvatarId } from '../../../shared/avatar';
 
 export interface BoardCard {
   id: string;
@@ -13,7 +12,6 @@ export interface BoardCard {
 export interface BoardPlayer {
   id: string;
   name: string;
-  avatar?: AvatarId;
   connected: boolean;
   count: number;
   families: Category[];

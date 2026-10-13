@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { onboard } from '../helpers/onboard';
 
-test('touch card flow, shared avatars, rendered Phaser board and motion settings', async ({ browser }) => {
+test('touch card flow without characters, rendered Phaser board and motion settings', async ({ browser }) => {
   const hostContext = await browser.newContext({ viewport: { width: 375, height: 844 }, isMobile: true, hasTouch: true });
   const guestContext = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const host = await hostContext.newPage(), guest = await guestContext.newPage();
@@ -15,20 +15,21 @@ test('touch card flow, shared avatars, rendered Phaser board and motion settings
   for (const p of [host, guest]) p.on('pageerror', e => errors.push(e.message));
   try {
     await host.goto('/');
-    await host.getByRole('radio', { name: 'Pelajar perempuan', exact: true }).check();
+    await expect(host.locator('.avatar-picker, .character-avatar')).toHaveCount(0);
+    await expect(host.getByText('Pilih watak anda', { exact: true })).toHaveCount(0);
     await onboard(host, 'Aina');
     await host.getByRole('button', { name: 'Buka bilik' }).click();
     await host.getByRole('button', { name: 'Cipta bilik', exact: true }).click();
     const code = await host.getByTestId('room-code').innerText();
     await guest.goto('/');
-    await guest.getByRole('radio', { name: 'Robot', exact: true }).check();
+    await expect(guest.locator('.avatar-picker, .character-avatar')).toHaveCount(0);
     await onboard(guest, 'Razi');
     await guest.getByRole('button', { name: 'Sertai', exact: true }).click();
     await guest.getByLabel('Kod bilik', { exact: true }).fill(code);
     await guest.getByRole('button', { name: 'Masuk bilik' }).click();
-    const hostAvatar = await host.locator('.lobby-player').filter({ hasText: 'Aina' }).locator('img').getAttribute('src');
-    await expect(guest.locator('.lobby-player').filter({ hasText: 'Aina' }).locator('img')).toHaveAttribute('src', hostAvatar!);
-    await expect(host.locator('.lobby-player').filter({ hasText: 'Razi' }).locator('img')).toHaveAttribute('src', /svg/);
+    await expect(guest.locator('.lobby-player').filter({ hasText: 'Aina' }).locator('.avatar')).toHaveText('A');
+    await expect(host.locator('.lobby-player').filter({ hasText: 'Razi' }).locator('.avatar')).toHaveText('R');
+    await expect(host.locator('.lobby-player img')).toHaveCount(0);
     for (const p of [host, guest]) await p.getByRole('button', { name: 'Saya sedia', exact: true }).click();
     await host.getByRole('button', { name: 'Mula', exact: true }).click();
     for (const p of [host, guest]) {
@@ -57,12 +58,13 @@ test('touch card flow, shared avatars, rendered Phaser board and motion settings
     await host.screenshot({ path: 'docs/screenshots/ui-upgrade-game-375.png', fullPage: true });
     await guest.screenshot({ path: 'docs/screenshots/ui-upgrade-game-desktop.png', fullPage: true });
     await host.getByRole('button', { name: 'Tetapan', exact: true }).click();
+    await expect(host.locator('.avatar-picker, .character-avatar')).toHaveCount(0);
     await host.getByLabel('Kurangkan animasi').check();
     await host.getByRole('button', { name: 'Tutup', exact: true }).click();
     await host.reload();
     await expect(host.getByTestId('board-container')).toHaveAttribute('aria-busy', 'false');
     await expect(host.locator('html')).toHaveAttribute('data-motion', 'reduced');
-    await expect(guest.locator('.target-choice').filter({ hasText: 'Aina' }).locator('img')).toHaveAttribute('src', hostAvatar!);
+    await expect(guest.locator('.target-choice').filter({ hasText: 'Aina' }).locator('.player-mark')).toHaveText('A');
     await host.getByRole('button', { name: 'Tetapan', exact: true }).click();
     await expect(host.getByLabel('Kurangkan animasi')).toBeChecked();
     await host.getByRole('button', { name: 'Tutup', exact: true }).click();

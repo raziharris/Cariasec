@@ -263,7 +263,6 @@ export function viewFor(r: Room, id: string): View {
     players: r.players.map((p) => ({
       id: p.id,
       name: p.name,
-      avatar: p.avatar ?? 'cat',
       connected: p.connected,
       ready: p.ready,
       count: p.hand.length,

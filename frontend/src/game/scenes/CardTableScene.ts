@@ -2,8 +2,6 @@ import { GameObjects, Geom, Scene } from "phaser";
 import { colors } from "../../cards/presentation";
 import { EventBus } from "../EventBus";
 import type { BoardCard, BoardState } from "../boardTypes";
-import { avatarIds } from '../../../../shared/avatar';
-import { avatarSvg } from '../../avatars';
 
 const hex = (value: string) => Number.parseInt(value.slice(1), 16);
 const initials = (name: string) =>
@@ -194,9 +192,12 @@ export class CardTableScene extends Scene {
         EventBus.emit("game-sound", { name: "click" });
         EventBus.emit("select-target", player.id);
       });
-      const avatar = this.add.image(x + (compact ? 18 : 25), y + (compact ? 24 : 32), `avatar-${player.avatar ?? 'cat'}`).setDisplaySize(compact ? 28 : 40, compact ? 28 : 40);
-      const avatarText = this.add
-        .text(avatar.x, y + (compact ? 45 : 63), player.connected ? '●' : '○', {
+      const mark = this.add.circle(x + (compact ? 18 : 25), y + (compact ? 24 : 32), compact ? 14 : 20, 0xe8eee3);
+      const markText = this.add.text(mark.x, mark.y, initials(player.name), {
+        fontFamily: 'Nunito Sans, Arial', fontSize: compact ? '11px' : '14px', fontStyle: 'bold', color: '#17352d',
+      }).setOrigin(0.5);
+      const connection = this.add
+        .text(mark.x, y + (compact ? 45 : 63), player.connected ? '●' : '○', {
           fontFamily: "Nunito Sans, Arial",
           fontSize: compact ? "10px" : "12px",
           fontStyle: "bold",
@@ -219,7 +220,7 @@ export class CardTableScene extends Scene {
           color: selected ? "#315c4f" : "#b9d3c9",
         },
       );
-      this.layer!.add([panel, avatar, avatarText, name, meta]);
+      this.layer!.add([panel, mark, markText, connection, name, meta]);
     });
   }
 
@@ -452,7 +453,6 @@ export class CardTableScene extends Scene {
 
   preload() {
     this.load.on('progress', (value: number) => EventBus.emit('board-loading', value, this.game));
-    for (const id of avatarIds) this.load.svg(`avatar-${id}`, `data:image/svg+xml;base64,${btoa(avatarSvg(id))}`, { width: 96, height: 96 });
     // Every career card can enter the hand after a Colyseus state update.
     const base = import.meta.env.BASE_URL;
     for (const category of ["R", "I", "A", "S", "E", "C"] as const) {

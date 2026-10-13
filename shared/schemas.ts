@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { nicknamePattern } from "./nickname";
-import { avatarIds } from './avatar';
 export const nickname = z.string().trim().min(2).max(20).regex(nicknamePattern);
 export const settingsSchema = z
   .object({
@@ -13,7 +12,6 @@ export const commandSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("create"),
     nickname,
-    avatar: z.enum(avatarIds).optional(),
     settings: settingsSchema,
     serverCode: z
       .string()
@@ -23,7 +21,6 @@ export const commandSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("join"),
     nickname,
-    avatar: z.enum(avatarIds).optional(),
     code: z.string().regex(/^[A-Z2-9]{6}$/),
   }),
   z.object({

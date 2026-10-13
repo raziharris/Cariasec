@@ -2,7 +2,6 @@ import { chromium, expect } from '@playwright/test';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { observeAudio, audioStarts, resetAudio } from '../tests/helpers/audioProbe';
 import { onboard } from '../tests/helpers/onboard';
-import { avatarUrl } from '../frontend/src/avatars';
 
 const base = 'http://43.156.11.241/Cariasec/';
 const browser = await chromium.launch();
@@ -22,6 +21,8 @@ try {
     page.on('pageerror', e => errors.push(e.message));
     await observeAudio(page);
     await page.goto(base);
+    await expect(page.locator('.avatar-picker, .character-avatar')).toHaveCount(0);
+    await expect(page.getByText('Pilih watak anda', { exact: true })).toHaveCount(0);
     expect(await audioStarts(page)).toEqual([]);
     await page.locator('#player-name').click();
     await expect.poll(() => page.evaluate(() => (window as any).__audioProbe.decoded.length)).toBe(6);
@@ -67,19 +68,18 @@ try {
     page.on('requestfailed', r => failedRequests.push(`${r.failure()?.errorText}: ${r.url()}`));
     await observeAudio(page); await page.goto(base);
   }
-  await host.getByRole('radio', { name: 'Pelajar perempuan', exact: true }).check();
   await onboard(host, 'Bunyi Hos');
   await host.getByRole('button', { name: 'Buka bilik' }).click();
   await host.getByRole('button', { name: 'Cipta bilik', exact: true }).click();
   const code = await host.getByTestId('room-code').innerText();
-  await guest.getByRole('radio', { name: 'Robot', exact: true }).check();
   await onboard(guest, 'Bunyi Tetamu');
   await guest.getByRole('button', { name: 'Sertai', exact: true }).click();
   await guest.getByLabel('Kod bilik', { exact: true }).fill(code);
   await guest.getByRole('button', { name: 'Masuk bilik' }).click();
   for (const page of [host, guest]) {
-    await expect(page.locator('.lobby-player').filter({ hasText: 'Bunyi Hos' }).locator('img')).toHaveAttribute('src', avatarUrl('student-girl'));
-    await expect(page.locator('.lobby-player').filter({ hasText: 'Bunyi Tetamu' }).locator('img')).toHaveAttribute('src', avatarUrl('robot'));
+    await expect(page.locator('.lobby-player').filter({ hasText: 'Bunyi Hos' }).locator('.avatar')).toHaveText('BH');
+    await expect(page.locator('.lobby-player').filter({ hasText: 'Bunyi Tetamu' }).locator('.avatar')).toHaveText('BT');
+    await expect(page.locator('.lobby-player img')).toHaveCount(0);
   }
   for (const page of [host, guest]) await page.getByRole('button', { name: 'Saya sedia', exact: true }).click();
   await host.waitForTimeout(100);
@@ -110,7 +110,7 @@ try {
   await guest.reload();
   await expect(guest.getByTestId('board-container')).toHaveAttribute('aria-busy', 'false');
   await expect(guest.locator('html')).toHaveAttribute('data-motion', 'reduced');
-  await expect(guest.locator('.target-choice').filter({ hasText: 'Bunyi Hos' }).locator('img')).toHaveAttribute('src', avatarUrl('student-girl'));
+  await expect(guest.locator('.target-choice').filter({ hasText: 'Bunyi Hos' }).locator('.player-mark')).toHaveText('BH');
   expect(await audioStarts(guest)).toEqual([]);
   await host.screenshot({ path: 'docs/screenshots/tencent-ui-upgrade-375.png', fullPage: true });
   await host.getByRole('button', { name: 'Keluar', exact: true }).click();
@@ -118,7 +118,7 @@ try {
   await Promise.all(contexts.map(c => c.close()));
   expect(errors).toEqual([]);
   expect(failedRequests).toEqual([]);
-  const result = { date: new Date().toISOString(), url: base, assets, realWebAudioPlayback: true, desktopAndMobileEmulation: true, defaultVolume45: true, liveGain20: true, muteUnmute: true, preferencesPersist: true, phaserDealAndRequestAudio: true, twoPlayerMultiplayer: true, sharedChosenAvatars: true, stickyMobileAction: true, sixFamilyProgressBadges: true, motionPreferencePersists: true, actualPhaserFrameReady: true, reconnectSilent: true, noDuplicateOrOverlappingSources: true, errors, failedRequests, limitations: 'Chromium desktop and mobile emulation; physical speakers and actual Safari/iPhone not tested.' };
+  const result = { date: new Date().toISOString(), url: base, assets, realWebAudioPlayback: true, desktopAndMobileEmulation: true, defaultVolume45: true, liveGain20: true, muteUnmute: true, preferencesPersist: true, phaserDealAndRequestAudio: true, twoPlayerMultiplayer: true, characterSelectionRemoved: true, neutralPlayerIdentity: true, stickyMobileAction: true, sixFamilyProgressBadges: true, motionPreferencePersists: true, actualPhaserFrameReady: true, reconnectSilent: true, noDuplicateOrOverlappingSources: true, errors, failedRequests, limitations: 'Chromium desktop and mobile emulation; physical speakers and actual Safari/iPhone not tested.' };
   writeFileSync('docs/tencent-sound-smoke.json', JSON.stringify(result, null, 2) + '\n');
   console.log(JSON.stringify(result, null, 2));
 } finally { await browser.close(); }

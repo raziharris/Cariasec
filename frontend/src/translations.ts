@@ -2,8 +2,6 @@
 export const english: Record<string, string> = {
   'Papan belum berjaya dimuatkan. Sesi anda masih disimpan.': 'The board could not load. Your session is still saved.',
   'Muat semula halaman': 'Reload page',
-  'Pilih watak anda': 'Choose your character',
-  'Kucing': 'Cat', 'Arnab': 'Rabbit', 'Robot': 'Robot', 'Pelajar lelaki': 'Boy student', 'Pelajar perempuan': 'Girl student',
   'Kurangkan animasi': 'Reduce motion',
   'Menyusun kad anda...': 'Dealing your cards...',
   'Papan permainan sedang disediakan.': 'Getting your game board ready.',

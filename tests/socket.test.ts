@@ -103,24 +103,28 @@ async function harness(options: Options = {}) {
   };
 }
 const settings = { turnSeconds: 60, maxActions: 60 } as const;
-test('cosmetic avatars are validated, shared and retained on authenticated resume', async () => {
+test('legacy character metadata is ignored and player identity survives authenticated resume', async () => {
   const h = await harness();
   try {
-    const host = await h.client(), guest = await h.client(), invalid = await h.client();
-    assert.equal((await host.send({ type: 'create', nickname: 'Aina', avatar: 'student-girl', settings })).ok, true);
+    const host = await h.client(), guest = await h.client();
+    assert.equal((await host.send({ type: 'create', nickname: 'Aina', avatar: 'student-girl', settings } as unknown as Command)).ok, true);
     const code = host.session!.code;
-    assert.equal((await guest.send({ type: 'join', nickname: 'Razi', avatar: 'robot', code })).ok, true);
+    assert.equal((await guest.send({ type: 'join', nickname: 'Razi', avatar: 'robot', code } as unknown as Command)).ok, true);
     await until(() => host.view!.players.length === 2);
-    assert.deepEqual(host.view!.players.map(p => p.avatar), ['student-girl', 'robot']);
-    assert.deepEqual(guest.view!.players.map(p => p.avatar), ['student-girl', 'robot']);
-    assert.equal((await invalid.send({ type: 'join', nickname: 'Invalid', code, avatar: 'unknown' } as unknown as Command)).ok, false);
+    assert.deepEqual(host.view!.players.map(p => p.name), ['Aina', 'Razi']);
+    assert.ok(host.view!.players.every(p => !('avatar' in p)));
+    assert.ok(guest.view!.players.every(p => !('avatar' in p)));
     assert.equal(host.view!.players.length, 2);
     const session = host.session!;
+    const playerId = host.view!.you;
     host.socket.disconnect();
     await until(() => !guest.view!.players[0].connected);
     const resumed = await h.client();
     assert.equal((await resumed.send({ type: 'resume', ...session })).ok, true);
-    assert.equal(resumed.view!.players.find(p => p.id === resumed.view!.you)!.avatar, 'student-girl');
+    const player = resumed.view!.players.find(p => p.id === resumed.view!.you)!;
+    assert.equal(player.name, 'Aina');
+    assert.equal(player.id, playerId);
+    assert.ok(!('avatar' in player));
   } finally { await h.dispose(); }
 });
 test("custom base path scopes health and Colyseus", async () => {

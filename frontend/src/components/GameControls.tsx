@@ -3,7 +3,7 @@ import { ArrowRight, Trophy, Wifi, WifiOff, Check } from 'lucide-react';
 import type { Category, View } from '../../../shared/game';
 import { useI18n } from '../i18n';
 import { assetUrl, colors } from '../cards/presentation';
-import { Avatar } from './AvatarPicker';
+import { PlayerMark } from './PlayerMark';
 
 export function GameControls({ room, target, family, requested, busy, online, onTarget, onFamily, onCard, onSubmit, onPreview }: {
   room: View; target: string; family: Category; requested: string; busy: boolean; online: boolean;
@@ -31,7 +31,7 @@ export function GameControls({ room, target, family, requested, busy, online, on
       <div className="selection-heading"><span>1</span><h3>{t('Pilih rakan')}</h3><small>{t('Tap untuk memilih')}</small></div>
       <div className="target-choices">
         {opponents.map(p => <button key={p.id} className={`target-choice ${target === p.id ? 'selected' : ''} ${room.turn === p.id ? 'active-turn' : ''}`} aria-label={t('Pilih {name}', { name: p.name })} aria-pressed={target === p.id} disabled={!p.count} onClick={() => onTarget(p.id)}>
-          <Avatar id={p.avatar} /><span><b>{p.name}</b><small>{p.count} {t('kad')} · {p.families.length} <Trophy size={11} /></small></span>{p.connected ? <Wifi size={14} /> : <WifiOff size={14} />}
+          <PlayerMark name={p.name} /><span><b>{p.name}</b><small>{p.count} {t('kad')} · {p.families.length} <Trophy size={11} /></small></span>{p.connected ? <Wifi size={14} /> : <WifiOff size={14} />}
         </button>)}
       </div>
       <div className="selection-heading"><span>2</span><h3>{t('Pilih keluarga')}</h3></div>
