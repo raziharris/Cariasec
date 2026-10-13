@@ -1,5 +1,6 @@
 import { LanguageProvider, useI18n } from "./i18n";
 import { createActionId } from "./actionId";
+import { copyText } from './clipboard';
 import { Welcome } from "./components/Welcome";
 import { RulesPage } from "./pages/RulesPage";
 import { LearnPage } from "./pages/LearnPage";
@@ -129,7 +130,17 @@ function App() {
     [requested, setRequested] = useState(""),
     [family, setFamily] = useState<Category>("R"),
     [copied, setCopied] = useState(false),
+    [manualCopyCode, setManualCopyCode] = useState<string | null>(null),
     [now, setNow] = useState(Date.now());
+  const copyTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const copying = React.useRef(false);
+  const currentRoomCode = React.useRef(room?.code);
+  currentRoomCode.current = room?.code;
+  useEffect(() => {
+    setCopied(false);
+    setManualCopyCode(null);
+    return () => { if (copyTimer.current) clearTimeout(copyTimer.current); };
+  }, [room?.code]);
   const osReduced = useReducedMotion();
   const reduced = Boolean(osReduced || profile.reducedMotion);
   const [roomConnected, setRoomConnected] = useState(true);
@@ -338,13 +349,20 @@ function App() {
     }
   }
   async function copyCode() {
-    try {
-      await navigator.clipboard.writeText(room!.code);
+    const text = room?.code;
+    if (!text || copying.current) return;
+    copying.current = true;
+    const success = await copyText(text);
+    copying.current = false;
+    if (currentRoomCode.current !== text) return;
+    if (copyTimer.current) clearTimeout(copyTimer.current);
+    setCopied(success);
+    setManualCopyCode(success ? null : text);
+    if (success) {
       playSound("confirm");
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setError(`Salin kod bilik: ${room!.code}`);
+      copyTimer.current = setTimeout(() => setCopied(false), 2000);
+    } else {
+      playSound('error');
     }
   }
   const me = room?.players.find((p) => p.id === room.you),
@@ -532,6 +550,12 @@ function App() {
                 {t("Keluar")}
               </button>
             </div>
+            {copied && <p className="copy-feedback" role="status">{t('Kod disalin')}</p>}
+            {manualCopyCode === room.code && <div className="manual-copy">
+              <p role="status">{t('Browser menyekat salinan automatik. Pilih kod dan salin secara manual.')}</p>
+              <label htmlFor="manual-room-code">{t('KOD BILIK')}</label>
+              <input id="manual-room-code" value={room.code} readOnly autoFocus onFocus={e => e.currentTarget.select()} onClick={e => e.currentTarget.select()} />
+            </div>}
             {room.phase === "lobby" && (
               <div className="lobby">
                 <div className="lobby-intro">

@@ -1,4 +1,9 @@
 .player-mark { display:grid; place-items:center; width:48px; height:48px; border-radius:50%; flex-shrink:0; background:#d9e4d4; color:#17352d; font-size:16px; font-weight:800; }
+.copy-feedback, .manual-copy { width:min(1040px,calc(100% - 32px)); margin:10px auto; color:#17352d; }
+.manual-copy { padding:16px; border:2px solid #b2c5af; border-radius:16px; background:#fffaf0; }
+.manual-copy p { margin:0 0 12px; }
+.manual-copy label { display:block; font-weight:800; font-size:12px; margin-bottom:6px; }
+.manual-copy input { width:100%; max-width:240px; font-size:20px; letter-spacing:3px; }
 .motion-setting { display:flex; align-items:center; gap:10px; padding:16px 0; font-weight:800; }
 .motion-setting input[type=checkbox] { width:20px; height:20px; min-height:20px; accent-color:#245949; }
 .game-hud { display:grid; grid-template-columns:64px 1fr auto; gap:8px 16px; align-items:center; width:min(1040px,calc(100% - 32px)); margin:14px auto; padding:14px 18px; background:#e8eee3; color:#17352d; border:1px solid #bacdbc; border-radius:22px; }
