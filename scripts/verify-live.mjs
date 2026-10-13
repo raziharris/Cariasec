@@ -135,6 +135,7 @@ try {
   await host.getByRole("button", { name: "Mula", exact: true }).click();
   await expect(host.locator(".hand-scroll .career-card")).toHaveCount(7);
   await expect(guest.locator(".hand-scroll .career-card")).toHaveCount(7);
+  for (const page of [host, guest]) await expect(page.getByTestId('board-container')).toHaveAttribute('aria-busy', 'false');
   const guestHand = await guest.locator(".card-title").allTextContents();
   await guest.reload();
   await expect(guest.locator(".card-title")).toHaveText(guestHand);

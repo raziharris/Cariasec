@@ -43,6 +43,7 @@ test("two independent browsers play a full round, recover refresh/network, verif
   await expect(a.getByText("Menunggu rakan.")).toBeHidden({
     timeout: 20000,
   });
+  for (const p of [a, b]) await expect(p.getByTestId('board-container')).toHaveAttribute('aria-busy', 'false');
   await expect(b.locator(".hand-scroll .card-title")).toHaveText(original);
   await a.screenshot({
     path: "docs/screenshots/board-desktop.png",
@@ -75,6 +76,7 @@ test("two independent browsers play a full round, recover refresh/network, verif
     const familyOptions = await active
       .locator("#family option")
       .evaluateAll((opts) => opts.map((o) => (o as HTMLOptionElement).value));
+    await active.getByTestId('advanced-selection').evaluate((element: HTMLDetailsElement) => { element.open = true; });
     await active
       .locator("#family")
       .selectOption(familyOptions[actions % familyOptions.length]);

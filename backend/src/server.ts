@@ -201,6 +201,7 @@ function createRoomClass(runtime: Runtime) {
           const player: Player = {
             id: randomUUID(),
             name: command.nickname,
+            avatar: command.avatar ?? 'cat',
             tokenHash: digest(token),
             connected: true,
             disconnectedAt: null,
@@ -262,6 +263,7 @@ function createRoomClass(runtime: Runtime) {
         const player: Player = {
           id: randomUUID(),
           name: command.nickname,
+          avatar: command.avatar ?? 'cat',
           tokenHash: digest(token),
           connected: true,
           disconnectedAt: null,

@@ -12,10 +12,11 @@ import {
   type View,
 } from "../../shared/game";
 import { validNickname } from "../../shared/nickname";
+import { validAvatar, type AvatarId } from '../../shared/avatar';
 import { english, careerTitles, familyEnglish } from "./translations";
 
 export type Language = "ms" | "en";
-export type Profile = { name: string; language: Language };
+export type Profile = { name: string; language: Language; avatar: AvatarId; reducedMotion: boolean };
 const PROFILE_KEY = "cariasec-profile";
 const READY_KEY = "cariasec-onboarded";
 export function validName(name: string) {
@@ -30,11 +31,11 @@ function storedProfile(): Profile {
       validName(data.name) &&
       (data.language === "ms" || data.language === "en")
     )
-      return { name: data.name.trim(), language: data.language };
+      return { name: data.name.trim(), language: data.language, avatar: validAvatar(data.avatar) ? data.avatar : 'cat', reducedMotion: data.reducedMotion === true };
   } catch {
     /* Storage can be unavailable in a restricted browser. */
   }
-  return { name: "", language: "ms" };
+  return { name: "", language: "ms", avatar: 'cat', reducedMotion: false };
 }
 export function translate(
   language: Language,
@@ -106,6 +107,8 @@ type ContextValue = {
   setLanguage: (language: Language) => void;
   finishSetup: (name: string) => boolean;
   rememberName: (name: string) => void;
+  setAvatar: (avatar: AvatarId) => void;
+  setReducedMotion: (reducedMotion: boolean) => void;
 };
 const LanguageContext = createContext<ContextValue | null>(null);
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
@@ -138,6 +141,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         profile,
         ready,
         setLanguage: (language) => persist({ ...profile, language }),
+        setAvatar: (avatar) => persist({ ...profile, avatar }),
+        setReducedMotion: (reducedMotion) => persist({ ...profile, reducedMotion }),
         rememberName: (name) => {
           if (validName(name)) persist({ ...profile, name: name.trim() });
         },

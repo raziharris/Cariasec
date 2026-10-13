@@ -1,4 +1,5 @@
 import cardData from "./cards.json";
+import type { AvatarId } from './avatar';
 import categoryData from "./categories.json";
 export const codes = ["R", "I", "A", "S", "E", "C"] as const;
 export type Category = (typeof codes)[number];
@@ -17,6 +18,7 @@ export type Phase = "lobby" | "playing" | "finished" | "cancelled";
 export interface Player {
   id: string;
   name: string;
+  avatar?: AvatarId;
   tokenHash: string;
   connected: boolean;
   disconnectedAt: number | null;
@@ -54,6 +56,7 @@ export interface Room {
 export interface PublicPlayer {
   id: string;
   name: string;
+  avatar?: AvatarId;
   connected: boolean;
   ready: boolean;
   count: number;

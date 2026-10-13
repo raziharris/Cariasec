@@ -2,6 +2,8 @@ import { GameObjects, Geom, Scene } from "phaser";
 import { colors } from "../../cards/presentation";
 import { EventBus } from "../EventBus";
 import type { BoardCard, BoardState } from "../boardTypes";
+import { avatarIds } from '../../../../shared/avatar';
+import { avatarSvg } from '../../avatars';
 
 const hex = (value: string) => Number.parseInt(value.slice(1), 16);
 const initials = (name: string) =>
@@ -21,6 +23,7 @@ export class CardTableScene extends Scene {
   private restTimer?: number;
   private pendingState?: BoardState;
   private previousSoundKey?: string;
+  private rendered = false;
 
   constructor() {
     super("CardTable");
@@ -61,10 +64,11 @@ export class CardTableScene extends Scene {
             ),
           ),
         );
-    this.clock.setText(`◷  ${remaining}`);
+    this.clock.setText(remaining);
   }
 
   shutdown() {
+    if (this.input) this.input.enabled = false;
     EventBus.off("board-state", this.receiveState, this);
     EventBus.off("board-clock", this.tickClock, this);
     EventBus.off("destroy-board", this.shutdown, this);
@@ -110,6 +114,8 @@ export class CardTableScene extends Scene {
 
   private redraw() {
     if (!this.state) return;
+    this.game.loop.wake();
+    this.scheduleRest(100);
     this.layer?.destroy(true);
     this.layer = this.add.container(0, 0);
     const width = this.scale.width;
@@ -120,6 +126,10 @@ export class CardTableScene extends Scene {
     this.drawOpponents(width, compact);
     this.drawCenter(width, height, compact);
     this.drawHand(width, height, compact);
+    if (!this.rendered) {
+      this.rendered = true;
+      this.game.events.once('postrender', () => EventBus.emit('board-rendered', this.game));
+    }
   }
 
   private drawTable(width: number, height: number) {
@@ -159,22 +169,24 @@ export class CardTableScene extends Scene {
     const state = this.state!;
     const opponents = state.players.filter((player) => player.id !== state.you);
     if (!opponents.length) return;
-    const gap = compact ? 8 : 14;
-    const maxWidth = compact ? 132 : 174;
-    const cardWidth = Math.min(maxWidth, (width - 36 - gap * (opponents.length - 1)) / opponents.length);
-    const total = cardWidth * opponents.length + gap * (opponents.length - 1);
+    const gap = compact ? 6 : 14;
+    const cols = compact ? Math.min(3, opponents.length) : opponents.length;
+    const maxWidth = compact ? 160 : 174;
+    const cardWidth = Math.min(maxWidth, (width - 28 - gap * (cols - 1)) / cols);
+    const total = cardWidth * cols + gap * (cols - 1);
     const start = (width - total) / 2;
     opponents.forEach((player, index) => {
-      const x = start + index * (cardWidth + gap);
+      const x = start + index % cols * (cardWidth + gap);
+      const y = 48 + Math.floor(index / cols) * 59;
       const active = state.turn === player.id;
       const selected = state.selectedTarget === player.id;
       const panel = this.add.graphics();
       panel.fillStyle(selected ? 0xf3d39a : 0x173f35, 0.96);
-      panel.fillRoundedRect(x, 54, cardWidth, compact ? 66 : 76, 14);
+      panel.fillRoundedRect(x, y, cardWidth, compact ? 53 : 76, 14);
       panel.lineStyle(active ? 3 : 1, active ? 0xf5c768 : 0xffffff, active ? 1 : 0.16);
-      panel.strokeRoundedRect(x, 54, cardWidth, compact ? 66 : 76, 14);
+      panel.strokeRoundedRect(x, y, cardWidth, compact ? 53 : 76, 14);
       panel.setInteractive(
-        new Geom.Rectangle(x, 54, cardWidth, compact ? 66 : 76),
+        new Geom.Rectangle(x, y, cardWidth, compact ? 53 : 76),
         Geom.Rectangle.Contains,
       );
       panel.on("pointerdown", () => {
@@ -182,25 +194,25 @@ export class CardTableScene extends Scene {
         EventBus.emit("game-sound", { name: "click" });
         EventBus.emit("select-target", player.id);
       });
-      const avatar = this.add.circle(x + 25, compact ? 80 : 86, compact ? 16 : 19, selected ? 0x173f35 : 0xdba867);
+      const avatar = this.add.image(x + (compact ? 18 : 25), y + (compact ? 24 : 32), `avatar-${player.avatar ?? 'cat'}`).setDisplaySize(compact ? 28 : 40, compact ? 28 : 40);
       const avatarText = this.add
-        .text(avatar.x, avatar.y, initials(player.name), {
+        .text(avatar.x, y + (compact ? 45 : 63), player.connected ? '●' : '○', {
           fontFamily: "Nunito Sans, Arial",
           fontSize: compact ? "10px" : "12px",
           fontStyle: "bold",
-          color: selected ? "#f8ead2" : "#17352d",
+          color: selected ? '#17352d' : '#c4ead2',
         })
         .setOrigin(0.5);
-      const name = this.add.text(x + 48, 65, player.name, {
+      const name = this.add.text(x + (compact ? 37 : 48), y + 10, player.name.length > (compact ? 9 : 15) ? `${player.name.slice(0, compact ? 8 : 14)}…` : player.name, {
         fontFamily: "Nunito Sans, Arial",
         fontSize: compact ? "11px" : "13px",
         fontStyle: "bold",
         color: selected ? "#17352d" : "#fff8ec",
       });
       const meta = this.add.text(
-        x + 48,
-        compact ? 86 : 90,
-        `${player.count} ${state.labels.cards}  ·  ${player.families.length} ${state.labels.complete}`,
+        x + (compact ? 37 : 48),
+        y + (compact ? 29 : 42),
+        compact ? `${player.count} ${state.labels.cards}` : `${player.count} ${state.labels.cards}  ·  ${player.families.length} ${state.labels.complete}`,
         {
           fontFamily: "Nunito Sans, Arial",
           fontSize: compact ? "9px" : "10px",
@@ -213,7 +225,7 @@ export class CardTableScene extends Scene {
 
   private drawCenter(width: number, height: number, compact: boolean) {
     const state = this.state!;
-    const centerY = compact ? height * 0.43 : height * 0.42;
+    const centerY = compact ? height * (state.players.length > 4 ? 0.53 : 0.45) : height * 0.42;
     const deckX = compact ? width * 0.22 : width * 0.3;
     const deckW = compact ? 64 : 82;
     const deckH = deckW * 1.38;
@@ -292,6 +304,8 @@ export class CardTableScene extends Scene {
         padding: { x: 10, y: 5 },
       })
       .setOrigin(0.5);
+    // React's HUD provides the compact timer; avoid covering the phone's cards.
+    this.clock.setVisible(!compact);
     this.layer!.add([deckBrand, deckCount, eyebrow, title, sub, this.clock]);
     this.refreshClock();
   }
@@ -299,19 +313,22 @@ export class CardTableScene extends Scene {
   private drawHand(width: number, height: number, compact: boolean) {
     const state = this.state!;
     if (!state.hand.length) return;
+    const hand = state.hand.length > (compact ? 8 : 12)
+      ? state.hand.filter(card => card.category === state.selectedFamily)
+      : state.hand;
     const cardW = compact ? 76 : 112;
     const cardH = cardW * 1.34;
     const maxSpread = width - (compact ? 30 : 70);
-    const step = Math.min(cardW * 0.76, (maxSpread - cardW) / Math.max(1, state.hand.length - 1));
-    const total = cardW + step * (state.hand.length - 1);
+    const step = Math.min(cardW * 0.76, (maxSpread - cardW) / Math.max(1, hand.length - 1));
+    const total = cardW + step * (hand.length - 1);
     const startX = (width - total) / 2 + cardW / 2;
     const baseY = height - cardH / 2 - (compact ? 15 : 20);
     const newHand = new Set(state.hand.map((card) => card.id));
-    state.hand.forEach((card, index) => {
+    hand.forEach((card, index) => {
       const selected = card.category === state.selectedFamily;
       const targetX = startX + index * step;
-      const targetY = baseY - (selected ? 12 : 0) - Math.sin((index / Math.max(1, state.hand.length - 1)) * Math.PI) * 8;
-      const rotation = (index - (state.hand.length - 1) / 2) * (compact ? 0.018 : 0.025);
+      const targetY = baseY - (selected ? 12 : 0) - Math.sin((index / Math.max(1, hand.length - 1)) * Math.PI) * 8;
+      const rotation = (index - (hand.length - 1) / 2) * (compact ? 0.018 : 0.025);
       const container = this.makeCard(card, cardW, cardH, selected);
       container.setPosition(targetX, targetY).setRotation(rotation).setDepth(index + (selected ? 50 : 0));
       container.setInteractive(
@@ -319,10 +336,16 @@ export class CardTableScene extends Scene {
         Geom.Rectangle.Contains,
       );
       container.on("pointerover", () => {
+        if (!container.active || !this.input || !this.game?.loop) return;
+        this.game.loop.wake();
+        this.scheduleRest(250);
         this.input.setDefaultCursor("pointer");
         if (!state.reducedMotion) this.tweens.add({ targets: container, y: targetY - 9, duration: 120 });
       });
       container.on("pointerout", () => {
+        if (!container.active || !this.input || !this.game?.loop) return;
+        this.game.loop.wake();
+        this.scheduleRest(250);
         this.input.setDefaultCursor("default");
         if (!state.reducedMotion) this.tweens.add({ targets: container, y: targetY, duration: 120 });
       });
@@ -428,6 +451,8 @@ export class CardTableScene extends Scene {
   }
 
   preload() {
+    this.load.on('progress', (value: number) => EventBus.emit('board-loading', value, this.game));
+    for (const id of avatarIds) this.load.svg(`avatar-${id}`, `data:image/svg+xml;base64,${btoa(avatarSvg(id))}`, { width: 96, height: 96 });
     // Every career card can enter the hand after a Colyseus state update.
     const base = import.meta.env.BASE_URL;
     for (const category of ["R", "I", "A", "S", "E", "C"] as const) {

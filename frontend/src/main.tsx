@@ -75,11 +75,28 @@ import type { BoardState } from "./game/boardTypes";
 import { SoundProvider, useSound } from "./audio/SoundProvider";
 import { SoundSettings } from "./audio/SoundSettings";
 import { useGameSound } from "./audio/useGameSound";
-const PhaserBoard = React.lazy(() =>
-  import("./components/PhaserBoard").then((module) => ({
-    default: module.PhaserBoard,
-  })),
-);
+import { Avatar, AvatarPicker } from './components/AvatarPicker';
+import { LoadingCards } from './components/LoadingCards';
+import { GameControls } from './components/GameControls';
+import { GameHud } from './components/GameHud';
+import { Celebration } from './components/Celebration';
+import { BoardBoundary } from './components/BoardBoundary';
+import './ui-upgrade.css';
+const PhaserBoard = React.lazy(async () => {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const module = await import('./components/PhaserBoard');
+      return { default: module.PhaserBoard };
+    } catch (error) {
+      if (navigator.onLine && attempt >= 5) throw error;
+      await new Promise<void>(resolve => {
+        const done = () => { clearTimeout(timer); window.removeEventListener('online', done); resolve(); };
+        const timer = window.setTimeout(done, 600);
+        window.addEventListener('online', done, { once: true });
+      });
+    }
+  }
+});
 function App() {
   const { playSound } = useSound();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -92,6 +109,8 @@ function App() {
     language,
     setLanguage,
     rememberName,
+    setAvatar,
+    setReducedMotion,
     message,
     logText,
   } = useI18n();
@@ -113,7 +132,13 @@ function App() {
     [family, setFamily] = useState<Category>("R"),
     [copied, setCopied] = useState(false),
     [now, setNow] = useState(Date.now());
-  const reduced = useReducedMotion();
+  const osReduced = useReducedMotion();
+  const reduced = Boolean(osReduced || profile.reducedMotion);
+  const [roomConnected, setRoomConnected] = useState(true);
+  const connected = online && (!room || roomConnected);
+  useEffect(() => {
+    document.documentElement.dataset.motion = reduced ? 'reduced' : 'full';
+  }, [reduced]);
   const soundCue = useGameSound(room);
   useEffect(() => { if (error) playSound("error"); }, [error, playSound]);
   useEffect(() => {
@@ -202,6 +227,7 @@ function App() {
   }, [room?.hand.join(","), family]);
 
   function attach(joined: ColyseusRoom) {
+    setRoomConnected(true);
     activeRoom?.removeAllListeners();
     activeRoom = joined;
     joined.reconnection.minUptime = 0;
@@ -217,8 +243,9 @@ function App() {
       setPage("home");
       setError(text);
     });
-    joined.onDrop(() => setOnline(false));
+    joined.onDrop(() => { setOnline(false); setRoomConnected(false); });
     joined.onReconnect(() => {
+      setRoomConnected(true);
       setOnline(true);
       void joined
         .request<never, View>("sync")
@@ -228,6 +255,7 @@ function App() {
     joined.onLeave((_code, reason) => {
       if (activeRoom !== joined) return;
       activeRoom = null;
+      setRoomConnected(false);
       setOnline(false);
       if (reason) setError(reason);
     });
@@ -430,9 +458,9 @@ function App() {
           )}
         </nav>
       </header>
-      {!online && (
+      {!connected && (
         <div className="connection-banner" role="status">
-          <WifiOff size={16} /> {t("Menyambung…")}
+          <WifiOff size={16} /> {t('Menyambung semula...')} <span>{t('Sesi anda disimpan. Kami sedang cuba semula.')}</span>
         </div>
       )}
       {error && (
@@ -531,9 +559,7 @@ function App() {
                   <div className="lobby-players">
                     {room.players.map((p, i) => (
                       <div className="lobby-player" key={p.id}>
-                        <span className={`avatar avatar-${i}`}>
-                          {short(p.name)}
-                        </span>
+                        <span className={`avatar avatar-${i}`}><Avatar id={p.avatar} /></span>
                         <div>
                           <b>
                             {p.name}{" "}
@@ -614,13 +640,13 @@ function App() {
             )}
             {room.phase === "playing" && (
               <>
+                <GameHud room={room} now={now} reduced={reduced} />
                 {boardState && (
                   <div className="game-table phaser-game-table">
+                    <BoardBoundary title={t('Papan belum berjaya dimuatkan. Sesi anda masih disimpan.')} button={t('Muat semula halaman')}>
                     <React.Suspense
                       fallback={
-                        <div className="phaser-loading" role="status">
-                          {t("Menyambungâ€¦")}
-                        </div>
+                        <LoadingCards />
                       }
                     >
                       <PhaserBoard
@@ -630,28 +656,7 @@ function App() {
                         onInspectCard={setDetail}
                       />
                     </React.Suspense>
-                    <div className="phaser-dom-status" aria-live="polite">
-                      <div className="table-top">
-                        <span>
-                          {room.paused ? t("DIJEDA") : t("PUSINGAN AKTIF")}
-                        </span>
-                        <span>
-                          {room.actions} / {room.settings.maxActions}{" "}
-                          {t("tindakan")}
-                        </span>
-                      </div>
-                      <div className="turn-message">
-                        <h2>
-                          {room.paused
-                            ? t("Menunggu rakan.")
-                            : myTurn
-                              ? t("Giliran anda!")
-                              : t("Giliran {name}", {
-                                  name: current?.name ?? "",
-                                })}
-                        </h2>
-                      </div>
-                    </div>
+                    </BoardBoundary>
                   </div>
                 )}
                 <div className="opponents">
@@ -827,93 +832,9 @@ function App() {
                       </p>
                     )}
                   </div>
-                  <div className="request-panel">
-                    <div>
-                      <label htmlFor="family">{t("Keluarga")}</label>
-                      <select
-                        id="family"
-                        value={family}
-                        onChange={(e) => setFamily(e.target.value as Category)}
-                      >
-                        {categories
-                          .filter((c) =>
-                            room.hand.some(
-                              (id) => cardById[id].category === c.code,
-                            ),
-                          )
-                          .map((c) => (
-                            <option key={c.code} value={c.code}>
-                              {c.name}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label htmlFor="target">{t("Pemain")}</label>
-                      <select
-                        id="target"
-                        value={target}
-                        onChange={(e) => setTarget(e.target.value)}
-                      >
-                        {room.players
-                          .filter((p) => p.id !== room.you && p.count)
-                          .map((p) => (
-                            <option key={p.id} value={p.id}>
-                              {p.name}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label htmlFor="requested">{t("Kad")}</label>
-                      <select
-                        id="requested"
-                        value={requested}
-                        onChange={(e) => setRequested(e.target.value)}
-                      >
-                        {available.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.title}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <button
-                      className="primary"
-                      data-sound="none"
-                      disabled={
-                        !online ||
-                        busy ||
-                        !myTurn ||
-                        room.paused ||
-                        (!!target && !requested)
-                      }
-                      onClick={() =>
-                        command(
-                          target
-                            ? {
-                                type: "request",
-                                target,
-                                card: requested,
-                                version: room.version,
-                                actionId: createActionId(),
-                              }
-                            : {
-                                type: "draw",
-                                version: room.version,
-                                actionId: createActionId(),
-                              },
-                        )
-                      }
-                    >
-                      {myTurn
-                        ? target
-                          ? t("Minta kad")
-                          : t("Ambil kad")
-                        : t("Menunggu giliran")}
-                      <ArrowRight size={18} />
-                    </button>
-                  </div>
+                  <GameControls room={room} target={target} family={family} requested={requested}
+                    busy={busy} online={connected} onTarget={setTarget} onFamily={setFamily} onCard={setRequested} onPreview={setDetail}
+                    onSubmit={() => command(target ? { type: 'request', target, card: requested, version: room.version, actionId: createActionId() } : { type: 'draw', version: room.version, actionId: createActionId() })} />
                   <div className="your-families">
                     {me?.families.map((code) => (
                       <span key={code} style={{ borderColor: colors[code] }}>
@@ -942,6 +863,7 @@ function App() {
                 initial={reduced ? false : { opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
               >
+                {room.phase === 'finished' && <Celebration key={`${room.code}:${room.version}`} reduced={reduced} />}
                 <span className="result-icon">
                   {room.phase === "finished" ? (
                     <Trophy size={44} />
@@ -978,7 +900,7 @@ function App() {
                         key={p.id}
                         className={room.winners.includes(p.id) ? "winner" : ""}
                       >
-                        <span className="avatar">{short(p.name)}</span>
+                        <span className="avatar"><Avatar id={p.avatar} /></span>
                         <div>
                           <b>
                             {p.name}{" "}
@@ -1050,6 +972,8 @@ function App() {
             <span className="modal-icon"><Settings size={26} /></span>
             <h2 id="settings-title">{t("Tetapan")}</h2>
             <SoundSettings />
+            <label className="motion-setting"><input type="checkbox" checked={profile.reducedMotion} onChange={e => setReducedMotion(e.target.checked)} />{t('Kurangkan animasi')}</label>
+            {!room && <AvatarPicker value={profile.avatar} onChange={setAvatar} />}
           </section>
         </div>
       )}
@@ -1091,11 +1015,13 @@ function App() {
                       ? {
                           type: "create",
                           nickname,
+                          avatar: profile.avatar,
                           settings: { turnSeconds: seconds, maxActions: limit },
                         }
                       : {
                           type: "join",
                           nickname,
+                          avatar: profile.avatar,
                           code: code.toUpperCase().trim(),
                         },
                   );

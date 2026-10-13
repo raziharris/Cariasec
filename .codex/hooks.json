@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rtk hook codex",
+            "commandWindows": "node C:\\Users\\User\\Desktop\\Cariasec\\.codex\\rtk-hook.cjs",
+            "timeout": 5,
+            "statusMessage": "Optimizing routine command output with RTK"
+          }
+        ]
+      }
+    ]
+  }
+}

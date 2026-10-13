@@ -103,6 +103,26 @@ async function harness(options: Options = {}) {
   };
 }
 const settings = { turnSeconds: 60, maxActions: 60 } as const;
+test('cosmetic avatars are validated, shared and retained on authenticated resume', async () => {
+  const h = await harness();
+  try {
+    const host = await h.client(), guest = await h.client(), invalid = await h.client();
+    assert.equal((await host.send({ type: 'create', nickname: 'Aina', avatar: 'student-girl', settings })).ok, true);
+    const code = host.session!.code;
+    assert.equal((await guest.send({ type: 'join', nickname: 'Razi', avatar: 'robot', code })).ok, true);
+    await until(() => host.view!.players.length === 2);
+    assert.deepEqual(host.view!.players.map(p => p.avatar), ['student-girl', 'robot']);
+    assert.deepEqual(guest.view!.players.map(p => p.avatar), ['student-girl', 'robot']);
+    assert.equal((await invalid.send({ type: 'join', nickname: 'Invalid', code, avatar: 'unknown' } as unknown as Command)).ok, false);
+    assert.equal(host.view!.players.length, 2);
+    const session = host.session!;
+    host.socket.disconnect();
+    await until(() => !guest.view!.players[0].connected);
+    const resumed = await h.client();
+    assert.equal((await resumed.send({ type: 'resume', ...session })).ok, true);
+    assert.equal(resumed.view!.players.find(p => p.id === resumed.view!.you)!.avatar, 'student-girl');
+  } finally { await h.dispose(); }
+});
 test("custom base path scopes health and Colyseus", async () => {
   const h = await harness({ basePath: "/Cariasec/" });
   try {

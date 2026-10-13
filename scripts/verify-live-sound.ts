@@ -84,10 +84,9 @@ try {
   }
   await host.waitForTimeout(1600);
   const active = (await host.locator('.turn-message h2').innerText()) === 'Giliran anda!' ? host : guest;
-  const families = await active.locator('#family option').evaluateAll(options => options.map(o => (o as HTMLOptionElement).value));
-  await active.locator('#family').selectOption(families[0]);
-  const requested = await active.locator('#requested option').evaluateAll(options => options.map(o => (o as HTMLOptionElement).value));
-  await active.locator('#requested').selectOption(requested[0]);
+  await active.locator('.family-choices button').first().click();
+  await active.locator('.request-card').first().click();
+  await active.waitForTimeout(100);
   for (const page of [host, guest]) await resetAudio(page);
   await active.getByRole('button', { name: 'Minta kad', exact: true }).click();
   for (const page of [host, guest]) {

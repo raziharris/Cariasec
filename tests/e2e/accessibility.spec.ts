@@ -63,6 +63,14 @@ test("accessible navigation, keyboard dialog and six-player board", async ({
     path: "docs/screenshots/board-six-players.png",
     fullPage: true,
   });
+  await expect(host.getByTestId('board-container')).toHaveAttribute('aria-busy', 'false');
+  await host.setViewportSize({ width: 320, height: 844 });
+  await expect(host.locator('.request-dock')).toBeInViewport();
+  expect(await host.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect(host.locator('.target-choice')).toHaveCount(5);
+  await audit();
+  await host.screenshot({ path: 'docs/screenshots/ui-upgrade-six-players-320.png', fullPage: true });
+  await host.setViewportSize({ width: 1280, height: 900 });
   await host.getByRole("button", { name: "RIASEC", exact: true }).click();
   for (const name of [
     "R · Realistik",

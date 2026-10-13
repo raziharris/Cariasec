@@ -114,6 +114,7 @@ try {
   await a.getByRole("button", { name: "Mula", exact: true }).click();
   await expect(a.locator(".hand-scroll .career-card")).toHaveCount(7);
   await expect(b.locator(".hand-scroll .career-card")).toHaveCount(7);
+  for (const page of [a, b]) await expect(page.getByTestId('board-container')).toHaveAttribute('aria-busy', 'false');
   await a.getByRole("button", { name: "Minta kad", exact: true }).click();
   await expect(a.locator(".table-top")).toContainText("1 / 120");
   await expect(b.locator(".table-top")).toContainText("1 / 120");
