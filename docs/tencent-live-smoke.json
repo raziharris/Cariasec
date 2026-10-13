@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-13T14:16:33.001Z",
+  "date": "2026-10-13T14:26:53.824Z",
   "url": "http://43.156.11.241/Cariasec/",
   "health": 200,
   "twoBrowserGameplay": true,
@@ -22,11 +22,11 @@
   "salaryRangesVerified": 36,
   "iphoneZoomGuardVerified": true,
   "websocketUrls": [
-    "ws://43.156.11.241/Cariasec/4x3K5ACoM/XMT3PB?sessionId=8sA3Q5qIt",
-    "ws://43.156.11.241/Cariasec/4x3K5ACoM/XMT3PB?sessionId=c2wZIRX_p",
-    "ws://43.156.11.241/Cariasec/4x3K5ACoM/XMT3PB?sessionId=acHuvKA5n"
+    "ws://43.156.11.241/Cariasec/4x3K5ACoM/VFGJVD?sessionId=XtSzTjtEl",
+    "ws://43.156.11.241/Cariasec/4x3K5ACoM/VFGJVD?sessionId=HfO-INjwQ",
+    "ws://43.156.11.241/Cariasec/4x3K5ACoM/VFGJVD?sessionId=qnSZaDzCC"
   ],
-  "receivedFrames": 24,
+  "receivedFrames": 23,
   "pageErrors": [],
   "failedRequests": [],
   "httpErrors": []
