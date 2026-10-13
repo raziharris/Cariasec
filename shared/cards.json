@@ -1,0 +1,434 @@
+[
+  {
+    "id": "R1",
+    "category": "R",
+    "title": "Jurutera",
+    "description": null,
+    "originalContent": "REALISTIK\nENGINEER\nJURUTERA\n",
+    "artwork": "/cards/R1.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 20
+    }
+  },
+  {
+    "id": "R2",
+    "category": "R",
+    "title": "Tukang Masak",
+    "description": null,
+    "originalContent": "REALISTIK\nTUKANG MASAK\nCHEF\n",
+    "artwork": "/cards/R2.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 22
+    }
+  },
+  {
+    "id": "R3",
+    "category": "R",
+    "title": "Mekanik",
+    "description": null,
+    "originalContent": "REALISTIK\nMECHANIC\nMEKANIK\n",
+    "artwork": "/cards/R3.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 24
+    }
+  },
+  {
+    "id": "R4",
+    "category": "R",
+    "title": "Tukang Kebun",
+    "description": null,
+    "originalContent": "REALISTIK\nGARDENER\nTUKANG KEBUN\n",
+    "artwork": "/cards/R4.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 26
+    }
+  },
+  {
+    "id": "R5",
+    "category": "R",
+    "title": "Buruh",
+    "description": null,
+    "originalContent": "REALISTIK\nBUILDER\nBURUH\n",
+    "artwork": "/cards/R5.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 28
+    }
+  },
+  {
+    "id": "R6",
+    "category": "R",
+    "title": "Atlet",
+    "description": null,
+    "originalContent": "REALISTIK\nATHLETE\nATLET\n",
+    "artwork": "/cards/R6.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 30
+    }
+  },
+  {
+    "id": "I1",
+    "category": "I",
+    "title": "Peguam",
+    "description": null,
+    "originalContent": "INVESTIGATIF\nLAWYER\nPEGUAM\n",
+    "artwork": "/cards/I1.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 33
+    }
+  },
+  {
+    "id": "I2",
+    "category": "I",
+    "title": "Ahli Sains",
+    "description": null,
+    "originalContent": "INVESTIGATIF\nSCIENTIST\nAHLI SAINS\n",
+    "artwork": "/cards/I2.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 35
+    }
+  },
+  {
+    "id": "I3",
+    "category": "I",
+    "title": "Pengatur Cara",
+    "description": null,
+    "originalContent": "INVESTIGATIF\nPROGRAMMER\nPENGATUR CARA\n",
+    "artwork": "/cards/I3.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 37
+    }
+  },
+  {
+    "id": "I4",
+    "category": "I",
+    "title": "Ahli Farmasi",
+    "description": null,
+    "originalContent": "INVESTIGATIF\nPHARMACIST\nAHLI FARMASI\n",
+    "artwork": "/cards/I4.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 39
+    }
+  },
+  {
+    "id": "I5",
+    "category": "I",
+    "title": "Pakar Bedah",
+    "description": null,
+    "originalContent": "INVESTIGATIF\nSURGEON\nPAKAR BEDAH\n",
+    "artwork": "/cards/I5.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 41
+    }
+  },
+  {
+    "id": "I6",
+    "category": "I",
+    "title": "Pakar Psikiatri",
+    "description": null,
+    "originalContent": "INVESTIGATIF\nPSYCHIATRIST\nPAKAR PSIKIATRI\n",
+    "artwork": "/cards/I6.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 43
+    }
+  },
+  {
+    "id": "A1",
+    "category": "A",
+    "title": "Penyanyi",
+    "description": null,
+    "originalContent": "ARTISTIK\nSINGER\nPENYANYI\n",
+    "artwork": "/cards/A1.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 49
+    }
+  },
+  {
+    "id": "A2",
+    "category": "A",
+    "title": "Pelukis",
+    "description": null,
+    "originalContent": "ARTISTIK\nPAINTER\nPELUKIS\n",
+    "artwork": "/cards/A2.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 51
+    }
+  },
+  {
+    "id": "A3",
+    "category": "A",
+    "title": "Ahli Muzik",
+    "description": null,
+    "originalContent": "ARTISTIK\nMUSICIAN\nAHLI MUZIK\n",
+    "artwork": "/cards/A3.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 53
+    }
+  },
+  {
+    "id": "A4",
+    "category": "A",
+    "title": "Penari",
+    "description": null,
+    "originalContent": "ARTISTIK\nDANCER\nPENARI\n",
+    "artwork": "/cards/A4.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 55
+    }
+  },
+  {
+    "id": "A5",
+    "category": "A",
+    "title": "Pelakon",
+    "description": null,
+    "originalContent": "ARTISTIK\nACTOR\nPELAKON\n",
+    "artwork": "/cards/A5.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 57
+    }
+  },
+  {
+    "id": "A6",
+    "category": "A",
+    "title": "Pereka Grafik",
+    "description": null,
+    "originalContent": "ARTISTIK\nGRAPHIC DESIGNER\nPEREKA GRAFIK\n",
+    "artwork": "/cards/A6.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 59
+    }
+  },
+  {
+    "id": "S1",
+    "category": "S",
+    "title": "Guru",
+    "description": null,
+    "originalContent": "SOSIAL\nTEACHER\nGURU\n",
+    "artwork": "/cards/S1.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 65
+    }
+  },
+  {
+    "id": "S2",
+    "category": "S",
+    "title": "Jururawat",
+    "description": null,
+    "originalContent": "SOSIAL\nNURSE\nJURURAWAT\n",
+    "artwork": "/cards/S2.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 67
+    }
+  },
+  {
+    "id": "S3",
+    "category": "S",
+    "title": "Pramugari",
+    "description": null,
+    "originalContent": "SOSIAL\nSTEWARDESS\nPRAMUGARI\n",
+    "artwork": "/cards/S3.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 69
+    }
+  },
+  {
+    "id": "S4",
+    "category": "S",
+    "title": "Kaunselor",
+    "description": null,
+    "originalContent": "SOSIAL\nCOUNSELLOR\nKAUNSELOR\n",
+    "artwork": "/cards/S4.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 71
+    }
+  },
+  {
+    "id": "S5",
+    "category": "S",
+    "title": "Pelayan Restoran",
+    "description": null,
+    "originalContent": "SOSIAL\nPELAYAN RESTORAN\nWAITER\n",
+    "artwork": "/cards/S5.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 73
+    }
+  },
+  {
+    "id": "S6",
+    "category": "S",
+    "title": "Setiausaha Pejabat",
+    "description": null,
+    "originalContent": "SOSIAL\nSETIAUSAHA PEJABAT\nOFFICE SECRETARY\n",
+    "artwork": "/cards/S6.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 75
+    }
+  },
+  {
+    "id": "E1",
+    "category": "E",
+    "title": "Ejen Jualan",
+    "description": null,
+    "originalContent": "ENTERPRISING\nSALES AGENT\nEJEN JUALAN\n",
+    "artwork": "/cards/E1.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 81
+    }
+  },
+  {
+    "id": "E2",
+    "category": "E",
+    "title": "Ahli Politik",
+    "description": null,
+    "originalContent": "ENTERPRISING\nPOLITICIAN\nAHLI POLITIK\n",
+    "artwork": "/cards/E2.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 83
+    }
+  },
+  {
+    "id": "E3",
+    "category": "E",
+    "title": "Ketua Eksekutif",
+    "description": null,
+    "originalContent": "ENTERPRISING\nCHIEF EXECUTIVE\nKETUA EKSEKUTIF\n",
+    "artwork": "/cards/E3.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 85
+    }
+  },
+  {
+    "id": "E4",
+    "category": "E",
+    "title": "Pemandu Pelancong",
+    "description": null,
+    "originalContent": "ENTERPRISING\nTRAVEL GUIDE\nPEMANDU PELANCONG\n",
+    "artwork": "/cards/E4.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 87
+    }
+  },
+  {
+    "id": "E5",
+    "category": "E",
+    "title": "Kurator",
+    "description": null,
+    "originalContent": "ENTERPRISING\nCURATORS\nKURATOR\n",
+    "artwork": "/cards/E5.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 89
+    }
+  },
+  {
+    "id": "E6",
+    "category": "E",
+    "title": "Penilai Hartanah",
+    "description": null,
+    "originalContent": "ENTERPRISING\nAPPRAISER\nPENILAI HARTANAH\n",
+    "artwork": "/cards/E6.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 91
+    }
+  },
+  {
+    "id": "C1",
+    "category": "C",
+    "title": "Penganalisis Kewangan",
+    "description": null,
+    "originalContent": "KONVENSIONAL\nFINANCIAL ANALYST\nPENGANALISIS\nKEWANGAN\n",
+    "artwork": "/cards/C1.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 97
+    }
+  },
+  {
+    "id": "C2",
+    "category": "C",
+    "title": "Akauntan",
+    "description": null,
+    "originalContent": "KONVENSIONAL\nACCOUNTANT\nAKAUNTAN\n",
+    "artwork": "/cards/C2.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 99
+    }
+  },
+  {
+    "id": "C3",
+    "category": "C",
+    "title": "Penasihat",
+    "description": null,
+    "originalContent": "KONVENSIONAL\nPENASIHAT\nADVISOR\n",
+    "artwork": "/cards/C3.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 101
+    }
+  },
+  {
+    "id": "C4",
+    "category": "C",
+    "title": "Pustakawan",
+    "description": null,
+    "originalContent": "KONVENSIONAL\nLIBRARIAN\nPUSTAKAWAN\n",
+    "artwork": "/cards/C4.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 103
+    }
+  },
+  {
+    "id": "C5",
+    "category": "C",
+    "title": "Juruwang",
+    "description": null,
+    "originalContent": "KONVENSIONAL\nCASHIER\nJURUWANG\n",
+    "artwork": "/cards/C5.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 105
+    }
+  },
+  {
+    "id": "C6",
+    "category": "C",
+    "title": "Operator",
+    "description": null,
+    "originalContent": "KONVENSIONAL\nOPERATOR\nOPERATOR\n",
+    "artwork": "/cards/C6.webp",
+    "source": {
+      "file": "KAD CARIASEC LATEST.1pdf.pdf",
+      "page": 107
+    }
+  }
+]

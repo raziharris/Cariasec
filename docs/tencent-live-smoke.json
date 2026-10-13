@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-11T13:10:33.732Z",
+  "url": "http://43.156.11.241/Cariasec/",
+  "health": 200,
+  "twoBrowserGameplay": true,
+  "gameStartSynchronized": true,
+  "refreshRestored": true,
+  "languagesVerified": [
+    "ms",
+    "en"
+  ],
+  "profileOnboarding": true,
+  "sourceReferencesRemoved": true,
+  "languageSwitchKeepsRoom": true,
+  "mobileWidthsWithoutOverflow": [
+    320,
+    375,
+    390,
+    430
+  ],
+  "cardAssetsVerified": 36,
+  "salaryRangesVerified": 36,
+  "iphoneZoomGuardVerified": true,
+  "websocketUrls": [
+    "ws://43.156.11.241/Cariasec/Gwu9AxtcQ/WQ6GWT?sessionId=3pKVPRCFy",
+    "ws://43.156.11.241/Cariasec/Gwu9AxtcQ/WQ6GWT?sessionId=_Rf7wF9ON",
+    "ws://43.156.11.241/Cariasec/Gwu9AxtcQ/WQ6GWT?sessionId=g8wJiETjn"
+  ],
+  "receivedFrames": 23,
+  "pageErrors": [],
+  "failedRequests": [],
+  "httpErrors": []
+}

@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-11T01:34:19.018Z",
+  "environment": "Local Windows; separate Node backend process; SQLite WAL on disk; websocket clients on same machine. Not a Tencent capacity claim.",
+  "players": 8,
+  "rooms": 4,
+  "completedRooms": 4,
+  "elapsedSeconds": 25.62,
+  "commands": 260,
+  "latencyMs": {
+    "median": 5.36,
+    "p95": 7.93,
+    "p99": 9.15,
+    "max": 37.14
+  },
+  "backend": {
+    "peakRssMB": 143.59,
+    "averageCpuPercentOfOneCore": 3.53,
+    "peakCpuPercentOfOneCore": 21.26
+  },
+  "unexpectedDisconnections": 0,
+  "eventFailures": 0,
+  "consistencyChecks": 240
+}

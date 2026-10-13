@@ -1,0 +1,17 @@
+.cariasec-sound-settings { color: var(--ink); margin-top: 20px; }
+.cariasec-sound-settings h3 { margin: 0 0 14px; font-size: 18px; }
+.cariasec-sound-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.cariasec-sound-row output { font-weight: 800; font-variant-numeric: tabular-nums; }
+.cariasec-sound-settings label { display: block; font-size: 13px; font-weight: 800; }
+.cariasec-sound-settings input[type="range"] { width: 100%; min-height: 44px; padding: 0; accent-color: #315c4f; cursor: pointer; margin: 6px 0 14px; }
+.cariasec-sound-settings input:focus-visible { outline: 3px solid #315c4f; outline-offset: 3px; }
+.site-header .nav-settings { min-width: 40px; min-height: 44px; padding: 8px; display: inline-flex; align-items: center; justify-content: center; }
+@media (max-width: 359px) {
+  .site-header { gap: 6px; }
+  .site-header .brand { font-size: 20px; gap: 5px; }
+  .site-header .brand-mark { width: 28px; height: 32px; }
+  .site-header nav { gap: 4px; }
+  .site-header .nav-settings { min-width: 34px; padding: 4px; }
+  .site-header .language-switch { width: 44px; min-width: 44px; padding: 4px; }
+  .site-header nav .nav-play { padding: 8px; font-size: 11px; gap: 4px; }
+}

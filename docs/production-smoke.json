@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-11T01:38:40.542Z",
+  "runtime": "v24.13.0",
+  "build": "dist/server.js + dist/public",
+  "origin": "http://127.0.0.1:3002/",
+  "health": 200,
+  "cspPresent": true,
+  "twoBrowserGameplay": true,
+  "refreshRestored": true,
+  "pageErrors": [],
+  "failedRequests": [],
+  "limitations": "Local HTTP production bundle smoke test; not Docker/Nginx/HTTPS/WSS or Tencent verification."
+}

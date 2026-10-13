@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-10T15:25:12.689Z",
+  "title": "Cariasec",
+  "manifestStatus": 200,
+  "name": "Cariasec",
+  "display": "standalone",
+  "startUrl": "http://43.156.11.241/Cariasec/",
+  "scope": "http://43.156.11.241/Cariasec/",
+  "icons": [
+    {
+      "url": "http://43.156.11.241/Cariasec/icons/cariasec-careers-180.png",
+      "status": 200,
+      "type": "image/png",
+      "width": 180,
+      "height": 180
+    },
+    {
+      "url": "http://43.156.11.241/Cariasec/icons/cariasec-careers-32.png",
+      "status": 200,
+      "type": "image/png",
+      "width": 32,
+      "height": 32
+    },
+    {
+      "url": "http://43.156.11.241/Cariasec/icons/cariasec-careers-192.png",
+      "status": 200,
+      "type": "image/png",
+      "width": 192,
+      "height": 192
+    },
+    {
+      "url": "http://43.156.11.241/Cariasec/icons/cariasec-careers-512.png",
+      "status": 200,
+      "type": "image/png",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "url": "http://43.156.11.241/Cariasec/icons/cariasec-careers-1024.png",
+      "status": 200,
+      "type": "image/png",
+      "width": 1024,
+      "height": 1024
+    }
+  ],
+  "pageErrors": [],
+  "physicalIPhoneInstallTested": false
+}

@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-10T09:55:00.422Z",
+  "runtime": "v24.13.0",
+  "build": "dist/server.js + dist/public",
+  "origin": "https://127.0.0.1:8443",
+  "health": 200,
+  "cspPresent": true,
+  "twoBrowserGameplay": true,
+  "refreshRestored": true,
+  "pageErrors": [],
+  "failedRequests": [],
+  "limitations": "Local native Windows Nginx with temporary self-signed TLS; Docker DNS, Linux containers, public certificates and Tencent are unverified.",
+  "selfSignedLocalTls": true,
+  "websocketUrls": [
+    "wss://127.0.0.1:8443/socket.io/?EIO=4&transport=websocket&sid=pczLU-HzsLAtYOYPAAAA",
+    "wss://127.0.0.1:8443/socket.io/?EIO=4&transport=websocket&sid=zYyR3UY3mCjO8u2CAAAB",
+    "wss://127.0.0.1:8443/socket.io/?EIO=4&transport=websocket&sid=lCLir-qykUmIPiFQAAAC"
+  ],
+  "receivedWebsocketFrames": 22
+}

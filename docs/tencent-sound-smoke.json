@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-11T13:10:20.714Z",
+  "url": "http://43.156.11.241/Cariasec/",
+  "assets": [
+    "click",
+    "confirm",
+    "back",
+    "error",
+    "card",
+    "win"
+  ],
+  "realWebAudioPlayback": true,
+  "desktopAndMobileEmulation": true,
+  "defaultVolume45": true,
+  "liveGain20": true,
+  "muteUnmute": true,
+  "preferencesPersist": true,
+  "phaserDealAndRequestAudio": true,
+  "twoPlayerMultiplayer": true,
+  "reconnectSilent": true,
+  "noDuplicateOrOverlappingSources": true,
+  "errors": [],
+  "failedRequests": [],
+  "limitations": "Chromium desktop and mobile emulation; physical speakers and actual Safari/iPhone not tested."
+}

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+data/
+tmp/
+test-results/
+playwright-report/
+.env
+*.sqlite*
+*.pdf
+output/
+tencent-key/
+docs/screenshots/
