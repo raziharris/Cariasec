@@ -1,6 +1,8 @@
 import { LanguageProvider, useI18n } from "./i18n";
 import { createActionId } from "./actionId";
 import { copyText } from './clipboard';
+import { mergeChat, type ChatMessage, type ChatInput, type ChatReply } from '../../shared/chat';
+import { RoomChat } from './components/RoomChat';
 import { Welcome } from "./components/Welcome";
 import { RulesPage } from "./pages/RulesPage";
 import { LearnPage } from "./pages/LearnPage";
@@ -100,6 +102,8 @@ const PhaserBoard = React.lazy(async () => {
 function App() {
   const { playSound } = useSound();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatHistoryError, setChatHistoryError] = useState('');
   const {
     t,
     cards,
@@ -239,6 +243,12 @@ function App() {
     setRoomConnected(true);
     activeRoom?.removeAllListeners();
     activeRoom = joined;
+    setChatMessages([]);
+    setChatHistoryError('');
+    joined.onMessage<ChatMessage>('chat-message', item => {
+      if (activeRoom === joined) setChatMessages(previous => mergeChat(previous, [item]));
+    });
+    void syncChat(joined);
     joined.reconnection.minUptime = 0;
     joined.onMessage<View>("state", (view) => {
       setRoom(view);
@@ -256,6 +266,7 @@ function App() {
     joined.onReconnect(() => {
       setRoomConnected(true);
       setOnline(true);
+      void syncChat(joined);
       void joined
         .request<never, View>("sync")
         .then((view) => setRoom(view))
@@ -268,6 +279,26 @@ function App() {
       setOnline(false);
       if (reason) setError(reason);
     });
+  }
+
+  async function syncChat(joined: ColyseusRoom) {
+    try {
+      const history = await joined.request<never, ChatMessage[]>('chat-sync', undefined, { timeout: 7000 });
+      if (activeRoom === joined) { setChatMessages(previous => mergeChat(history, previous)); setChatHistoryError(''); }
+    } catch {
+      if (activeRoom === joined) setChatHistoryError('Chat belum dimuatkan. Cuba lagi.');
+    }
+  }
+
+  async function sendChat(input: ChatInput): Promise<ChatReply> {
+    const joined = activeRoom;
+    if (!joined || !connected) return { ok: false, error: 'Mesej belum dihantar. Cuba lagi.' };
+    try {
+      const reply = await joined.request<ChatInput, ChatReply>('chat-send', input, { timeout: 7000 });
+      if (activeRoom !== joined) return { ok: false, error: 'Sesi tidak sah.' };
+      if (reply.ok) setChatMessages(previous => mergeChat(previous, [reply.message]));
+      return reply;
+    } catch { return { ok: false, error: 'Mesej belum dihantar. Cuba lagi.' }; }
   }
 
   async function joinRoom(
@@ -556,6 +587,8 @@ function App() {
               <label htmlFor="manual-room-code">{t('KOD BILIK')}</label>
               <input id="manual-room-code" value={room.code} readOnly autoFocus onFocus={e => e.currentTarget.select()} onClick={e => e.currentTarget.select()} />
             </div>}
+            <RoomChat key={room.code} messages={chatMessages} you={room.you} online={connected} historyError={chatHistoryError}
+              onSend={sendChat} onRefresh={() => { if (activeRoom) void syncChat(activeRoom); }} />
             {room.phase === "lobby" && (
               <div className="lobby">
                 <div className="lobby-intro">
@@ -673,6 +706,7 @@ function App() {
                     >
                       <PhaserBoard
                         state={boardState}
+                        interactionDisabled={settingsOpen || !!modal || !!detail}
                         onSelectFamily={setFamily}
                         onSelectTarget={setTarget}
                         onInspectCard={setDetail}

@@ -23,6 +23,7 @@ export interface PhaserBoardRef {
 }
 
 interface PhaserBoardProps {
+  interactionDisabled?: boolean;
   state: BoardState;
   onSelectFamily: (family: BoardState["selectedFamily"]) => void;
   onSelectTarget: (playerId: string) => void;
@@ -31,7 +32,7 @@ interface PhaserBoardProps {
 
 export const PhaserBoard = forwardRef<PhaserBoardRef, PhaserBoardProps>(
   function PhaserBoard(
-    { state, onSelectFamily, onSelectTarget, onInspectCard },
+    { state, onSelectFamily, onSelectTarget, onInspectCard, interactionDisabled = false },
     forwardedRef,
   ) {
     const generatedId = useId().replace(/:/g, "");
@@ -45,6 +46,8 @@ export const PhaserBoard = forwardRef<PhaserBoardRef, PhaserBoardProps>(
     const gameRef = useRef<Phaser.Game | null>(null);
     const sceneRef = useRef<Phaser.Scene | null>(null);
     const stateRef = useRef(state);
+    const disabledRef = useRef(interactionDisabled);
+    disabledRef.current = interactionDisabled;
     stateRef.current = state;
 
     useLayoutEffect(() => {
@@ -63,6 +66,7 @@ export const PhaserBoard = forwardRef<PhaserBoardRef, PhaserBoardProps>(
       const ready = (scene: Phaser.Scene) => {
         if (scene.game !== gameRef.current) return;
         sceneRef.current = scene;
+        scene.input.enabled = !disabledRef.current;
         if (typeof forwardedRef === "function") {
           forwardedRef({ game: gameRef.current, scene });
         } else if (forwardedRef) {
@@ -95,6 +99,9 @@ export const PhaserBoard = forwardRef<PhaserBoardRef, PhaserBoardProps>(
     useEffect(() => {
       EventBus.emit("board-state", state);
     }, [state]);
+    useLayoutEffect(() => {
+      if (sceneRef.current?.input) sceneRef.current.input.enabled = !interactionDisabled;
+    }, [interactionDisabled]);
 
     useEffect(() => {
       const chooseFamily = (family: BoardState["selectedFamily"]) =>

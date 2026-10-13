@@ -2,6 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import type { Room } from "../../../shared/game.js";
+import { CHAT_HISTORY_LIMIT, type ChatMessage } from '../../../shared/chat.js';
 export class Store {
   db: DatabaseSync;
   constructor(path: string) {
@@ -12,6 +13,8 @@ export class Store {
  CREATE TABLE IF NOT EXISTS migrations(version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL);
  CREATE TABLE IF NOT EXISTS rooms(code TEXT PRIMARY KEY, snapshot TEXT NOT NULL, updated_at INTEGER NOT NULL);
  CREATE TABLE IF NOT EXISTS results(code TEXT PRIMARY KEY, result TEXT NOT NULL, finished_at INTEGER NOT NULL);
+ CREATE TABLE IF NOT EXISTS room_chat(code TEXT PRIMARY KEY, messages TEXT NOT NULL);
+ INSERT OR IGNORE INTO migrations VALUES(2,datetime('now'));
  INSERT OR IGNORE INTO migrations VALUES(1,datetime('now'));`);
   }
   save(r: Room) {
@@ -52,7 +55,16 @@ export class Store {
       .map((row) => JSON.parse(row.snapshot as string));
   }
   delete(code: string) {
+    this.db.prepare('DELETE FROM room_chat WHERE code=?').run(code);
     this.db.prepare("DELETE FROM rooms WHERE code=?").run(code);
+  }
+  loadChat(code: string): ChatMessage[] {
+    const row = this.db.prepare('SELECT messages FROM room_chat WHERE code=?').get(code);
+    return row ? (JSON.parse(row.messages as string) as ChatMessage[]).slice(-CHAT_HISTORY_LIMIT) : [];
+  }
+  saveChat(code: string, messages: ChatMessage[]) {
+    this.db.prepare('INSERT INTO room_chat VALUES(?,?) ON CONFLICT(code) DO UPDATE SET messages=excluded.messages')
+      .run(code, JSON.stringify(messages.slice(-CHAT_HISTORY_LIMIT)));
   }
   prune(now: number) {
     this.db

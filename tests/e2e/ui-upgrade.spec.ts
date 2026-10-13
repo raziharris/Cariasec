@@ -60,6 +60,8 @@ test('touch card flow without characters, rendered Phaser board and motion setti
     await host.getByRole('button', { name: 'Tetapan', exact: true }).click();
     await expect(host.locator('.avatar-picker, .character-avatar')).toHaveCount(0);
     await host.getByLabel('Kurangkan animasi').check();
+    await expect(host.getByRole('dialog')).toHaveCount(1);
+    await expect(host.getByRole('dialog', { name: 'Butiran kad' })).toHaveCount(0);
     await host.getByRole('button', { name: 'Tutup', exact: true }).click();
     await host.reload();
     await expect(host.getByTestId('board-container')).toHaveAttribute('aria-busy', 'false');

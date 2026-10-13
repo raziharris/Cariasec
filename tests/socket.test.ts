@@ -15,6 +15,7 @@ import {
   type Reply,
   type Session,
 } from "../shared/game.js";
+import type { ChatMessage, ChatReply } from '../shared/chat';
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 async function until(check: () => boolean) {
   for (let i = 0; i < 100; i++) {
@@ -38,6 +39,7 @@ async function harness(options: Options = {}) {
       room: null as ColyseusRoom | null,
       view: null as View | null,
       session: null as Session | null,
+      chat: [] as ChatMessage[],
       async send(command: Command): Promise<Reply> {
         try {
           if (
@@ -65,6 +67,7 @@ async function harness(options: Options = {}) {
             room.reconnection.enabled = false;
             room.onMessage<View>("state", (view) => (c.view = view));
             room.onMessage<string>("removed", () => undefined);
+            room.onMessage<ChatMessage>('chat-message', message => c.chat.push(message));
             c.session = await room.request<never, Session>("session");
             c.view = await room.request<never, View>("sync");
             return { ok: true, session: c.session };
@@ -103,6 +106,69 @@ async function harness(options: Options = {}) {
   };
 }
 const settings = { turnSeconds: 60, maxActions: 60 } as const;
+test('room chat is authenticated, isolated, deduplicated, unrestricted by new cooldowns and independent of gameplay', async () => {
+  const h = await harness();
+  try {
+    const host = await h.client(), guest = await h.client(), outsider = await h.client();
+    await host.send({ type: 'create', nickname: 'Aina', settings });
+    await guest.send({ type: 'join', nickname: 'Razi', code: host.session!.code });
+    await outsider.send({ type: 'create', nickname: 'Other', settings });
+    const baseline = structuredClone(h.rooms.get(host.session!.code)!);
+    const input = { id: randomUUID(), text: '  Hai 👋  ' };
+    const reply = await host.room!.request<unknown, ChatReply>('chat-send', input);
+    assert.ok(reply.ok);
+    if (reply.ok) { assert.equal(reply.message.name, 'Aina'); assert.equal(reply.message.playerId, host.view!.you); assert.equal(reply.message.text, 'Hai 👋'); }
+    await until(() => guest.chat.length === 1 && host.chat.length === 1);
+    await host.room!.request('chat-send', input);
+    await delay(40);
+    assert.equal(guest.chat.length, 1);
+    assert.equal(outsider.chat.length, 0);
+    assert.deepEqual(await outsider.room!.request('chat-sync'), []);
+    for (const text of ['', '   ', 'x'.repeat(241), 'bad\u0000text', 'bad\u202Etext']) assert.equal((await host.room!.request<unknown, ChatReply>('chat-send', { id: randomUUID(), text })).ok, false);
+    assert.equal((await guest.room!.request<unknown, ChatReply>('chat-send', input)).ok, false);
+    assert.equal((await guest.room!.request<unknown, ChatReply>('chat-send', { id: randomUUID(), text: 'spoof', name: 'Aina' })).ok, false);
+    await delay(1100); // Existing transport-wide messages/sec guard is unchanged.
+    for (let i = 0; i < 8; i++) assert.equal((await guest.room!.request<unknown, ChatReply>('chat-send', { id: randomUUID(), text: `Spam ${i}` })).ok, true);
+    await until(() => host.chat.length === 9);
+    assert.deepEqual(h.rooms.get(host.session!.code), baseline);
+    assert.equal((await host.room!.request<never, ChatMessage[]>('chat-sync')).length, 9);
+    const session = guest.session!;
+    guest.socket.disconnect();
+    await until(() => !host.view!.players.find(player => player.name === 'Razi')!.connected);
+    const resumed = await h.client();
+    await resumed.send({ type: 'resume', ...session });
+    assert.equal((await resumed.room!.request<never, ChatMessage[]>('chat-sync')).length, 9);
+  } finally { await h.dispose(); }
+});
+
+test('chat history is bounded, survives server restart and is removed with its room', async () => {
+  const directory = mkdtempSync(join(tmpdir(), 'cariasec-chat-'));
+  const dbPath = join(directory, 'chat.sqlite');
+  const first = await harness({ dbPath });
+  let session: Session;
+  try {
+    const host = await first.client();
+    await host.send({ type: 'create', nickname: 'Aina', settings });
+    session = host.session!;
+    const history = Array.from({ length: 60 }, (_, sequence) => ({ id: randomUUID(), playerId: host.view!.you, name: 'Aina', text: `Mesej ${sequence}`, sequence: sequence + 1, sentAt: Date.now() }));
+    first.store.saveChat(session.code, history);
+    assert.equal(first.store.loadChat(session.code).length, 50);
+  } finally { await first.dispose(); }
+  const second = await harness({ dbPath });
+  try {
+    const resumed = await second.client();
+    await resumed.send({ type: 'resume', ...session! });
+    const history = await resumed.room!.request<never, ChatMessage[]>('chat-sync');
+    assert.equal(history.length, 50);
+    assert.equal(history[0].text, 'Mesej 10');
+    const reply = await resumed.room!.request<unknown, ChatReply>('chat-send', { id: randomUUID(), text: 'Selepas restart' });
+    assert.ok(reply.ok);
+    if (reply.ok) assert.equal(reply.message.sequence, 61);
+    assert.equal(second.store.loadChat(session!.code).length, 50);
+    second.store.delete(session!.code);
+    assert.deepEqual(second.store.loadChat(session!.code), []);
+  } finally { await second.dispose(); rmSync(directory, { recursive: true, force: true }); }
+});
 test('legacy character metadata is ignored and player identity survives authenticated resume', async () => {
   const h = await harness();
   try {

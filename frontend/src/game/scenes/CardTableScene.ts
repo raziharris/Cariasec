@@ -30,6 +30,7 @@ export class CardTableScene extends Scene {
   private get density() { return this.game.registry.get('pixel-density') as number || 1; }
 
   private endHandGesture(pointer: Input.Pointer) {
+    if (pointer.event?.target !== this.game.canvas) return;
     // Use the pointer's own down position so a redraw/resize cannot discard a
     // gesture half-way through. The camera is origin-zero with density zoom.
     const startY = pointer.downY / this.density;
@@ -397,7 +398,12 @@ export class CardTableScene extends Scene {
         this.input.setDefaultCursor("default");
         if (!state.reducedMotion) this.tweens.add({ targets: container, y: targetY, duration: 120 });
       });
+      let downTime: number | null = null;
+      container.on('pointerdown', (pointer: Input.Pointer) => { if (pointer.event?.target === this.game.canvas) downTime = pointer.downTime; });
       container.on("pointerup", (pointer: Input.Pointer) => {
+        const tapped = downTime === pointer.downTime;
+        downTime = null;
+        if (!tapped || pointer.event?.target !== this.game.canvas) return;
         if (Math.abs(pointer.x - pointer.downX) > 10 * this.density || Math.abs(pointer.y - pointer.downY) > 10 * this.density) return;
         EventBus.emit("game-sound", { name: "card" });
         EventBus.emit("select-family", card.category);

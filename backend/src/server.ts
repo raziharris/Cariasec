@@ -14,6 +14,8 @@ import {
 } from "@colyseus/core";
 import { WebSocketTransport } from "@colyseus/ws-transport";
 import { commandSchema } from "../../shared/schemas.js";
+import { CHAT_HISTORY_LIMIT, type ChatMessage, type ChatReply } from '../../shared/chat.js';
+import { chatSchema } from '../../shared/chatSchema.js';
 import type {
   Command,
   Player,
@@ -288,6 +290,7 @@ function createRoomClass(runtime: Runtime) {
     private game!: GameRoom;
     private connections = new Map<string, GameClient>();
     private pendingReconnections = new Map<string, { reject(): void }>();
+    private chat: ChatMessage[] = [];
 
     async onCreate(raw: unknown) {
       const parsed = commandSchema.safeParse(raw);
@@ -326,6 +329,12 @@ function createRoomClass(runtime: Runtime) {
       await this.setMetadata({ code });
 
       this.onMessage("sync", (client: GameClient) => this.view(client));
+      this.chat = runtime.store.loadChat(code);
+      this.onMessage('chat-sync', (client: GameClient) => {
+        this.chatPlayer(client);
+        return this.chat;
+      });
+      this.onMessage('chat-send', (client: GameClient, raw: unknown) => this.sendChat(client, raw));
       this.onMessage("session", (client: GameClient): Session => ({
         code: this.game.code,
         token: client.userData!.token,
@@ -495,6 +504,36 @@ function createRoomClass(runtime: Runtime) {
         playerId && this.game.players.find((item) => item.id === playerId);
       ensure(player, "Sesi tidak sah.");
       return viewFor(this.game, player.id);
+    }
+
+    private chatPlayer(client: GameClient): Player {
+      const data = client.userData;
+      const player = this.game.players.find(item => item.id === data?.playerId);
+      ensure(player && player.connected && !data?.leaving && !data?.superseded && this.connections.get(player.id) === client, 'Sesi tidak sah.');
+      return player;
+    }
+
+    private sendChat(client: GameClient, raw: unknown): ChatReply {
+      try {
+        const player = this.chatPlayer(client);
+        const parsed = chatSchema.safeParse(raw);
+        ensure(parsed.success, 'Mesej mesti antara 1 hingga 240 aksara.');
+        const existing = this.chat.find(message => message.id === parsed.data.id);
+        if (existing) {
+          ensure(existing.playerId === player.id && existing.text === parsed.data.text, 'Mesej tidak sah.');
+          return { ok: true, message: existing };
+        }
+        const now = Date.now();
+        const message: ChatMessage = { id: parsed.data.id, playerId: player.id, name: player.name, text: parsed.data.text, sentAt: now, sequence: (this.chat.at(-1)?.sequence ?? 0) + 1 };
+        const history = [...this.chat, message].slice(-CHAT_HISTORY_LIMIT);
+        runtime.store.saveChat(this.game.code, history);
+        this.chat = history;
+        for (const [id, recipient] of this.connections) if (recipient.state === 1 && this.game.players.some(item => item.id === id)) recipient.send('chat-message', message);
+        return { ok: true, message };
+      } catch (error) {
+        if (!(error instanceof GameError)) console.error('chat_failure', error);
+        return { ok: false, error: error instanceof GameError ? error.message : 'Mesej belum dihantar. Cuba lagi.' };
+      }
     }
 
     private publish() {
