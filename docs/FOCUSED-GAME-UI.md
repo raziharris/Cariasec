@@ -58,3 +58,36 @@ Release results are recorded after verification below.
 - Menu, chat and request-step screenshots were visually inspected, not only
   HTTP-checked. These are Chromium/WebKit emulation checks, not physical Safari,
   iPhone keyboard or speaker listening tests.
+
+### Tencent release
+
+Live URL: `http://43.156.11.241/Cariasec/`.
+Deployed application source: `f4977bbbb27fdae5ee0aeacc3dd34b940a11b234`.
+
+The frontend was published by adding hashed assets and atomically switching the
+HTML entry point. PM2 PID `3474325` stayed unchanged throughout deployment and
+post-release checks. The backend bundle hash is unchanged:
+`bb4893d1e097202234aafacb3c8cbd8b6fc7871fbaffde4715908446c4746de9`.
+No Nginx, multiplayer process, networking, game rules or database migration was
+changed. All eight protected public routes passed before and after publication.
+
+Rollback files: `/var/backups/Cariasec-focus-ui-20261014223526/public`.
+The online database backup
+`/var/lib/cariasec/cariasec-pre-focus-ui-1791988311960.sqlite` was independently
+reopened read-only and passed `PRAGMA integrity_check`.
+
+Live verification passed:
+
+- Six Chromium tests: all four phone-width card/swipe/preview checks, chat and
+  the focused request/collection/menu flow.
+- One WebKit focused UI test, including phone widths, game menu focus, chat,
+  settings, translated labels and synchronized card requests.
+- `node scripts/verify-live.mjs` and `npx.cmd tsx scripts/verify-live-sound.ts`:
+  real two-client WebSockets, refresh recovery, all 36 card assets, preferences,
+  sound gain/mute, synchronized deal/request cues and no page/request failures.
+- Live menu/chat/request screenshots were visually inspected. Remote main JS,
+  Phaser JS and CSS SHA-256 values match the local release files.
+
+Live reports: `tencent-live-smoke.json`, `tencent-sound-smoke.json` and
+`tencent-focused-ui-smoke.json`. Follow-up report commits do not change the
+deployed application bundle.

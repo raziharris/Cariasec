@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-14",
+  "url": "http://43.156.11.241/Cariasec/",
+  "applicationSourceCommit": "f4977bbbb27fdae5ee0aeacc3dd34b940a11b234",
+  "localUnitTestsPassed": 31,
+  "finalLocalChromiumTestsPassed": 24,
+  "liveChromiumTestsPassed": 6,
+  "liveWebKitTestsPassed": 1,
+  "iphoneWidths": [320, 375, 390, 430],
+  "singleTurnHud": true,
+  "progressiveRequestFlow": true,
+  "explicitCardConfirmation": true,
+  "compactCollectionDetails": true,
+  "chatIconUnreadAndDialog": true,
+  "compactGameMenu": true,
+  "menuAndChatFocusRestoration": true,
+  "settingsAndLanguagesPreserved": true,
+  "sixPlayerBoardHeightStable": true,
+  "realMultiplayerAndSoundSmokePassed": true,
+  "liveScreenshotsVisuallyInspected": true,
+  "protectedRoutesPassedBeforeAndAfter": 8,
+  "multiplayerPidUnchanged": 3474325,
+  "backendUnchanged": true,
+  "assetSha256": {
+    "index-B8XVSe71.js": "9df85da8a0fbadae292edbe1392327cb178cfe165a117deb10cbad1ec1b4330e",
+    "PhaserBoard-Bh_dYQdx.js": "2c1c99b7e625dab52e825318f10d6dfcd62ecb99e441878e3bd95e4766607a4d",
+    "index-Po1uBk4a.css": "7199f94efb2c65918cf1f2a5d891cc4ee1860b69fddbabfd8e914d5f54de7546"
+  },
+  "limitations": "Desktop Chromium/WebKit and phone emulation; physical iPhone, mobile keyboard and speaker listening were not tested."
+}
