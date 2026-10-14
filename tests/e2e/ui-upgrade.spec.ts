@@ -1,3 +1,4 @@
+import { gameAction } from '../helpers/gameUi';
 import { test, expect } from '@playwright/test';
 import { onboard } from '../helpers/onboard';
 
@@ -57,7 +58,7 @@ test('touch card flow without characters, rendered Phaser board and motion setti
     await host.waitForTimeout(1600);
     await host.screenshot({ path: 'docs/screenshots/ui-upgrade-game-375.png', fullPage: true });
     await guest.screenshot({ path: 'docs/screenshots/ui-upgrade-game-desktop.png', fullPage: true });
-    await host.getByRole('button', { name: 'Tetapan', exact: true }).click();
+    await gameAction(host, 'Tetapan');
     await expect(host.locator('.avatar-picker, .character-avatar')).toHaveCount(0);
     await host.getByLabel('Kurangkan animasi').check();
     await expect(host.getByRole('dialog')).toHaveCount(1);
@@ -67,10 +68,10 @@ test('touch card flow without characters, rendered Phaser board and motion setti
     await expect(host.getByTestId('board-container')).toHaveAttribute('aria-busy', 'false');
     await expect(host.locator('html')).toHaveAttribute('data-motion', 'reduced');
     await expect(guest.locator('.target-choice').filter({ hasText: 'Aina' }).locator('.player-mark')).toHaveText('A');
-    await host.getByRole('button', { name: 'Tetapan', exact: true }).click();
+    await gameAction(host, 'Tetapan');
     await expect(host.getByLabel('Kurangkan animasi')).toBeChecked();
     await host.getByRole('button', { name: 'Tutup', exact: true }).click();
-    await host.getByRole('button', { name: 'Keluar', exact: true }).click();
+    await gameAction(host, 'Keluar');
     await expect(guest.locator('.results')).toBeVisible();
     expect(errors).toEqual([]);
   } finally { await hostContext.close(); await guestContext.close(); }

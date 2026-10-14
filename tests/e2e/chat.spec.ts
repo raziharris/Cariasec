@@ -1,3 +1,4 @@
+import { gameAction, prepareRequest, selectLanguage } from '../helpers/gameUi';
 import { test, expect } from '@playwright/test';
 import { onboard } from '../helpers/onboard';
 import AxeBuilder from '@axe-core/playwright';
@@ -83,15 +84,18 @@ test('minimal room chat: shared messages, no new cooldown, history, isolation an
     await hostContext.setOffline(false);
     await expect(host.locator('.chat-message p').last()).toHaveText('Jumpa selepas reconnect');
     await expect(host.getByLabel('Tulis mesej', { exact: true })).toHaveValue('Draft offline');
-    await host.locator('.chat-toggle').click();
+    await host.getByRole('button', { name: 'Tutup chat' }).click();
+    await prepareRequest(host);
     await host.getByRole('button', { name: 'Minta kad', exact: true }).click();
     for (const page of [host, guest]) await expect(page.locator('.table-top')).toContainText('1 / 120');
-    await guest.locator('.language-switch').selectOption('en');
+    await guest.getByRole('button', { name: 'Tutup chat' }).click();
+    await selectLanguage(guest, 'en');
+    await guest.locator('.chat-toggle').click();
     await expect(guest.locator('.chat-toggle')).toContainText('Room chat');
     await expect(guest.locator('.chat-message p').last()).toHaveText('Jumpa selepas reconnect');
-    await host.getByRole('button', { name: 'Keluar', exact: true }).click();
+    await gameAction(host, 'Keluar');
     await expect(guest.locator('.results')).toBeVisible();
-    await other.getByRole('button', { name: 'Keluar', exact: true }).click();
+    await gameAction(other, 'Keluar');
     expect(errors).toEqual([]); expect(dialogs).toEqual([]);
     if (sdkWarnings.length) await test.info().attach('caught-colyseus-webkit-probe', { body: JSON.stringify(sdkWarnings), contentType: 'application/json' });
   } finally { await hostContext.close(); await guestContext.close(); await otherContext.close(); }

@@ -1,3 +1,4 @@
+import { gameAction } from '../helpers/gameUi';
 import { test, expect } from '@playwright/test';
 import { onboard } from '../helpers/onboard';
 test.use({ browserName: process.env.READABILITY_BROWSER === 'webkit' ? 'webkit' : 'chromium' });
@@ -91,7 +92,7 @@ for (const width of [320, 375, 390, 430]) {
       await expect(board).toHaveAttribute('aria-busy', 'false');
       await expect.poll(async () => canvas.evaluate((element: HTMLCanvasElement) => element.width / element.getBoundingClientRect().width)).toBeCloseTo(2, 1);
       expect(await host.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-      await host.getByRole('button', { name: 'Keluar', exact: true }).click();
+      await gameAction(host, 'Keluar');
       await expect(guest.locator('.results')).toBeVisible();
       expect(errors).toEqual([]);
       if (sdkWarnings.length) await test.info().attach('caught-colyseus-webkit-probe', { body: JSON.stringify(sdkWarnings), contentType: 'application/json' });

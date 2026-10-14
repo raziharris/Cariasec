@@ -1,5 +1,14 @@
 // Malay source strings are explicit translation keys; player names are never translated.
 export const english: Record<string, string> = {
+  'Menu permainan': 'Game menu',
+  'Tutup menu': 'Close menu',
+  'Tutup chat': 'Close chat',
+  'Tutup koleksi': 'Close collection',
+  'Langkah permintaan': 'Request steps',
+  'Langkah sebelumnya': 'Previous step',
+  'Rakan': 'Friend',
+  'Permintaan kad': 'Card request',
+  'Baki dek': 'Cards in deck',
   'Chat bilik': 'Room chat',
   'Untuk pemain bilik ini': 'For players in this room',
   '{count} mesej belum dibaca': '{count} unread messages',

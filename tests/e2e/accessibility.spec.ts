@@ -1,3 +1,4 @@
+import { gameAction } from '../helpers/gameUi';
 import { onboard } from "../helpers/onboard";
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
@@ -68,10 +69,15 @@ test("accessible navigation, keyboard dialog and six-player board", async ({
   await expect(host.locator('.request-dock')).toBeInViewport();
   expect(await host.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await expect(host.locator('.target-choice')).toHaveCount(5);
+  const tableHeight = await host.locator('.phaser-game-table').evaluate(element => element.clientHeight);
+  await host.locator('.target-choice').first().click();
+  await host.locator('.family-choices button').first().click();
+  await expect(host.locator('.phaser-game-table')).toHaveJSProperty('clientHeight', tableHeight);
+  await host.locator('.request-steps button').first().click();
   await audit();
   await host.screenshot({ path: 'docs/screenshots/ui-upgrade-six-players-320.png', fullPage: true });
   await host.setViewportSize({ width: 1280, height: 900 });
-  await host.getByRole("button", { name: "RIASEC", exact: true }).click();
+  await gameAction(host, 'RIASEC');
   for (const name of [
     "R · Realistik",
     "I · Investigatif",
@@ -87,6 +93,6 @@ test("accessible navigation, keyboard dialog and six-player board", async ({
     );
   }
   await host.getByRole("button", { name: "Bilik", exact: true }).click();
-  await host.getByRole("button", { name: "Keluar", exact: true }).click();
+  await gameAction(host, 'Keluar');
   for (const c of contexts) await c.close();
 });

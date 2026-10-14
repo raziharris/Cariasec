@@ -1,3 +1,4 @@
+import { gameAction, prepareRequest } from './game-ui.mjs';
 import { onboard } from "./onboarding.mjs";
 import { spawn } from "node:child_process";
 import { chromium, expect } from "@playwright/test";
@@ -115,6 +116,7 @@ try {
   await expect(a.locator(".hand-scroll .career-card")).toHaveCount(7);
   await expect(b.locator(".hand-scroll .career-card")).toHaveCount(7);
   for (const page of [a, b]) await expect(page.getByTestId('board-container')).toHaveAttribute('aria-busy', 'false');
+  await prepareRequest(a);
   await a.getByRole("button", { name: "Minta kad", exact: true }).click();
   await expect(a.locator(".table-top")).toContainText("1 / 120");
   await expect(b.locator(".table-top")).toContainText("1 / 120");
@@ -125,7 +127,7 @@ try {
     path: "docs/screenshots/production-board.png",
     fullPage: true,
   });
-  await a.getByRole("button", { name: "Keluar", exact: true }).click();
+  await gameAction(a, 'Keluar');
   expect(errors).toEqual([]);
   expect(failedRequests).toEqual([]);
   const result = {

@@ -1,3 +1,4 @@
+import { gameAction, prepareRequest } from '../tests/helpers/gameUi';
 import { chromium, expect } from '@playwright/test';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { observeAudio, audioStarts, resetAudio } from '../tests/helpers/audioProbe';
@@ -29,7 +30,7 @@ try {
     await page.getByRole('button', { name: 'Teruskan', exact: true }).click();
     await expect.poll(async () => (await audioStarts(page)).at(-1)?.name).toBe('ui-error.wav');
     await onboard(page, 'Tencent Bunyi');
-    await page.getByRole('button', { name: 'Tetapan', exact: true }).click();
+    await gameAction(page, 'Tetapan');
     const slider = page.getByLabel('Volume kesan bunyi');
     await expect(slider).toHaveValue('45');
     await page.waitForTimeout(100);
@@ -50,7 +51,7 @@ try {
     await page.getByRole('button', { name: 'Tutup', exact: true }).click();
     expect(await audioStarts(page)).toEqual([]);
     await page.reload();
-    await page.getByRole('button', { name: 'Tetapan', exact: true }).click();
+    await gameAction(page, 'Tetapan');
     await expect(slider).toHaveValue('20');
     await expect(page.getByRole('button', { name: 'Cuba bunyi' })).toBeDisabled();
     await page.getByRole('button', { name: 'Hidupkan bunyi' }).click();
@@ -94,8 +95,7 @@ try {
   await expect(host.locator('.collection-badge')).toHaveCount(6);
   await host.waitForTimeout(1600);
   const active = (await host.locator('.turn-message h2').innerText()) === 'Giliran anda!' ? host : guest;
-  await active.locator('.family-choices button').first().click();
-  await active.locator('.request-card').first().click();
+  await prepareRequest(active);
   await active.waitForTimeout(100);
   for (const page of [host, guest]) await resetAudio(page);
   await active.getByRole('button', { name: 'Minta kad', exact: true }).click();
@@ -104,7 +104,7 @@ try {
     await expect.poll(async () => (await audioStarts(page)).map(s => s.name)).toEqual(['ui-card.wav']);
     expect(await page.evaluate(() => (window as any).__audioProbe.maxActive)).toBe(1);
   }
-  await guest.getByRole('button', { name: 'Tetapan', exact: true }).click();
+  await gameAction(guest, 'Tetapan');
   await guest.getByLabel('Kurangkan animasi').check();
   await guest.getByRole('button', { name: 'Tutup', exact: true }).click();
   await guest.reload();
@@ -113,7 +113,7 @@ try {
   await expect(guest.locator('.target-choice').filter({ hasText: 'Bunyi Hos' }).locator('.player-mark')).toHaveText('BH');
   expect(await audioStarts(guest)).toEqual([]);
   await host.screenshot({ path: 'docs/screenshots/tencent-ui-upgrade-375.png', fullPage: true });
-  await host.getByRole('button', { name: 'Keluar', exact: true }).click();
+  await gameAction(host, 'Keluar');
   await expect(guest.locator('.results')).toBeVisible();
   await Promise.all(contexts.map(c => c.close()));
   expect(errors).toEqual([]);

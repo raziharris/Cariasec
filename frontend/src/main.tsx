@@ -32,6 +32,7 @@ import {
   Clock3,
   ChevronRight,
   Settings,
+  MoreHorizontal,
 } from "lucide-react";
 import {
   type Category,
@@ -84,6 +85,7 @@ import { GameHud } from './components/GameHud';
 import { Celebration } from './components/Celebration';
 import { BoardBoundary } from './components/BoardBoundary';
 import './ui-upgrade.css';
+import './focus-game.css';
 const PhaserBoard = React.lazy(async () => {
   for (let attempt = 0; ; attempt++) {
     try {
@@ -102,6 +104,8 @@ const PhaserBoard = React.lazy(async () => {
 function App() {
   const { playSound } = useSound();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [gameMenuOpen, setGameMenuOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatHistoryError, setChatHistoryError] = useState('');
   const {
@@ -137,6 +141,7 @@ function App() {
     [manualCopyCode, setManualCopyCode] = useState<string | null>(null),
     [now, setNow] = useState(Date.now());
   const copyTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const menuTrigger = React.useRef<HTMLButtonElement>(null);
   const copying = React.useRef(false);
   const currentRoomCode = React.useRef(room?.code);
   currentRoomCode.current = room?.code;
@@ -155,10 +160,12 @@ function App() {
   const soundCue = useGameSound(room);
   useEffect(() => { if (error) playSound("error"); }, [error, playSound]);
   useEffect(() => {
-    if (!modal && !detail && !settingsOpen) return;
+    if (!modal && !detail && !settingsOpen && !gameMenuOpen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const previous = document.activeElement as HTMLElement;
+    // Safari does not focus a button on pointer click, so retain the explicit
+    // menu trigger instead of relying on document.activeElement there.
+    const previous = gameMenuOpen ? menuTrigger.current : document.activeElement as HTMLElement;
     const dialog = document.querySelector<HTMLElement>("[role=dialog]")!;
     const focusable = () =>
       Array.from(
@@ -172,6 +179,7 @@ function App() {
         setModal(null);
         setDetail(null);
         setSettingsOpen(false);
+        setGameMenuOpen(false);
         playSound("back");
       }
       if (e.key === "Tab") {
@@ -193,7 +201,7 @@ function App() {
       document.removeEventListener("keydown", key);
       previous?.focus();
     };
-  }, [modal, detail, settingsOpen]);
+  }, [modal, detail, settingsOpen, gameMenuOpen]);
   useEffect(() => {
     let cancelled = false;
     const checkHealth = async () => {
@@ -440,7 +448,7 @@ function App() {
             seconds: t("{count} saat", { count: "{count}" }),
             cards: t("kad"),
             complete: t("lengkap"),
-            deck: t("Kad"),
+            deck: t("Baki dek"),
           },
           }
         : null,
@@ -450,9 +458,14 @@ function App() {
     setError("");
     setModal(type);
   }
+  const focusGame = page === 'room' && room?.phase === 'playing';
   return (
     <>
-      <header className="site-header">
+      {focusGame ? <header className="focus-header">
+        <span className="focus-brand" role="img" aria-label="CARIASEC"><span className="brand-mark"><Layers size={19} /></span><span>cariasec</span></span>
+        <button className="room-code focus-code" data-sound="none" onClick={copyCode} aria-label={t('Salin kod bilik')}><span><small>{t('KOD BILIK')}</small><b data-testid="room-code">{room.code}</b></span>{copied ? <Check size={16} /> : <Copy size={16} />}</button>
+        <div className="focus-header-tools"><span className="chat-slot" aria-hidden="true" /><button ref={menuTrigger} className="game-menu-trigger" aria-label={t('Menu permainan')} aria-haspopup="dialog" onClick={() => setGameMenuOpen(true)}><MoreHorizontal size={23} /></button></div>
+      </header> : <header className="site-header">
         <button
           className="brand"
           data-sound="back"
@@ -504,7 +517,7 @@ function App() {
             </button>
           )}
         </nav>
-      </header>
+      </header>}
       {!connected && (
         <div className="connection-banner" role="status">
           <WifiOff size={16} /> {t('Menyambung semula...')} <span>{t('Sesi anda disimpan. Kami sedang cuba semula.')}</span>
@@ -551,16 +564,15 @@ function App() {
         )}
         {page === "room" && room && (
           <section
-            className={`room-page ${room.phase === "playing" ? "playing" : ""}`}
+            className={`room-page ${room.phase === "playing" ? "playing focus-play" : ""}`}
+            data-players={room.players.length}
           >
-            <div className="room-toolbar">
+            {room.phase !== 'playing' && <div className="room-toolbar">
               <div className="room-label">
                 <span className="live-dot" />
                 {room.phase === "lobby"
                   ? t("LOBI")
-                  : room.phase === "playing"
-                    ? t("BERMAIN")
-                    : t("KEPUTUSAN")}
+                  : t("KEPUTUSAN")}
               </div>
               <button
                 className="room-code"
@@ -580,14 +592,14 @@ function App() {
                 <LogOut size={17} />
                 {t("Keluar")}
               </button>
-            </div>
+            </div>}
             {copied && <p className="copy-feedback" role="status">{t('Kod disalin')}</p>}
             {manualCopyCode === room.code && <div className="manual-copy">
               <p role="status">{t('Browser menyekat salinan automatik. Pilih kod dan salin secara manual.')}</p>
               <label htmlFor="manual-room-code">{t('KOD BILIK')}</label>
               <input id="manual-room-code" value={room.code} readOnly autoFocus onFocus={e => e.currentTarget.select()} onClick={e => e.currentTarget.select()} />
             </div>}
-            <RoomChat key={room.code} messages={chatMessages} you={room.you} online={connected} historyError={chatHistoryError}
+            <RoomChat key={room.code} compact={focusGame} onOpenChange={setChatOpen} messages={chatMessages} you={room.you} online={connected} historyError={chatHistoryError}
               onSend={sendChat} onRefresh={() => { if (activeRoom) void syncChat(activeRoom); }} />
             {room.phase === "lobby" && (
               <div className="lobby">
@@ -706,7 +718,7 @@ function App() {
                     >
                       <PhaserBoard
                         state={boardState}
-                        interactionDisabled={settingsOpen || !!modal || !!detail}
+                        interactionDisabled={settingsOpen || gameMenuOpen || chatOpen || !!modal || !!detail}
                         onSelectFamily={setFamily}
                         onSelectTarget={setTarget}
                         onInspectCard={setDetail}
@@ -1020,6 +1032,17 @@ function App() {
         <span className="footer-brand">cariasec</span>
         <small>{t("RIASEC · Main & kenali minat")}</small>
       </footer>
+      {gameMenuOpen && <div className="modal-backdrop game-menu-backdrop">
+        <section className="modal game-menu" role="dialog" aria-modal="true" aria-labelledby="game-menu-title">
+          <button className="close" aria-label={t('Tutup menu')} onClick={() => setGameMenuOpen(false)}><X size={20} /></button>
+          <span className="eyebrow">CARIASEC</span><h2 id="game-menu-title">{t('Menu permainan')}</h2>
+          <button onClick={() => { setGameMenuOpen(false); setSettingsOpen(true); }}><Settings size={18} />{t('Tetapan')}<ArrowRight size={16} /></button>
+          <label className="game-menu-language"><span>{t('Bahasa')}</span><select className="language-switch" aria-label={t('Bahasa')} value={language} onChange={e => setLanguage(e.target.value as 'ms' | 'en')}><option value="ms">BM</option><option value="en">EN</option></select></label>
+          <button onClick={() => { setGameMenuOpen(false); setPage('rules'); }}><CircleHelp size={18} />{t('Cara main')}<ArrowRight size={16} /></button>
+          <button onClick={() => { setGameMenuOpen(false); setPage('learn'); }}><BookOpen size={18} />RIASEC<ArrowRight size={16} /></button>
+          <button className="game-menu-leave" data-sound="none" onClick={() => { setGameMenuOpen(false); void command({ type: 'leave' }); }}><LogOut size={18} />{t('Keluar')}</button>
+        </section>
+      </div>}
       {settingsOpen && (
         <div className="modal-backdrop">
           <section className="modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">

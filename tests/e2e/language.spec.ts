@@ -1,3 +1,4 @@
+import { gameAction, selectLanguage } from '../helpers/gameUi';
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { onboard } from "../helpers/onboard";
@@ -46,7 +47,7 @@ test("name and language gate, validation, preferences and both mobile languages"
         ),
       ).toBe(true);
     }
-    await page.locator(".language-switch").selectOption("en");
+    await selectLanguage(page, 'en');
     await page.getByRole("button", { name: "New room", exact: true }).click();
     await expect(page.getByLabel("Nickname")).toHaveValue("Mula");
     await page.getByRole("button", { name: "Close", exact: true }).click();
@@ -122,10 +123,10 @@ test("mixed-language players share one game, translate errors, cards and results
   await expect(guest.locator(".hand-scroll .card-title")).toHaveText(guestHand);
   await expect(guest.getByTestId("room-code")).toHaveText(code);
   await expect(guest.locator(".table-event")).toContainText("Menang is back.");
-  await guest.locator(".language-switch").selectOption("ms");
+  await selectLanguage(guest, 'ms');
   await expect(guest.locator(".turn-message h2")).toHaveText("Giliran Mula");
   await expect(guest.getByTestId("room-code")).toHaveText(code);
-  await guest.locator(".language-switch").selectOption("en");
+  await selectLanguage(guest, 'en');
   await expect(guest.locator(".hand-scroll .card-title")).toHaveText(guestHand);
   await guest.screenshot({
     path: "docs/screenshots/board-en-375.png",
@@ -146,7 +147,7 @@ test("mixed-language players share one game, translate errors, cards and results
       targets: v.nodes.map((n) => n.target),
     })),
   ).toEqual([]);
-  await guest.getByRole("button", { name: "How to play", exact: true }).click();
+  await gameAction(guest, 'How to play');
   await expect(guest.locator(".rules")).toContainText("Complete a family");
   await guest.getByRole("button", { name: "CARIASEC home" }).click();
   await guest.getByRole("button", { name: "Explore RIASEC" }).click();
@@ -165,7 +166,7 @@ test("mixed-language players share one game, translate errors, cards and results
     "Psychiatrist",
   ]);
   await guest.getByRole("button", { name: "Room", exact: true }).click();
-  await host.getByRole("button", { name: "Keluar", exact: true }).click();
+  await gameAction(host, 'Keluar');
   await expect(guest.locator(".results")).toContainText(
     "Mula left the game. Round cancelled with no winner.",
   );

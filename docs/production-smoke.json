@@ -1,8 +1,8 @@
 {
-  "date": "2026-10-13T14:14:44.875Z",
+  "date": "2026-10-14T14:30:11.634Z",
   "runtime": "v24.13.0",
   "build": "dist/server.js + dist/public",
-  "origin": "http://127.0.0.1:3002/",
+  "origin": "http://127.0.0.1:3002/Cariasec/",
   "health": 200,
   "cspPresent": true,
   "twoBrowserGameplay": true,

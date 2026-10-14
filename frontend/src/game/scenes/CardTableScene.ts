@@ -17,7 +17,6 @@ export class CardTableScene extends Scene {
   private layer?: GameObjects.Container;
   private previousHand = new Set<string>();
   private previousEventId?: number;
-  private clock?: GameObjects.Text;
   private restTimer?: number;
   private pendingState?: BoardState;
   private previousSoundKey?: string;
@@ -57,7 +56,6 @@ export class CardTableScene extends Scene {
     this.input.on('pointerup', this.endHandGesture, this);
     EventBus.on('hand-page', this.changeHandPage, this);
     EventBus.on("board-state", this.receiveState, this);
-    EventBus.on("board-clock", this.tickClock, this);
     EventBus.on("destroy-board", this.shutdown, this);
     this.scale.on("resize", this.redraw, this);
     this.events.once("shutdown", this.shutdown, this);
@@ -71,46 +69,17 @@ export class CardTableScene extends Scene {
       this.pendingState = undefined;
       this.applyState(pending);
     }
-    this.refreshClock();
-  }
-
-  private refreshClock() {
-    if (!this.state || !this.clock) return;
-    const remaining = this.state.paused
-      ? this.state.labels.paused
-      : this.state.labels.seconds.replace(
-          "{count}",
-          String(
-            Math.min(
-              this.state.turnSeconds,
-              Math.max(
-                0,
-                Math.ceil(((this.state.deadline ?? Date.now()) - Date.now()) / 1000),
-              ),
-            ),
-          ),
-        );
-    this.clock.setText(remaining);
   }
 
   shutdown() {
     if (this.input) this.input.enabled = false;
     EventBus.off("board-state", this.receiveState, this);
-    EventBus.off("board-clock", this.tickClock, this);
     EventBus.off("destroy-board", this.shutdown, this);
     EventBus.off('hand-page', this.changeHandPage, this);
     this.input?.off('pointerup', this.endHandGesture, this);
     this.scale.off("resize", this.redraw, this);
     if (this.restTimer) window.clearTimeout(this.restTimer);
-    this.clock = undefined;
     this.pendingState = undefined;
-  }
-
-  private tickClock() {
-    if (!this.clock?.active) return;
-    this.game.loop.wake();
-    this.refreshClock();
-    this.scheduleRest(80);
   }
 
   private receiveState(state: BoardState) {
@@ -153,7 +122,6 @@ export class CardTableScene extends Scene {
     this.layer = this.add.container(0, 0);
     const compact = width < 720;
     this.drawTable(width, height);
-    this.drawStatus(width, compact);
     this.drawOpponents(width, compact);
     this.drawCenter(width, height, compact);
     this.drawHand(width, height, compact);
@@ -181,28 +149,6 @@ export class CardTableScene extends Scene {
     this.layer!.add(g);
   }
 
-  private drawStatus(width: number, compact: boolean) {
-    const state = this.state!;
-    const size = compact ? 12 : 14;
-    const status = this.add
-      .text(26, 20, `●  ${state.paused ? state.labels.paused : state.labels.activeRound}`, {
-        fontFamily: "Nunito Sans, Arial",
-        fontSize: `${size}px`,
-        fontStyle: "bold",
-        color: state.paused ? "#f7c873" : "#9ce2bd",
-      })
-      .setOrigin(0, 0);
-    const actions = this.add
-      .text(width - 26, 20, `${state.actions} / ${state.maxActions}`, {
-        fontFamily: "Nunito Sans, Arial",
-        fontSize: `${size}px`,
-        fontStyle: "bold",
-        color: "#f6ead6",
-      })
-      .setOrigin(1, 0);
-    this.layer!.add([status, actions]);
-  }
-
   private drawOpponents(width: number, compact: boolean) {
     const state = this.state!;
     const opponents = state.players.filter((player) => player.id !== state.you);
@@ -215,7 +161,7 @@ export class CardTableScene extends Scene {
     const start = (width - total) / 2;
     opponents.forEach((player, index) => {
       const x = start + index % cols * (cardWidth + gap);
-      const y = 48 + Math.floor(index / cols) * 59;
+      const y = 14 + Math.floor(index / cols) * 59;
       const active = state.turn === player.id;
       const selected = state.selectedTarget === player.id;
       const panel = this.add.graphics();
@@ -264,91 +210,17 @@ export class CardTableScene extends Scene {
     });
   }
 
-  private drawCenter(width: number, height: number, compact: boolean) {
+  private drawCenter(_width: number, _height: number, compact: boolean) {
     const state = this.state!;
-    const centerY = compact ? (state.players.length > 4 ? 212 : 153) : height * 0.35;
-    const deckX = compact ? width * 0.22 : width * 0.3;
-    const deckW = compact ? 64 : 82;
-    const deckH = deckW * 1.38;
-    for (let i = 2; i >= 0; i--) {
-      const back = this.add.graphics();
-      back.fillStyle(i ? 0xe8d5ad : 0x1d5748, 1);
-      back.fillRoundedRect(deckX - deckW / 2 + i * 4, centerY - deckH / 2 - i * 3, deckW, deckH, 10);
-      if (!i) {
-        back.lineStyle(3, 0xf0d295, 1);
-        back.strokeRoundedRect(deckX - deckW / 2, centerY - deckH / 2, deckW, deckH, 10);
-      }
-      this.layer!.add(back);
-    }
-    const deckBrand = this.add
-      .text(deckX, centerY - 7, "C", {
-        fontFamily: "Georgia, serif",
-        fontSize: compact ? "28px" : "38px",
-        fontStyle: "bold",
-        color: "#f2d69c",
-      })
-      .setOrigin(0.5);
-    const deckCount = this.add
-      .text(deckX, centerY + deckH / 2 + 11, `${state.deckCount} ${state.labels.cards}`, {
-        fontFamily: "Nunito Sans, Arial",
-        fontSize: compact ? "10px" : "12px",
-        fontStyle: "bold",
-        color: "#d5e6df",
-      })
-      .setOrigin(0.5, 0);
-    const myTurn = state.turn === state.you;
-    const current = state.players.find((player) => player.id === state.turn);
-    const heading = state.paused
-      ? state.labels.waitingFriend
-      : myTurn
-        ? state.labels.yourTurn
-        : state.labels.friendTurn.replace("{name}", current?.name ?? "");
-    const prompt = state.paused
-      ? state.labels.waiting
-      : myTurn
-        ? state.labels.chooseCard
-        : state.labels.planMove;
-    const messageX = compact ? width * 0.63 : width * 0.61;
-    const eyebrow = this.add
-      .text(messageX, centerY - 46, myTurn ? state.labels.yourTurn.toUpperCase() : state.labels.friendTurn.toUpperCase().replace("{NAME}", ""), {
-        fontFamily: "Nunito Sans, Arial",
-        fontSize: compact ? "9px" : "11px",
-        fontStyle: "bold",
-        color: "#f0c979",
-      })
-      .setOrigin(0.5);
-    const title = this.add
-      .text(messageX, centerY - 18, heading, {
-        fontFamily: "Georgia, serif",
-        fontSize: compact ? "21px" : "30px",
-        fontStyle: "bold",
-        color: "#fff8ec",
-        align: "center",
-        wordWrap: { width: compact ? width * 0.48 : width * 0.42 },
-      })
-      .setOrigin(0.5);
-    const sub = this.add
-      .text(messageX, centerY + 18, prompt, {
-        fontFamily: "Nunito Sans, Arial",
-        fontSize: compact ? "10px" : "13px",
-        color: "#bfd5cc",
-        align: "center",
-      })
-      .setOrigin(0.5);
-    this.clock = this.add
-      .text(messageX, centerY + 49, "", {
-        fontFamily: "Nunito Sans, Arial",
-        fontSize: compact ? "10px" : "12px",
-        fontStyle: "bold",
-        color: "#17352d",
-        backgroundColor: "#f2d69c",
-        padding: { x: 10, y: 5 },
-      })
-      .setOrigin(0.5);
-    // React's HUD provides the compact timer; avoid covering the phone's cards.
-    this.clock.setVisible(!compact);
-    this.layer!.add([deckBrand, deckCount, eyebrow, title, sub, this.clock]);
-    this.refreshClock();
+    const y = compact ? (state.players.length > 4 ? 150 : 94) : 112;
+    const back = this.add.graphics();
+    back.fillStyle(0xe2c28b, 1).fillRoundedRect(26, y - 21, 28, 36, 6);
+    back.fillStyle(0x285c4c, 1).fillRoundedRect(22, y - 18, 28, 36, 6);
+    back.lineStyle(1, 0xd9c18c).strokeRoundedRect(22, y - 18, 28, 36, 6);
+    const brand = this.add.text(36, y, 'C', { fontFamily: 'Georgia, serif', fontSize: '17px', color: '#f2d69c' }).setOrigin(0.5);
+    const count = this.add.text(66, y - 12, `${state.deckCount} ${state.labels.cards}`, { fontFamily: 'Nunito Sans, Arial', fontSize: '13px', fontStyle: 'bold', color: '#fff8ec' });
+    const label = this.add.text(66, y + 6, state.labels.deck, { fontFamily: 'Nunito Sans, Arial', fontSize: '10px', color: '#b9d3c9' });
+    this.layer!.add([back, brand, count, label]);
   }
 
   private drawHand(width: number, height: number, compact: boolean) {

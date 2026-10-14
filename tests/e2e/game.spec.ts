@@ -1,3 +1,4 @@
+import { gameAction, prepareRequest } from '../helpers/gameUi';
 import { onboard } from "../helpers/onboard";
 import { observeAudio, audioStarts } from "../helpers/audioProbe";
 import { test, expect, type Page } from "@playwright/test";
@@ -70,9 +71,6 @@ test("two independent browsers play a full round, recover refresh/network, verif
       await active.waitForTimeout(400);
       continue;
     }
-    await expect(
-      active.getByRole("button", { name: "Minta kad", exact: true }),
-    ).toBeEnabled();
     const familyOptions = await active
       .locator("#family option")
       .evaluateAll((opts) => opts.map((o) => (o as HTMLOptionElement).value));
@@ -86,6 +84,7 @@ test("two independent browsers play a full round, recover refresh/network, verif
     await active
       .locator("#requested")
       .selectOption(options[actions % options.length]);
+    await expect(active.getByRole("button", { name: "Minta kad", exact: true })).toBeEnabled();
     const previousText = await active.locator(".table-top").innerText();
     await active
       .getByRole("button", { name: "Minta kad", exact: true })
@@ -201,9 +200,10 @@ test("responsive home, learning, room creation and game board at 320, 375, 390, 
       path: `docs/screenshots/board-${width}.png`,
       fullPage: true,
     });
+    await prepareRequest(p);
     await p.getByRole("button", { name: "Minta kad", exact: true }).click();
     await expect(p.locator(".table-top")).toContainText("1 / 120");
-    await p.getByRole("button", { name: "Keluar", exact: true }).click();
+    await gameAction(p, 'Keluar');
     await context.close();
     await peer.close();
   }

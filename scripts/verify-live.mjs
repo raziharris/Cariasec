@@ -1,3 +1,4 @@
+import { gameAction, selectLanguage } from './game-ui.mjs';
 import { onboard } from "./onboarding.mjs";
 import { chromium, expect } from "@playwright/test";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -143,16 +144,16 @@ try {
   await expect(guest.locator(".table-event")).toContainText(
     "Tencent Guest is back.",
   );
-  await guest.locator(".language-switch").selectOption("ms");
+  await selectLanguage(guest, 'ms');
   await expect(guest.getByTestId("room-code")).toHaveText(code);
   await expect(guest.locator(".turn-message h2")).toContainText("Giliran");
-  await guest.locator(".language-switch").selectOption("en");
+  await selectLanguage(guest, 'en');
   await expect(guest.locator(".card-title")).toHaveText(guestHand);
   await host.screenshot({
     path: "docs/screenshots/tencent-live-board.png",
     fullPage: true,
   });
-  await host.getByRole("button", { name: "Keluar", exact: true }).click();
+  await gameAction(host, 'Keluar');
 
   const mobileWidths = [320, 375, 390, 430];
   for (const width of mobileWidths) {
@@ -189,7 +190,7 @@ try {
         fullPage: true,
         animations: "disabled",
       });
-    await page.locator(".language-switch").selectOption("en");
+    await selectLanguage(page, 'en');
     await expect(page.locator("h1")).toContainText("Collect.");
     expect(
       await page.evaluate(

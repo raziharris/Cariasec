@@ -1,3 +1,4 @@
+import { gameAction, prepareRequest } from '../helpers/gameUi';
 import { test, expect } from "@playwright/test";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -53,7 +54,7 @@ test("real button audio, volume gain, mute, persistence and gesture unlock on de
     await expect.poll(async () => (await audioStarts(page)).map((entry) => entry.name)).toEqual(["ui-click.wav"]);
     await page.getByRole("button", { name: "Tutup", exact: true }).click();
     await expect.poll(async () => (await audioStarts(page)).at(-1)?.name).toBe("ui-back.wav");
-    await page.getByRole("button", { name: "Tetapan", exact: true }).click();
+    await gameAction(page, 'Tetapan');
     const slider = page.getByLabel("Volume kesan bunyi");
     await expect(slider).toHaveValue("45");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -79,10 +80,10 @@ test("real button audio, volume gain, mute, persistence and gesture unlock on de
     await page.waitForTimeout(100);
     await resetAudio(page);
     await page.getByRole("button", { name: "Tutup", exact: true }).click();
-    await page.getByRole("button", { name: "Tetapan", exact: true }).click();
+    await gameAction(page, 'Tetapan');
     expect(await audioStarts(page)).toEqual([]);
     await page.reload();
-    await page.getByRole("button", { name: "Tetapan", exact: true }).click();
+    await gameAction(page, 'Tetapan');
     await expect(slider).toHaveValue("20");
     await expect(page.getByRole("button", { name: "Hidupkan bunyi" })).toHaveAttribute("aria-pressed", "true");
     await page.getByRole("button", { name: "Hidupkan bunyi" }).click();
@@ -129,6 +130,8 @@ test("Phaser cues match server actions, deduplicate, and remain silent on refres
     await expect.poll(async () => (await audioStarts(page)).map((entry) => entry.name)).toEqual(["ui-card.wav"]);
   }
   await host.waitForTimeout(1600);
+  await prepareRequest(host);
+  await host.waitForTimeout(250);
   await resetAudio(host);
   await resetAudio(guest);
   await host.getByRole("button", { name: "Minta kad", exact: true }).click();
@@ -147,7 +150,7 @@ test("Phaser cues match server actions, deduplicate, and remain silent on refres
   });
   await expect.poll(async () => (await audioStarts(host)).filter((entry) => entry.name === "ui-win.wav").length).toBe(1);
   expect(await host.evaluate(() => (window as any).__audioProbe.maxActive)).toBe(1);
-  await host.getByRole("button", { name: "Keluar", exact: true }).click();
+  await gameAction(host, 'Keluar');
   await expect(guest.locator(".results")).toBeVisible();
   await Promise.all(contexts.map((context) => context.close()));
 });

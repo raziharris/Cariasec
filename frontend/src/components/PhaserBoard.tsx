@@ -76,16 +76,11 @@ export const PhaserBoard = forwardRef<PhaserBoardRef, PhaserBoardProps>(
       };
       EventBus.on("current-scene-ready", ready);
       gameRef.current = startGame(parentId);
-      const clockTimer = window.setInterval(
-        () => EventBus.emit("board-clock"),
-        1000,
-      );
       return () => {
         window.clearTimeout(slowTimer);
         EventBus.off('board-rendered', shown);
         EventBus.off('board-loading', loading);
         EventBus.off('hand-layout', layout);
-        window.clearInterval(clockTimer);
         EventBus.off("current-scene-ready", ready);
         EventBus.emit("destroy-board");
         EventBus.off("game-sound", sound);
