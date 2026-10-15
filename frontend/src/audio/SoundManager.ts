@@ -23,6 +23,7 @@ export class SoundManager {
   private preferences: SoundPreferences = { volume: 0.45, muted: false };
   private listeners = new Set<() => void>();
   private context?: AudioContext;
+  private resuming?: Promise<void>;
   private master?: GainNode;
   private buffers = new Map<SoundName, Promise<AudioBuffer | undefined>>();
   private files = new Map<SoundName, Promise<ArrayBuffer | undefined>>();
@@ -47,6 +48,8 @@ export class SoundManager {
         muted: localStorage.getItem(STORAGE_MUTED) === "true",
       };
     } catch { /* Restricted storage must not prevent playing. */ }
+    if (this.preferences.muted || this.preferences.volume === 0) this.stop();
+    if (this.context) this.configureSession();
     this.applyGain();
     this.listeners.forEach((listener) => listener());
   }
@@ -57,6 +60,7 @@ export class SoundManager {
   private setPreferences(next: Partial<SoundPreferences>) {
     this.preferences = { ...this.preferences, ...next };
     if (this.preferences.muted || this.preferences.volume === 0) this.stop();
+    if (this.context) this.configureSession();
     this.applyGain();
     try {
       localStorage.setItem(STORAGE_VOLUME, String(this.preferences.volume));
@@ -79,6 +83,7 @@ export class SoundManager {
   // muted gestures so later unmuting and asynchronous server events can work.
   readonly unlock = () => {
     try {
+      this.configureSession();
       if (!this.context) {
         const AudioConstructor = window.AudioContext ??
           (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -89,10 +94,28 @@ export class SoundManager {
         this.applyGain();
         this.preload();
       }
-      if (this.context.state !== "running") void this.context.resume().catch(() => undefined);
+      // Safari can resume asynchronously, including after a call or tab switch.
+      // Retry on each trusted gesture (touchend included), even if an earlier
+      // resume is still pending because that gesture was not accepted.
+      if (this.context.state !== "running") {
+        this.resuming = this.context.resume().catch(() => undefined);
+      }
       for (const name of Object.keys(SOUND_FILES) as SoundName[]) this.loadBuffer(name);
     } catch { /* An unavailable audio device must not break the game. */ }
   };
+
+  private configureSession() {
+    try {
+      const session = (navigator as Navigator & {
+        audioSession?: { type: string };
+      }).audioSession;
+      if (session) {
+        const type = this.preferences.muted || this.preferences.volume === 0 || document.hidden
+          ? "auto" : "playback";
+        if (session.type !== type) session.type = type;
+      }
+    } catch { /* Older Safari versions may not support audio session selection. */ }
+  }
 
   private loadBuffer(name: SoundName) {
     if (!this.buffers.has(name) && this.context) {
@@ -115,10 +138,12 @@ export class SoundManager {
     if (this.lastName === name && now - this.lastTime < 65) return;
     this.lastName = name;
     this.lastTime = now;
-    if (!this.context || this.context.state !== "running" ||
+    if (!this.context ||
         this.preferences.muted || this.preferences.volume === 0 || document.hidden) return;
+    const ready = this.context.state === "running" ? undefined : this.resuming;
+    if (this.context.state !== "running" && !ready) return;
     const ticket = ++this.serial;
-    void this.loadBuffer(name)?.then((buffer) => {
+    void Promise.all([this.loadBuffer(name), ready]).then(([buffer]) => {
       // Never queue stale sound across unlock, mute, tab switches, or downloads.
       if (!buffer || ticket !== this.serial || performance.now() - now > 250 ||
           this.preferences.muted || this.preferences.volume === 0 || document.hidden ||
@@ -142,6 +167,7 @@ export class SoundManager {
   readonly stop = () => {
     ++this.serial;
     this.stopVoice();
+    if (document.hidden && this.context) this.configureSession();
   };
 
   private stopVoice() {

@@ -6,6 +6,45 @@ import { observeAudio, audioStarts, resetAudio } from "../helpers/audioProbe";
 import { onboard } from "../helpers/onboard";
 import AxeBuilder from "@axe-core/playwright";
 
+test("touch audio selects playback and retains a fresh cue during asynchronous resume", async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  try {
+    const page = await context.newPage();
+    test.skip(!await page.evaluate(() => typeof AudioContext !== "undefined"), "Web Audio unavailable in this browser port; this is not a physical iPhone sound check.");
+    await observeAudio(page);
+    await page.addInitScript(() => {
+      // Chromium has no Audio Session API: observe the requested Safari policy.
+      Object.defineProperty(navigator, "audioSession", { configurable: true, value: { type: "auto" } });
+    });
+    await page.goto("/");
+    await onboard(page, "Touch Audio");
+    await expect.poll(() => page.evaluate(() => (window as any).__audioProbe.decoded.length)).toBe(6);
+    await gameAction(page, "Tetapan");
+    const button = page.getByRole("button", { name: "Cuba bunyi" });
+    await page.waitForTimeout(100);
+    await resetAudio(page);
+    await page.evaluate(async () => {
+      const audio = (window as any).__audioProbe.gains[0].context as AudioContext;
+      await audio.suspend();
+      const resume = audio.resume.bind(audio);
+      audio.resume = () => new Promise<void>((resolve, reject) => {
+        setTimeout(() => { resume().then(resolve, reject); }, 90);
+      });
+    });
+    await button.tap();
+    await expect.poll(async () => (await audioStarts(page)).map(entry => entry.name)).toEqual(["ui-confirm.wav"]);
+    expect(await page.evaluate(() => (navigator as any).audioSession.type)).toBe("playback");
+    await page.getByRole("button", { name: "Senyapkan bunyi" }).tap();
+    expect(await page.evaluate(() => (navigator as any).audioSession.type)).toBe("auto");
+    await resetAudio(page);
+    await page.getByRole("button", { name: "Tutup", exact: true }).tap();
+    expect(await audioStarts(page)).toEqual([]);
+    await gameAction(page, "Tetapan");
+    await page.getByRole("button", { name: "Hidupkan bunyi" }).tap();
+    expect(await page.evaluate(() => (navigator as any).audioSession.type)).toBe("playback");
+  } finally { await context.close(); }
+});
+
 test("kit WAV assets are intact, short, softly mastered and served correctly", async ({ request }) => {
   const hashes: Record<string, string> = {
     click: "d63873e42f5c3800c37addf99e05852d82a1c8ed4794d08eada928bb4c73edb7",
@@ -142,6 +181,8 @@ test("Phaser cues match server actions, deduplicate, and remain silent on refres
   await guest.reload();
   await expect(guest.locator(".phaser-board canvas")).toBeVisible();
   expect(await audioStarts(guest)).toEqual([]);
+  // Reload focuses the guest tab; sound is intentionally suppressed in hidden tabs.
+  await host.bringToFront();
   await host.evaluate(async () => {
     const modulePath = "/frontend/src/audio/SoundManager.ts";
     const { soundManager } = await import(modulePath);

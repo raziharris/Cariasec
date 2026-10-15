@@ -70,3 +70,27 @@ Live verification: `npx.cmd tsx scripts/verify-live-sound.ts` and `node scripts/
 
 Live checks also caught and fixed HTTP compatibility for action UUID generation (secure getRandomValues fallback, independently tested) and enabled only `blob:` images in CSP for Phaser's locally decoded textures. Multiplayer rules and networking were not changed.
 
+## iPhone Safari / Home Screen audio correction — 15 October 2026
+
+The reported device uses Safari saved to the iPhone Home Screen with Silent Mode on.
+Web Audio's default ambient session can be silenced by the iPhone's Ring/Silent
+setting. Where supported, the manager now selects `navigator.audioSession.type =
+"playback"` synchronously inside a trusted gesture, before creating/resuming the
+context. Muting, zero volume and hiding the page release that policy back to
+`auto`. Unsupported APIs are tolerated. This follows the
+[WebKit explanation and iOS 17+ recommendation](https://bugs.webkit.org/show_bug.cgi?id=237322#c6).
+
+The provider also unlocks on `touchend`, alongside pointer, keyboard and click
+gestures. A cue arriving while `resume()` is pending now waits for that resume
+and decoding, subject to the existing 250 ms expiry, mute/visibility checks and
+duplicate suppression. Previously it was dropped immediately whenever the
+context was not yet `running`. No stale cue is replayed after a long interruption.
+
+The touch regression test uses real decoded WAVs with an intentionally delayed
+AudioContext resume and observes the requested session policy using an API stub
+in Chromium. This verifies our handling, not the iPhone operating system's
+speaker routing. Windows WebKit does not expose Web Audio, so its playback
+checks remain explicitly skipped. Actual iPhone/Home Screen listening must be
+confirmed on the user's device; older iOS versions without Audio Session API
+may still require Silent Mode off.
+

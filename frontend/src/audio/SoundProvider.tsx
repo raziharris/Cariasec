@@ -25,6 +25,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
       if (event.key === null || event.key.startsWith("cariasec:sfx-")) soundManager.hydrate();
     };
     document.addEventListener("pointerdown", unlock, true);
+    document.addEventListener("touchend", unlock, { capture: true, passive: true });
     document.addEventListener("keydown", unlock, true);
     document.addEventListener("click", onClick, true);
     document.addEventListener("invalid", invalid, true);
@@ -32,6 +33,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     window.addEventListener("storage", storage);
     return () => {
       document.removeEventListener("pointerdown", unlock, true);
+      document.removeEventListener("touchend", unlock, true);
       document.removeEventListener("keydown", unlock, true);
       document.removeEventListener("click", onClick, true);
       document.removeEventListener("invalid", invalid, true);
