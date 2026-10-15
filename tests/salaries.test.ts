@@ -2,7 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cards } from "../shared/game";
 import salaries from "../shared/salaries.json";
-import { salaryFor, salaryRange } from "../frontend/src/salary";
+import { salaryFor, salaryRange, salaryLevelsFor } from "../frontend/src/salary";
+import salaryLevels from "../shared/salary-levels.json";
 import { translate } from "../frontend/src/i18n";
 
 test("every occupation has a sourced Malaysian monthly range", () => {
@@ -31,4 +32,28 @@ test("salary labels are available in both languages", () => {
     translate("ms", "Malaysia · sebulan"),
     "Malaysia · sebulan",
   );
+});
+
+test("career salary levels retain providers and distinguish missing data from sourced ranges", () => {
+  assert.deepEqual(Object.keys(salaryLevels).sort(), cards.map(card => card.id).sort());
+  for (const card of cards) {
+    const levels = salaryLevelsFor(card.id);
+    assert.equal(levels.checkedAt, "2026-10-15");
+    for (const key of ["junior", "senior", "management"] as const) {
+      const level = levels[key];
+      if (!level) continue;
+      assert.ok(Number.isInteger(level.min) && level.min >= 1700, `${card.id} ${key}`);
+      assert.ok(Number.isInteger(level.max) && level.max > level.min, `${card.id} ${key}`);
+      assert.equal(new URL(level.source).hostname, new URL(salaryFor(card.id).source).hostname);
+      assert.ok(level.roleMs && level.roleEn);
+      if (level.reportedMin) assert.ok(level.reportedMin < level.min);
+      if (level.basis === "fiveYears") assert.equal(key, "senior");
+    }
+  }
+  assert.equal(salaryLevelsFor("C4").senior, null, "Do not publish inconsistent annual/monthly librarian data");
+  assert.equal(salaryLevelsFor("E2").notApplicable, true);
+  assert.equal(salaryLevelsFor("E3").management?.basis, "advert");
+  assert.equal(salaryRange(salaryLevelsFor("C2").junior!), "RM1,963–RM5,124");
+  assert.equal(translate("en", "Pengurusan"), "Management");
+  assert.equal(translate("en", "Data belum tersedia"), "Data not available");
 });

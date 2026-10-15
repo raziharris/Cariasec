@@ -5,6 +5,8 @@ import { onboard } from './onboarding.mjs';
 
 const base = process.env.LIVE_URL ?? 'http://127.0.0.1:3002/';
 const cards = JSON.parse(readFileSync('shared/cards.json', 'utf8'));
+const salaryLevels = JSON.parse(readFileSync('shared/salary-levels.json', 'utf8'));
+const money = new Intl.NumberFormat('ms-MY');
 mkdirSync('tmp/career-verification', { recursive: true });
 for (const [engine, browserType] of [['chromium', chromium], ['webkit', webkit]]) {
   const browser = await browserType.launch();
@@ -22,6 +24,17 @@ for (const [engine, browserType] of [['chromium', chromium], ['webkit', webkit]]
         for (const [cardIndex, card] of cards.filter(card => card.category === family).entries()) {
           await page.locator('.learning-cards .career-card').nth(cardIndex).click();
           await expect(page.getByTestId('career-description')).toHaveText(language === 'ms' ? card.description : careerDescriptions[card.id]);
+          const levels = salaryLevels[card.id];
+          for (const key of ['junior', 'senior', 'management']) {
+            const row = page.getByTestId(`salary-${key}`);
+            const level = levels[key];
+            if (key === 'management' && !level) {
+              await expect(row).toHaveCount(0);
+            } else {
+              const missing = levels.notApplicable ? (language === 'ms' ? 'Tidak berkenaan' : 'Not applicable') : (language === 'ms' ? 'Data belum tersedia' : 'Data not available');
+              await expect(row).toContainText(level ? `RM${money.format(level.min)}–RM${money.format(level.max)}` : missing);
+            }
+          }
           await page.getByRole('button', { name: language === 'ms' ? 'Tutup butiran kad' : 'Close card details' }).click();
         }
       }
@@ -34,12 +47,15 @@ for (const [engine, browserType] of [['chromium', chromium], ['webkit', webkit]]
         expect(fits).toBe(true);
         await page.getByTestId('career-description').scrollIntoViewIfNeeded();
         await page.screenshot({ path: `tmp/career-verification/${engine}-${language}-${width}.png` });
+        await page.getByTestId('salary-levels').scrollIntoViewIfNeeded();
+        await page.screenshot({ path: `tmp/career-verification/salary-${engine}-${language}-${width}.png` });
+        expect(await page.locator('.card-detail').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
         await page.getByRole('button', { name: language === 'ms' ? 'Faham' : 'Got it', exact: true }).click();
         await expect(page.locator('.card-detail')).toHaveCount(0);
       }
       expect(errors).toEqual([]);
       await context.close();
-      console.log(`${engine} ${language}: all 36 descriptions and 320/375/390/430px dialogs passed`);
+      console.log(`${engine} ${language}: all 36 descriptions, salary levels and 320/375/390/430px dialogs passed`);
     }
   } finally { await browser.close(); }
 }

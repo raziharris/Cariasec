@@ -1,5 +1,13 @@
 // Malay source strings are explicit translation keys; player names are never translated.
 export const english: Record<string, string> = {
+  "Pengurusan": "Management",
+  "Tidak berkenaan": "Not applicable",
+  "Data belum tersedia": "Data not available",
+  "Rujukan pengalaman 5 tahun; bukan gred jawatan rasmi.": "Five-year experience reference; not a formal job grade.",
+  "Tahap kemasukan": "Entry level",
+  "Contoh satu iklan kerja": "Example from one job advertisement",
+  "Julat rujukan asal": "Original reference range",
+  "Anggaran RM sebulan. Julat boleh bertindih mengikut majikan dan bidang.": "Estimated RM per month. Ranges may overlap across employers and fields.",
   'Menu permainan': 'Game menu',
   'Tutup menu': 'Close menu',
   'Tutup chat': 'Close chat',

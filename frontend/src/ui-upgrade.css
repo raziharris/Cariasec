@@ -100,6 +100,14 @@
   color: var(--ink, #354b3a);
   overflow-wrap: anywhere;
 }
+.salary-levels { text-align:left; margin: 14px 0; color:#24493d; }
+.salary-levels dl { margin:0; }
+.salary-level { padding:12px 0; border-bottom:1px solid #cdd7c6; }
+.salary-level dt { font-size:14px; font-weight:900; margin-bottom:4px; }
+.salary-level dd { margin:0; }
+.salary-level dd b { font-size:17px; overflow-wrap:anywhere; }
+.salary-level dd p, .salary-level-note { margin:4px 0 0; font-size:12px; line-height:1.5; color:#435b48; }
+.salary-level-note { margin-top:12px; }
 @keyframes preview-flip { from { transform:perspective(700px) rotateY(-75deg) scale(.94); opacity:.1; } to { transform:perspective(700px) rotateY(0) scale(1); opacity:1; } }
 .phaser-hand-mirror:focus-within { position:relative!important; width:100%!important; height:auto!important; margin:0 0 20px!important; padding:12px!important; clip:auto!important; white-space:normal!important; overflow:auto!important; }
 html[data-motion=reduced] *, html[data-motion=reduced] *::before, html[data-motion=reduced] *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }

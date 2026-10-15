@@ -59,6 +59,7 @@ const multiplayer = new Client(endpoint);
 let activeRoom: ColyseusRoom | null = null;
 import { assetUrl, colors } from "./cards/presentation";
 import { salaryFor, salaryRange } from "./salary";
+import { SalaryLevels } from "./components/SalaryLevels";
 import { lockIPhoneZoom } from "./iphoneZoom";
 const short = (s: string) =>
   s
@@ -1229,7 +1230,9 @@ function App() {
               </span>
               <strong>{salaryRange(salaryFor(detail))}</strong>
               <span>{t("Malaysia · sebulan")}</span>
+              <span>{t("Julat rujukan asal")}</span>
             </div>
+            <SalaryLevels id={detail} />
             <button className="primary full" onClick={() => setDetail(null)}>
               {t("Faham")} <Check size={17} />
             </button>

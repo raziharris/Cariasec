@@ -1,0 +1,622 @@
+{
+  "R1": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 2594,
+      "max": 4662,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/jurutera-awam",
+      "basis": "entry",
+      "roleMs": "Jurutera awam",
+      "roleEn": "Entry-level occupation group"
+    },
+    "senior": {
+      "min": 3734,
+      "max": 8438,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/jurutera-awam",
+      "basis": "fiveYears",
+      "roleMs": "Jurutera awam",
+      "roleEn": "Occupation group after five years"
+    }
+  },
+  "R2": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 1782,
+      "max": 3444,
+      "source": "https://malaysia.indeed.com/career/junior-chef/salaries",
+      "basis": "role",
+      "roleMs": "Cef junior",
+      "roleEn": "Junior chef"
+    },
+    "senior": {
+      "min": 2180,
+      "max": 7607,
+      "source": "https://malaysia.indeed.com/career/sous-chef/salaries",
+      "basis": "role",
+      "roleMs": "Sous chef",
+      "roleEn": "Sous chef"
+    },
+    "management": {
+      "min": 3016,
+      "max": 7888,
+      "source": "https://malaysia.indeed.com/career/head-chef/salaries",
+      "basis": "role",
+      "roleMs": "Ketua cef",
+      "roleEn": "Head chef"
+    }
+  },
+  "R3": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 1824,
+      "max": 4948,
+      "source": "https://malaysia.indeed.com/career/junior-mechanic/salaries",
+      "basis": "role",
+      "roleMs": "Mekanik junior",
+      "roleEn": "Junior mechanic"
+    },
+    "senior": {
+      "min": 2247,
+      "max": 5843,
+      "source": "https://malaysia.indeed.com/career/senior-mechanic/salaries",
+      "basis": "role",
+      "roleMs": "Mekanik senior",
+      "roleEn": "Senior mechanic"
+    },
+    "management": {
+      "min": 2372,
+      "max": 9445,
+      "source": "https://malaysia.indeed.com/career/workshop-manager/salaries",
+      "basis": "role",
+      "roleMs": "Pengurus bengkel",
+      "roleEn": "Workshop manager"
+    }
+  },
+  "R4": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": null
+  },
+  "R5": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 1706,
+      "max": 3919,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/buruh-kejuruteraan-awam",
+      "basis": "entry",
+      "roleMs": "Buruh kejuruteraan awam",
+      "roleEn": "Entry-level occupation group"
+    },
+    "senior": {
+      "min": 2030,
+      "max": 5311,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/buruh-kejuruteraan-awam",
+      "basis": "fiveYears",
+      "roleMs": "Buruh kejuruteraan awam",
+      "roleEn": "Occupation group after five years"
+    }
+  },
+  "R6": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 2660,
+      "max": 5782,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/atlet-dan-pemain-sukan",
+      "basis": "entry",
+      "roleMs": "Atlet dan pemain sukan",
+      "roleEn": "Entry-level occupation group"
+    },
+    "senior": {
+      "min": 3954,
+      "max": 10226,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/atlet-dan-pemain-sukan",
+      "basis": "fiveYears",
+      "roleMs": "Atlet dan pemain sukan",
+      "roleEn": "Occupation group after five years"
+    }
+  },
+  "I1": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 1976,
+      "max": 4760,
+      "source": "https://malaysia.indeed.com/career/junior-lawyer/salaries",
+      "basis": "role",
+      "roleMs": "Peguam junior",
+      "roleEn": "Junior lawyer"
+    },
+    "senior": {
+      "min": 4335,
+      "max": 12828,
+      "source": "https://malaysia.indeed.com/career/senior-lawyer/salaries",
+      "basis": "role",
+      "roleMs": "Peguam senior",
+      "roleEn": "Senior lawyer"
+    }
+  },
+  "I2": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": {
+      "min": 4787,
+      "max": 7317,
+      "source": "https://malaysia.indeed.com/career/senior-scientist/salaries",
+      "basis": "role",
+      "roleMs": "Ahli sains senior",
+      "roleEn": "Senior scientist"
+    },
+    "management": {
+      "min": 2453,
+      "max": 8384,
+      "source": "https://malaysia.indeed.com/career/research-manager/salaries",
+      "basis": "role",
+      "roleMs": "Pengurus penyelidikan",
+      "roleEn": "Research manager"
+    }
+  },
+  "I3": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 2130,
+      "max": 5694,
+      "source": "https://malaysia.indeed.com/career/junior-software-engineer/salaries",
+      "basis": "role",
+      "roleMs": "Jurutera perisian junior",
+      "roleEn": "Junior software engineer"
+    },
+    "senior": {
+      "min": 3319,
+      "max": 10258,
+      "source": "https://malaysia.indeed.com/career/senior-programmer/salaries",
+      "basis": "role",
+      "roleMs": "Pengatur cara senior",
+      "roleEn": "Senior programmer"
+    },
+    "management": {
+      "min": 7166,
+      "max": 16422,
+      "source": "https://malaysia.indeed.com/career/software-engineering-manager/salaries",
+      "basis": "role",
+      "roleMs": "Pengurus kejuruteraan perisian",
+      "roleEn": "Software engineering manager"
+    }
+  },
+  "I4": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 2857,
+      "max": 5509,
+      "source": "https://malaysia.indeed.com/career/junior-pharmacist/salaries",
+      "basis": "role",
+      "roleMs": "Ahli farmasi junior",
+      "roleEn": "Junior pharmacist"
+    },
+    "senior": {
+      "min": 8000,
+      "max": 10000,
+      "source": "https://malaysia.indeed.com/cmp/Alpro-Pharmacy-Sdn-Bhd-1/salaries?job_category=OtherCategoryGroup&location=MY%2FM13%2FMiri",
+      "basis": "advert",
+      "roleMs": "Ahli farmasi senior — Alpro, Miri",
+      "roleEn": "Senior pharmacist — Alpro, Miri"
+    },
+    "management": {
+      "min": 1700,
+      "max": 8230,
+      "source": "https://malaysia.indeed.com/career/pharmacy-manager/salaries",
+      "basis": "role",
+      "roleMs": "Pengurus farmasi",
+      "roleEn": "Pharmacy manager",
+      "reportedMin": 1671
+    }
+  },
+  "I5": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": null
+  },
+  "I6": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": null
+  },
+  "A1": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 2073,
+      "max": 3808,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/pemain-muzik-penyanyi-dan-komposer",
+      "basis": "entry",
+      "roleMs": "Pemain muzik",
+      "roleEn": "Entry-level occupation group"
+    },
+    "senior": {
+      "min": 2507,
+      "max": 4278,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/pemain-muzik-penyanyi-dan-komposer",
+      "basis": "fiveYears",
+      "roleMs": "Pemain muzik",
+      "roleEn": "Occupation group after five years"
+    }
+  },
+  "A2": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": {
+      "min": 3447,
+      "max": 6879,
+      "source": "https://malaysia.indeed.com/career/senior-artist/salaries",
+      "basis": "role",
+      "roleMs": "Artis senior (kategori lebih luas)",
+      "roleEn": "Senior artist (broader category)"
+    },
+    "management": {
+      "min": 3110,
+      "max": 13666,
+      "source": "https://malaysia.indeed.com/career/art-director/salaries",
+      "basis": "role",
+      "roleMs": "Pengarah seni",
+      "roleEn": "Art director"
+    }
+  },
+  "A3": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 2073,
+      "max": 3808,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/pemain-muzik-penyanyi-dan-komposer",
+      "basis": "entry",
+      "roleMs": "Pemain muzik",
+      "roleEn": "Entry-level occupation group"
+    },
+    "senior": {
+      "min": 2507,
+      "max": 4278,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/pemain-muzik-penyanyi-dan-komposer",
+      "basis": "fiveYears",
+      "roleMs": "Pemain muzik",
+      "roleEn": "Occupation group after five years"
+    }
+  },
+  "A4": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": null
+  },
+  "A5": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": null
+  },
+  "A6": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 1739,
+      "max": 3288,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/pereka-grafik-dan-multimedia",
+      "basis": "entry",
+      "roleMs": "Pereka grafik dan multimedia",
+      "roleEn": "Entry-level occupation group"
+    },
+    "senior": {
+      "min": 2287,
+      "max": 5376,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/pereka-grafik-dan-multimedia",
+      "basis": "fiveYears",
+      "roleMs": "Pereka grafik dan multimedia",
+      "roleEn": "Occupation group after five years"
+    }
+  },
+  "S1": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 1700,
+      "max": 2500,
+      "source": "https://malaysia.indeed.com/cmp/Dripping-Colours-Montessori-%28rawang%29/salaries",
+      "basis": "advert",
+      "roleMs": "Guru tadika junior — Dripping Colours, Rawang",
+      "roleEn": "Junior kindergarten teacher — Dripping Colours, Rawang"
+    },
+    "senior": null,
+    "management": {
+      "min": 2423,
+      "max": 9463,
+      "source": "https://malaysia.indeed.com/career/school-principal/salaries",
+      "basis": "role",
+      "roleMs": "Pengetua sekolah",
+      "roleEn": "School principal"
+    }
+  },
+  "S2": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": {
+      "min": 2143,
+      "max": 4114,
+      "source": "https://malaysia.indeed.com/career/senior-nurse/salaries",
+      "basis": "role",
+      "roleMs": "Jururawat senior",
+      "roleEn": "Senior nurse"
+    },
+    "management": {
+      "min": 2821,
+      "max": 6998,
+      "source": "https://malaysia.indeed.com/career/nurse-manager/salaries",
+      "basis": "role",
+      "roleMs": "Pengurus kejururawatan",
+      "roleEn": "Nurse manager"
+    }
+  },
+  "S3": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": null
+  },
+  "S4": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": {
+      "min": 2506,
+      "max": 4286,
+      "source": "https://malaysia.indeed.com/career/senior-counselor/salaries",
+      "basis": "role",
+      "roleMs": "Kaunselor senior",
+      "roleEn": "Senior counselor"
+    }
+  },
+  "S5": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": {
+      "min": 3360,
+      "max": 10655,
+      "source": "https://malaysia.indeed.com/career/senior-server/salaries",
+      "basis": "role",
+      "roleMs": "Pelayan senior",
+      "roleEn": "Senior server"
+    },
+    "management": {
+      "min": 1772,
+      "max": 5244,
+      "source": "https://malaysia.indeed.com/career/restaurant-manager/salaries",
+      "basis": "role",
+      "roleMs": "Pengurus restoran",
+      "roleEn": "Restaurant manager"
+    }
+  },
+  "S6": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": {
+      "min": 2715,
+      "max": 12219,
+      "source": "https://malaysia.indeed.com/career/senior-secretary/salaries",
+      "basis": "role",
+      "roleMs": "Setiausaha senior",
+      "roleEn": "Senior secretary"
+    },
+    "management": {
+      "min": 2317,
+      "max": 7480,
+      "source": "https://malaysia.indeed.com/career/office-manager/salaries",
+      "basis": "role",
+      "roleMs": "Pengurus pejabat",
+      "roleEn": "Office manager"
+    }
+  },
+  "E1": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 1889,
+      "max": 4598,
+      "source": "https://malaysia.indeed.com/career/junior-sales-executive/salaries",
+      "basis": "role",
+      "roleMs": "Eksekutif jualan junior",
+      "roleEn": "Junior sales executive"
+    },
+    "senior": {
+      "min": 3147,
+      "max": 7495,
+      "source": "https://malaysia.indeed.com/career/senior-sales-executive/salaries",
+      "basis": "role",
+      "roleMs": "Eksekutif jualan senior",
+      "roleEn": "Senior sales executive"
+    },
+    "management": {
+      "min": 3927,
+      "max": 11696,
+      "source": "https://malaysia.indeed.com/career/sales-manager/salaries",
+      "basis": "role",
+      "roleMs": "Pengurus jualan",
+      "roleEn": "Sales manager"
+    }
+  },
+  "E2": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": null,
+    "notApplicable": true
+  },
+  "E3": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": null,
+    "management": {
+      "min": 20000,
+      "max": 30000,
+      "source": "https://www.randstad.com.my/jobs/chief-executive-officer_kuala-lumpur_47463471/",
+      "basis": "advert",
+      "roleMs": "Ketua eksekutif",
+      "roleEn": "Chief executive officer"
+    },
+    "notApplicable": true
+  },
+  "E4": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 1747,
+      "max": 5698,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/pemandu-pelancong",
+      "basis": "entry",
+      "roleMs": "Pemandu pelancong",
+      "roleEn": "Entry-level occupation group"
+    },
+    "senior": {
+      "min": 1898,
+      "max": 4989,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/pemandu-pelancong",
+      "basis": "fiveYears",
+      "roleMs": "Pemandu pelancong",
+      "roleEn": "Occupation group after five years"
+    }
+  },
+  "E5": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 2181,
+      "max": 4543,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/juruarkib-dan-kurator",
+      "basis": "entry",
+      "roleMs": "Juruarkib dan kurator",
+      "roleEn": "Entry-level occupation group"
+    },
+    "senior": {
+      "min": 2854,
+      "max": 7015,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/juruarkib-dan-kurator",
+      "basis": "fiveYears",
+      "roleMs": "Juruarkib dan kurator",
+      "roleEn": "Occupation group after five years"
+    }
+  },
+  "E6": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 2879,
+      "max": 5877,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/jurunilai-dan-jurunilai-kerugian",
+      "basis": "entry",
+      "roleMs": "Jurunilai dan jurunilai kerugian",
+      "roleEn": "Entry-level occupation group"
+    },
+    "senior": {
+      "min": 3929,
+      "max": 10701,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/jurunilai-dan-jurunilai-kerugian",
+      "basis": "fiveYears",
+      "roleMs": "Jurunilai dan jurunilai kerugian",
+      "roleEn": "Occupation group after five years"
+    }
+  },
+  "C1": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 1848,
+      "max": 4560,
+      "source": "https://malaysia.indeed.com/career/junior-financial-analyst/salaries",
+      "basis": "role",
+      "roleMs": "Penganalisis kewangan junior",
+      "roleEn": "Junior financial analyst"
+    },
+    "senior": {
+      "min": 4016,
+      "max": 10889,
+      "source": "https://malaysia.indeed.com/career/senior-financial-analyst/salaries",
+      "basis": "role",
+      "roleMs": "Penganalisis kewangan senior",
+      "roleEn": "Senior financial analyst"
+    },
+    "management": {
+      "min": 5195,
+      "max": 13340,
+      "source": "https://malaysia.indeed.com/career/finance-manager/salaries",
+      "basis": "role",
+      "roleMs": "Pengurus kewangan",
+      "roleEn": "Finance manager"
+    }
+  },
+  "C2": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 1963,
+      "max": 5124,
+      "source": "https://malaysia.indeed.com/career/junior-accountant/salaries",
+      "basis": "role",
+      "roleMs": "Akauntan junior",
+      "roleEn": "Junior accountant"
+    },
+    "senior": {
+      "min": 1888,
+      "max": 12210,
+      "source": "https://malaysia.indeed.com/career/senior-accountant/salaries",
+      "basis": "role",
+      "roleMs": "Akauntan senior",
+      "roleEn": "Senior accountant"
+    },
+    "management": {
+      "min": 5131,
+      "max": 13168,
+      "source": "https://malaysia.indeed.com/career/accounting-manager/salaries",
+      "basis": "role",
+      "roleMs": "Pengurus perakaunan",
+      "roleEn": "Accounting manager"
+    }
+  },
+  "C3": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 2064,
+      "max": 8236,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/profesional-personel-dan-kerjaya",
+      "basis": "entry",
+      "roleMs": "Penasihat kerjaya",
+      "roleEn": "Entry-level occupation group"
+    },
+    "senior": {
+      "min": 2916,
+      "max": 14824,
+      "source": "https://wageindicator.org/ms-my/bekerja-di-malaysia/pekerjaan-dan-gaji/profesional-personel-dan-kerjaya",
+      "basis": "fiveYears",
+      "roleMs": "Penasihat kerjaya",
+      "roleEn": "Occupation group after five years"
+    }
+  },
+  "C4": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": null
+  },
+  "C5": {
+    "checkedAt": "2026-10-15",
+    "junior": null,
+    "senior": null
+  },
+  "C6": {
+    "checkedAt": "2026-10-15",
+    "junior": {
+      "min": 1700,
+      "max": 3276,
+      "source": "https://malaysia.indeed.com/career/junior-operator/salaries",
+      "basis": "role",
+      "roleMs": "Operator junior",
+      "roleEn": "Junior operator",
+      "reportedMin": 1660
+    },
+    "senior": {
+      "min": 1700,
+      "max": 3605,
+      "source": "https://malaysia.indeed.com/career/senior-operator/salaries",
+      "basis": "role",
+      "roleMs": "Operator senior",
+      "roleEn": "Senior operator",
+      "reportedMin": 1453
+    },
+    "management": {
+      "min": 1964,
+      "max": 5237,
+      "source": "https://malaysia.indeed.com/career/production-supervisor/salaries",
+      "basis": "role",
+      "roleMs": "Penyelia pengeluaran",
+      "roleEn": "Production supervisor"
+    }
+  }
+}
