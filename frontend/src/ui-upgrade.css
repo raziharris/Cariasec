@@ -94,12 +94,17 @@
 .card-detail .career-card { transform:none; }
 .card-detail .close { width:44px; height:44px; z-index:2; }
 .card-detail > .career-description {
+  margin: 16px 0;
+  padding-left: 22px;
+  list-style: disc;
   text-align: left;
   font-size: 15px;
   line-height: 1.7;
   color: var(--ink, #354b3a);
   overflow-wrap: anywhere;
 }
+.career-description li + li { margin-top: 10px; }
+.career-description li::marker { color: #527148; }
 .salary-levels { text-align:left; margin: 14px 0; color:#24493d; }
 .salary-levels dl { margin:0; }
 .salary-level { padding:12px 0; border-bottom:1px solid #cdd7c6; }

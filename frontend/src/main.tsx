@@ -1205,9 +1205,11 @@ function App() {
             </button>
             <Card id={detail} />
             <h2>{cardById[detail].title}</h2>
-            <p className="career-description" data-testid="career-description">
-              {cardById[detail].description}
-            </p>
+            <ul className="career-description" data-testid="career-description">
+              {cardById[detail].description.split(/(?<=[.!?])\s+/).map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
             <p>
               {t("Keluarga")}{" "}
               {

@@ -23,7 +23,7 @@ for (const [engine, browserType] of [['chromium', chromium], ['webkit', webkit]]
         await page.locator('.family-tabs button').nth(index).click();
         for (const [cardIndex, card] of cards.filter(card => card.category === family).entries()) {
           await page.locator('.learning-cards .career-card').nth(cardIndex).click();
-          await expect(page.getByTestId('career-description')).toHaveText(language === 'ms' ? card.description : careerDescriptions[card.id]);
+          await expect(page.getByTestId('career-description').locator('li')).toHaveText((language === 'ms' ? card.description : careerDescriptions[card.id]).split(/(?<=[.!?])\s+/));
           const levels = salaryLevels[card.id];
           for (const key of ['junior', 'senior', 'management']) {
             const row = page.getByTestId(`salary-${key}`);
@@ -42,7 +42,7 @@ for (const [engine, browserType] of [['chromium', chromium], ['webkit', webkit]]
       for (const width of [320, 375, 390, 430]) {
         await page.setViewportSize({ width, height: 844 });
         await page.locator('.learning-cards .career-card').first().click();
-        await expect(page.getByTestId('career-description')).toHaveText(language === 'ms' ? cards[0].description : careerDescriptions.R1);
+        await expect(page.getByTestId('career-description').locator('li')).toHaveText((language === 'ms' ? cards[0].description : careerDescriptions.R1).split(/(?<=[.!?])\s+/));
         const fits = await page.locator('.card-detail').evaluate(el => el.scrollWidth <= el.clientWidth && el.getBoundingClientRect().left >= 0 && el.getBoundingClientRect().right <= innerWidth);
         expect(fits).toBe(true);
         await page.getByTestId('career-description').scrollIntoViewIfNeeded();
