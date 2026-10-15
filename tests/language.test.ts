@@ -2,13 +2,17 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { translate, serverMessage, logMessage } from "../frontend/src/i18n";
 import { careerTitles, familyEnglish } from "../frontend/src/translations";
+import { careerDescriptions } from "../frontend/src/careerDescriptions";
 import { cards, categories, type View, type LogEntry } from "../shared/game";
 import { validNickname } from "../shared/nickname";
 import { nickname } from "../shared/schemas";
 
 test("all 36 careers and all six educational families have English content", () => {
   assert.equal(cards.length, 36);
-  for (const card of cards) assert.ok(careerTitles[card.id]?.length);
+  for (const card of cards) {
+    assert.ok(careerTitles[card.id]?.length);
+    assert.ok(careerDescriptions[card.id]?.trim().length, `${card.id} needs English copy`);
+  }
   for (const family of categories) {
     const en = familyEnglish[family.code];
     for (const field of [

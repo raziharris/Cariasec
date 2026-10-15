@@ -13,6 +13,7 @@ import {
 } from "../../shared/game";
 import { validNickname } from "../../shared/nickname";
 import { english, careerTitles, familyEnglish } from "./translations";
+import { careerDescriptions } from "./careerDescriptions";
 
 export type Language = "ms" | "en";
 export type Profile = { name: string; language: Language; reducedMotion: boolean };
@@ -168,6 +169,7 @@ export function useI18n() {
     const cards = sourceCards.map((card) => ({
       ...card,
       title: language === "en" ? careerTitles[card.id] : card.title,
+      description: language === "en" ? careerDescriptions[card.id] : card.description,
     }));
     const categories = sourceCategories.map((category) =>
       language === "ms"

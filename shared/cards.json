@@ -3,7 +3,7 @@
     "id": "R1",
     "category": "R",
     "title": "Jurutera",
-    "description": null,
+    "description": "Jurutera menggunakan ilmu sains, matematik dan teknologi untuk mereka bentuk serta menyelesaikan masalah dalam kehidupan harian. Bergantung pada bidang, mereka boleh membangunkan bangunan, jalan raya, mesin, sistem elektrik atau teknologi baharu. Tugas mereka termasuk menyediakan pelan, menguji reka bentuk, memilih bahan dan menilai keselamatan sesuatu projek. Kerjaya ini memerlukan pemikiran logik, kreativiti, ketelitian dan kerjasama untuk menghasilkan penyelesaian yang praktikal serta boleh dipercayai.",
     "originalContent": "REALISTIK\nENGINEER\nJURUTERA\n",
     "artwork": "/cards/R1.webp",
     "source": {
@@ -15,7 +15,7 @@
     "id": "R2",
     "category": "R",
     "title": "Tukang Masak",
-    "description": null,
+    "description": "Tukang masak menyediakan hidangan dengan menggabungkan kemahiran memasak, pengetahuan tentang bahan dan kreativiti. Mereka merancang menu, menyediakan bahan, mengawal masa memasak serta memastikan rasa dan persembahan makanan konsisten. Kebersihan dapur, penyimpanan bahan dan keselamatan makanan merupakan sebahagian penting daripada tanggungjawab mereka. Kerjaya ini memerlukan pengurusan masa, kerjasama dan kebolehan bekerja dengan tenang ketika banyak pesanan diterima serentak.",
     "originalContent": "REALISTIK\nTUKANG MASAK\nCHEF\n",
     "artwork": "/cards/R2.webp",
     "source": {
@@ -27,7 +27,7 @@
     "id": "R3",
     "category": "R",
     "title": "Mekanik",
-    "description": null,
+    "description": "Mekanik memastikan kenderaan atau mesin berfungsi dengan baik melalui pemeriksaan, penyelenggaraan dan pembaikan. Mereka mengenal pasti punca masalah menggunakan pemerhatian, alat pengukuran dan peralatan diagnostik. Selepas membaiki atau menggantikan komponen, mekanik menjalankan ujian untuk memastikan masalah telah diselesaikan. Sikap teliti, kemahiran menggunakan alatan dan kesediaan mempelajari teknologi baharu membantu mereka menjaga keselamatan serta memanjangkan jangka hayat peralatan.",
     "originalContent": "REALISTIK\nMECHANIC\nMEKANIK\n",
     "artwork": "/cards/R3.webp",
     "source": {
@@ -39,7 +39,7 @@
     "id": "R4",
     "category": "R",
     "title": "Tukang Kebun",
-    "description": null,
+    "description": "Tukang kebun menjaga tumbuhan dan kawasan hijau supaya kekal sihat, kemas dan menarik. Tugas mereka termasuk menyediakan tanah, menanam, menyiram, membaja, memangkas serta memantau tanda penyakit atau serangan perosak. Mereka perlu memahami bahawa setiap tumbuhan mempunyai keperluan cahaya, air dan penjagaan yang berbeza. Kerjaya ini sesuai diterokai oleh individu yang menikmati aktiviti luar, sabar melihat hasil usaha dan berminat terhadap alam sekitar.",
     "originalContent": "REALISTIK\nGARDENER\nTUKANG KEBUN\n",
     "artwork": "/cards/R4.webp",
     "source": {
@@ -51,7 +51,7 @@
     "id": "R5",
     "category": "R",
     "title": "Buruh",
-    "description": null,
+    "description": "Buruh melaksanakan pelbagai kerja fizikal yang menyokong pembinaan, pengeluaran, penyelenggaraan atau operasi sesuatu tempat. Tugasnya boleh merangkumi memindahkan bahan, menyediakan kawasan kerja, menggunakan alatan asas dan membantu pekerja berkemahiran. Mereka perlu memahami arahan, bekerjasama dan menggunakan peralatan perlindungan yang sesuai. Sumbangan mereka penting untuk memastikan kerja di lapangan berjalan lancar, dengan ketahanan fizikal, disiplin dan kesedaran keselamatan sebagai kekuatan utama.",
     "originalContent": "REALISTIK\nBUILDER\nBURUH\n",
     "artwork": "/cards/R5.webp",
     "source": {
@@ -63,7 +63,7 @@
     "id": "R6",
     "category": "R",
     "title": "Atlet",
-    "description": null,
+    "description": "Atlet mengembangkan kemahiran fizikal dan strategi untuk bertanding dalam sesuatu acara sukan. Kehidupan harian mereka melibatkan latihan teknik, pembinaan kecergasan, pemulihan dan penilaian prestasi bersama jurulatih. Selain kekuatan atau kepantasan, atlet memerlukan fokus, disiplin serta kebolehan mengurus tekanan dan menerima kekalahan. Mereka juga mengamalkan semangat kesukanan, menghormati peraturan dan berusaha meningkatkan pencapaian melalui latihan yang konsisten.",
     "originalContent": "REALISTIK\nATHLETE\nATLET\n",
     "artwork": "/cards/R6.webp",
     "source": {
@@ -75,7 +75,7 @@
     "id": "I1",
     "category": "I",
     "title": "Peguam",
-    "description": null,
+    "description": "Peguam membantu individu atau organisasi memahami dan menangani perkara berkaitan undang-undang. Mereka meneliti fakta, menjalankan penyelidikan, menyediakan dokumen dan memberikan nasihat berdasarkan situasi pelanggan. Bergantung pada bidang tugas, mereka juga boleh berunding bagi pihak pelanggan atau mewakili pelanggan dalam prosiding mahkamah. Kerjaya ini memerlukan pembacaan yang teliti, hujah yang tersusun, komunikasi yang jelas serta tanggungjawab menjaga kerahsiaan maklumat.",
     "originalContent": "INVESTIGATIF\nLAWYER\nPEGUAM\n",
     "artwork": "/cards/I1.webp",
     "source": {
@@ -87,7 +87,7 @@
     "id": "I2",
     "category": "I",
     "title": "Ahli Sains",
-    "description": null,
+    "description": "Ahli sains berusaha memahami bagaimana sesuatu berlaku melalui pemerhatian, penyelidikan dan eksperimen. Mereka membentuk persoalan, merancang kaedah kajian, mengumpulkan data dan menilai sama ada bukti menyokong sesuatu idea. Bidang kajian boleh melibatkan hidupan, bahan kimia, tenaga, bumi atau alam sekitar. Sifat ingin tahu, kesabaran dan kejujuran dalam melaporkan hasil amat penting kerana penemuan mereka membantu mengembangkan pengetahuan serta menyelesaikan masalah masyarakat.",
     "originalContent": "INVESTIGATIF\nSCIENTIST\nAHLI SAINS\n",
     "artwork": "/cards/I2.webp",
     "source": {
@@ -99,7 +99,7 @@
     "id": "I3",
     "category": "I",
     "title": "Pengatur Cara",
-    "description": null,
+    "description": "Pengatur cara membina perisian dengan menulis arahan yang boleh dilaksanakan oleh komputer. Mereka menterjemahkan keperluan pengguna kepada fungsi seperti pendaftaran akaun, carian maklumat atau pergerakan watak dalam permainan. Tugas mereka turut melibatkan pengujian, pembaikan ralat, dokumentasi dan penambahbaikan kod supaya sistem mudah diselenggara. Kerjaya ini memerlukan pemikiran logik, kreativiti, ketekunan serta kebolehan bekerjasama dengan pereka dan ahli pasukan lain.",
     "originalContent": "INVESTIGATIF\nPROGRAMMER\nPENGATUR CARA\n",
     "artwork": "/cards/I3.webp",
     "source": {
@@ -111,7 +111,7 @@
     "id": "I4",
     "category": "I",
     "title": "Ahli Farmasi",
-    "description": null,
+    "description": "Ahli farmasi mempunyai pengetahuan khusus tentang ubat dan penggunaannya. Mereka menyemak preskripsi, membekalkan ubat serta menerangkan arahan penggunaan, penyimpanan dan langkah berjaga-jaga yang berkaitan. Mereka juga membantu mengenal pasti isu penggunaan ubat dan bekerjasama dengan profesional kesihatan lain apabila diperlukan. Ketelitian, komunikasi yang mudah difahami dan sikap bertanggungjawab amat penting kerana tugas mereka membantu menyokong penggunaan ubat yang selamat.",
     "originalContent": "INVESTIGATIF\nPHARMACIST\nAHLI FARMASI\n",
     "artwork": "/cards/I4.webp",
     "source": {
@@ -123,7 +123,7 @@
     "id": "I5",
     "category": "I",
     "title": "Pakar Bedah",
-    "description": null,
+    "description": "Pakar bedah ialah doktor pakar yang menjalankan pembedahan untuk merawat keadaan kesihatan tertentu. Tanggungjawab mereka bermula dengan menilai pesakit, meneliti keputusan pemeriksaan dan membincangkan pilihan rawatan serta risiko yang berkaitan. Semasa pembedahan, mereka bekerja bersama pasukan perubatan dengan ketelitian dan koordinasi yang tinggi. Mereka turut memantau pemulihan pesakit, menjadikan kerjaya ini memerlukan kemahiran teknikal, komunikasi, ketahanan mental dan latihan yang panjang.",
     "originalContent": "INVESTIGATIF\nSURGEON\nPAKAR BEDAH\n",
     "artwork": "/cards/I5.webp",
     "source": {
@@ -135,7 +135,7 @@
     "id": "I6",
     "category": "I",
     "title": "Pakar Psikiatri",
-    "description": null,
+    "description": "Pakar psikiatri ialah doktor perubatan yang mengkhusus dalam kesihatan mental. Mereka menilai pengalaman, emosi, pemikiran dan tingkah laku pesakit sambil mempertimbangkan faktor kesihatan fizikal serta keadaan kehidupan. Berdasarkan penilaian, mereka merancang rawatan yang boleh melibatkan ubat, terapi dan kerjasama dengan profesional lain. Kerjaya ini memerlukan empati, kemahiran mendengar, pemikiran analitis dan penghormatan terhadap maruah serta kerahsiaan pesakit.",
     "originalContent": "INVESTIGATIF\nPSYCHIATRIST\nPAKAR PSIKIATRI\n",
     "artwork": "/cards/I6.webp",
     "source": {
@@ -147,7 +147,7 @@
     "id": "A1",
     "category": "A",
     "title": "Penyanyi",
-    "description": null,
+    "description": "Penyanyi menggunakan suara untuk menyampaikan melodi, lirik dan emosi kepada pendengar. Mereka melatih pernafasan, sebutan, ketepatan nada dan cara mentafsir lagu supaya persembahan mempunyai makna. Selain membuat persembahan, penyanyi boleh terlibat dalam rakaman, latihan bersama pemuzik dan penciptaan lagu. Kerjaya ini memerlukan latihan berterusan, penjagaan suara, disiplin dan kesediaan menerima maklum balas untuk memperbaiki mutu persembahan.",
     "originalContent": "ARTISTIK\nSINGER\nPENYANYI\n",
     "artwork": "/cards/A1.webp",
     "source": {
@@ -159,7 +159,7 @@
     "id": "A2",
     "category": "A",
     "title": "Pelukis",
-    "description": null,
+    "description": "Pelukis menghasilkan karya visual untuk menyampaikan idea, pengalaman, cerita atau pandangan tentang dunia. Mereka meneroka penggunaan garisan, bentuk, warna dan tekstur melalui bahan seperti pensel, cat atau medium digital. Proses berkarya boleh melibatkan pemerhatian, lakaran awal, eksperimen dan penambahbaikan sebelum sesuatu karya disiapkan. Kerjaya ini memerlukan imaginasi, kepekaan terhadap perincian dan ketekunan untuk membangunkan gaya serta kemahiran sendiri.",
     "originalContent": "ARTISTIK\nPAINTER\nPELUKIS\n",
     "artwork": "/cards/A2.webp",
     "source": {
@@ -171,7 +171,7 @@
     "id": "A3",
     "category": "A",
     "title": "Ahli Muzik",
-    "description": null,
+    "description": "Ahli muzik menghasilkan dan mempersembahkan muzik menggunakan alat muzik, sama ada secara solo atau berkumpulan. Mereka berlatih teknik permainan, memahami irama dan menyesuaikan persembahan dengan pemuzik lain. Ada yang turut menggubah lagu, membuat susunan muzik atau bekerja dalam rakaman dan produksi persembahan. Kemahiran mendengar, kreativiti, disiplin latihan dan kerjasama membantu mereka menghasilkan muzik yang tersusun serta memberi kesan kepada pendengar.",
     "originalContent": "ARTISTIK\nMUSICIAN\nAHLI MUZIK\n",
     "artwork": "/cards/A3.webp",
     "source": {
@@ -183,7 +183,7 @@
     "id": "A4",
     "category": "A",
     "title": "Penari",
-    "description": null,
+    "description": "Penari menggunakan pergerakan badan untuk menyampaikan cerita, emosi, budaya atau idea artistik. Mereka mempelajari koreografi, menguasai teknik dan menyelaraskan gerakan dengan muzik serta penari lain. Latihan melibatkan koordinasi, keseimbangan, kecergasan dan penjagaan tubuh untuk menyokong persembahan yang selamat. Kerjaya ini memerlukan disiplin, daya ingatan, ekspresi dan kesediaan mengulangi latihan sehingga pergerakan menjadi tepat serta bermakna.",
     "originalContent": "ARTISTIK\nDANCER\nPENARI\n",
     "artwork": "/cards/A4.webp",
     "source": {
@@ -195,7 +195,7 @@
     "id": "A5",
     "category": "A",
     "title": "Pelakon",
-    "description": null,
+    "description": "Pelakon menghidupkan watak supaya penonton dapat memahami cerita dan pengalaman yang disampaikan. Mereka meneliti skrip, memahami latar watak serta menggunakan suara, ekspresi muka dan pergerakan untuk membina persembahan. Tugas mereka termasuk menghadiri latihan, menghafal dialog dan menyesuaikan lakonan berdasarkan arahan pengarah. Imaginasi, pemerhatian terhadap manusia, kerjasama dan kesediaan mencuba pelbagai pendekatan merupakan kemahiran penting dalam kerjaya ini.",
     "originalContent": "ARTISTIK\nACTOR\nPELAKON\n",
     "artwork": "/cards/A5.webp",
     "source": {
@@ -207,7 +207,7 @@
     "id": "A6",
     "category": "A",
     "title": "Pereka Grafik",
-    "description": null,
+    "description": "Pereka grafik menyampaikan mesej melalui gabungan imej, warna, susun atur dan tipografi. Mereka boleh menghasilkan logo, poster, pembungkusan, bahan penerbitan atau kandungan untuk platform digital. Proses kerja bermula dengan memahami tujuan dan sasaran pengguna, diikuti lakaran, pembangunan reka bentuk serta semakan berdasarkan maklum balas. Kerjaya ini menggabungkan kreativiti dengan penyelesaian masalah supaya hasilnya menarik, jelas dan sesuai dengan kegunaannya.",
     "originalContent": "ARTISTIK\nGRAPHIC DESIGNER\nPEREKA GRAFIK\n",
     "artwork": "/cards/A6.webp",
     "source": {
@@ -219,7 +219,7 @@
     "id": "S1",
     "category": "S",
     "title": "Guru",
-    "description": null,
+    "description": "Guru membimbing murid memperoleh pengetahuan, membina kemahiran dan mengembangkan keyakinan untuk belajar. Mereka merancang pengajaran, menyediakan aktiviti dan menerangkan sesuatu konsep menggunakan pendekatan yang sesuai dengan keperluan murid. Guru turut menilai perkembangan pembelajaran, memberikan maklum balas dan membantu murid mengatasi kesukaran. Kesabaran, kreativiti, komunikasi dan kepekaan terhadap perbezaan individu membantu mereka membentuk suasana pembelajaran yang menyokong penyertaan semua murid.",
     "originalContent": "SOSIAL\nTEACHER\nGURU\n",
     "artwork": "/cards/S1.webp",
     "source": {
@@ -231,7 +231,7 @@
     "id": "S2",
     "category": "S",
     "title": "Jururawat",
-    "description": null,
+    "description": "Jururawat menjaga pesakit dan membantu memenuhi keperluan kesihatan mereka dalam pelbagai tempat rawatan. Tugas mereka termasuk memantau keadaan pesakit, merekod pemerhatian, memberikan penjagaan serta melaksanakan rawatan mengikut bidang tugas. Mereka juga membantu pesakit dan keluarga memahami penjagaan yang diperlukan serta menyampaikan perubahan keadaan kepada pasukan perubatan. Kerjaya ini memerlukan empati, ketelitian, kemahiran klinikal dan kebolehan bertindak dengan tenang dalam situasi mencabar.",
     "originalContent": "SOSIAL\nNURSE\nJURURAWAT\n",
     "artwork": "/cards/S2.webp",
     "source": {
@@ -243,7 +243,7 @@
     "id": "S3",
     "category": "S",
     "title": "Pramugari",
-    "description": null,
+    "description": "Pramugari dan pramugara bertanggungjawab terhadap keselamatan serta keselesaan penumpang di dalam pesawat. Sebelum dan semasa penerbangan, mereka memeriksa kelengkapan tertentu, menerangkan prosedur keselamatan dan memastikan arahan kabin dipatuhi. Mereka turut membantu penumpang yang memerlukan sokongan dan mengendalikan situasi kecemasan mengikut latihan. Komunikasi yang jelas, sikap prihatin, kerjasama dan kebolehan menyesuaikan diri dengan jadual serta penumpang yang pelbagai sangat penting.",
     "originalContent": "SOSIAL\nSTEWARDESS\nPRAMUGARI\n",
     "artwork": "/cards/S3.webp",
     "source": {
@@ -255,7 +255,7 @@
     "id": "S4",
     "category": "S",
     "title": "Kaunselor",
-    "description": null,
+    "description": "Kaunselor menyediakan ruang yang menyokong individu untuk membincangkan perasaan, pengalaman dan cabaran kehidupan. Mereka membantu individu memahami diri, mengenal pasti pilihan serta membina strategi menghadapi masalah seperti tekanan pembelajaran, hubungan atau hala tuju kerjaya. Kaunselor mendengar tanpa cepat menghukum dan membimbing individu membuat keputusan sendiri. Kerjaya ini memerlukan empati, kesabaran, kemahiran komunikasi dan pematuhan kepada etika serta batas kerahsiaan profesional.",
     "originalContent": "SOSIAL\nCOUNSELLOR\nKAUNSELOR\n",
     "artwork": "/cards/S4.webp",
     "source": {
@@ -267,7 +267,7 @@
     "id": "S5",
     "category": "S",
     "title": "Pelayan Restoran",
-    "description": null,
+    "description": "Pelayan restoran membantu memastikan pelanggan menerima layanan yang teratur sepanjang kunjungan mereka. Mereka menyambut pelanggan, menerangkan menu, mengambil pesanan dan menyampaikan keperluan pelanggan kepada pasukan dapur. Tugas lain termasuk menghidangkan makanan, menyemak ketepatan pesanan dan mengurus pertanyaan atau aduan dengan sopan. Kemahiran berkomunikasi, daya ingatan, pengurusan masa dan kerjasama amat diperlukan, terutama ketika restoran menerima ramai pelanggan.",
     "originalContent": "SOSIAL\nPELAYAN RESTORAN\nWAITER\n",
     "artwork": "/cards/S5.webp",
     "source": {
@@ -279,7 +279,7 @@
     "id": "S6",
     "category": "S",
     "title": "Setiausaha Pejabat",
-    "description": null,
+    "description": "Setiausaha pejabat membantu menyusun urusan pentadbiran supaya aktiviti harian organisasi berjalan lancar. Mereka mengurus jadual, menyediakan surat atau dokumen, menyelaras mesyuarat dan mengendalikan komunikasi yang berkaitan. Mereka juga menyimpan rekod, membuat susulan tugasan dan membantu memastikan maklumat sampai kepada individu yang betul. Kerjaya ini memerlukan ketelitian, kebijaksanaan menentukan keutamaan, kemahiran digital dan sikap profesional dalam mengendalikan maklumat sulit.",
     "originalContent": "SOSIAL\nSETIAUSAHA PEJABAT\nOFFICE SECRETARY\n",
     "artwork": "/cards/S6.webp",
     "source": {
@@ -291,7 +291,7 @@
     "id": "E1",
     "category": "E",
     "title": "Ejen Jualan",
-    "description": null,
+    "description": "Ejen jualan menghubungkan pelanggan dengan produk atau perkhidmatan yang sesuai dengan keperluan mereka. Mereka mengenal pasti kehendak pelanggan, menerangkan ciri serta syarat tawaran dan menjawab pertanyaan dengan jelas. Tugas mereka boleh melibatkan demonstrasi produk, penyediaan cadangan, rundingan dan susulan selepas jualan. Kejayaan dalam kerjaya ini memerlukan kemahiran mendengar, pengetahuan produk, ketekunan dan kejujuran untuk membina kepercayaan jangka panjang.",
     "originalContent": "ENTERPRISING\nSALES AGENT\nEJEN JUALAN\n",
     "artwork": "/cards/E1.webp",
     "source": {
@@ -303,7 +303,7 @@
     "id": "E2",
     "category": "E",
     "title": "Ahli Politik",
-    "description": null,
+    "description": "Ahli politik terlibat dalam kegiatan politik dan usaha mempengaruhi dasar serta keputusan awam. Bergantung pada peranan, mereka boleh membawa isu masyarakat, membincangkan cadangan dasar dan berunding dengan pelbagai pihak. Mereka perlu mendengar pandangan yang berbeza, menjelaskan pendirian dan mempertimbangkan kesan sesuatu keputusan terhadap orang ramai. Kerjaya ini memerlukan kepimpinan, komunikasi, integriti serta kesediaan bertanggungjawab terhadap tindakan dan keputusan sendiri.",
     "originalContent": "ENTERPRISING\nPOLITICIAN\nAHLI POLITIK\n",
     "artwork": "/cards/E2.webp",
     "source": {
@@ -315,7 +315,7 @@
     "id": "E3",
     "category": "E",
     "title": "Ketua Eksekutif",
-    "description": null,
+    "description": "Ketua eksekutif memimpin organisasi dengan menetapkan hala tuju dan menyelaraskan usaha mencapai matlamatnya. Mereka bekerjasama dengan pasukan pengurusan untuk merancang strategi, menetapkan keutamaan dan menilai prestasi keseluruhan. Tugas mereka melibatkan keputusan tentang sumber, pembangunan organisasi dan tindak balas terhadap cabaran atau peluang baharu. Kerjaya ini memerlukan kepimpinan, pertimbangan yang matang, komunikasi dan tanggungjawab terhadap pekerja serta pihak berkepentingan.",
     "originalContent": "ENTERPRISING\nCHIEF EXECUTIVE\nKETUA EKSEKUTIF\n",
     "artwork": "/cards/E3.webp",
     "source": {
@@ -327,7 +327,7 @@
     "id": "E4",
     "category": "E",
     "title": "Pemandu Pelancong",
-    "description": null,
+    "description": "Pemandu pelancong membantu pelawat memahami dan menikmati tempat yang dikunjungi. Mereka menerangkan sejarah, budaya, alam semula jadi atau keistimewaan setempat dengan cara yang menarik dan mudah difahami. Mereka turut menyelaras perjalanan, mengurus masa, menjawab pertanyaan dan memberikan panduan tentang tingkah laku yang sesuai di lokasi lawatan. Kerjaya ini memerlukan pengetahuan, kemahiran bercerita, layanan mesra dan kebolehan mengendalikan perubahan rancangan.",
     "originalContent": "ENTERPRISING\nTRAVEL GUIDE\nPEMANDU PELANCONG\n",
     "artwork": "/cards/E4.webp",
     "source": {
@@ -339,7 +339,7 @@
     "id": "E5",
     "category": "E",
     "title": "Kurator",
-    "description": null,
+    "description": "Kurator menyelidik, memilih dan mentafsir koleksi untuk muzium, galeri atau institusi kebudayaan. Mereka merancang pameran dengan menentukan tema, memilih objek atau karya dan menyediakan penerangan yang membantu pengunjung memahami konteksnya. Kurator juga bekerjasama dengan pihak lain dalam dokumentasi, penjagaan koleksi dan program pendidikan. Kerjaya ini menggabungkan penyelidikan, pertimbangan kreatif, pengurusan projek dan tanggungjawab terhadap warisan serta maklumat yang dipersembahkan.",
     "originalContent": "ENTERPRISING\nCURATORS\nKURATOR\n",
     "artwork": "/cards/E5.webp",
     "source": {
@@ -351,7 +351,7 @@
     "id": "E6",
     "category": "E",
     "title": "Penilai Hartanah",
-    "description": null,
+    "description": "Penilai hartanah menyediakan anggaran nilai hartanah berdasarkan bukti dan tujuan penilaian. Mereka memeriksa keadaan hartanah, meneliti lokasi serta cirinya dan membandingkan maklumat pasaran yang berkaitan. Hasil analisis disusun dalam laporan yang menerangkan kaedah, pertimbangan dan asas nilai yang diberikan. Kerjaya ini memerlukan ketelitian, kemahiran analisis, pertimbangan profesional dan kebolehan menjelaskan dapatan secara objektif.",
     "originalContent": "ENTERPRISING\nAPPRAISER\nPENILAI HARTANAH\n",
     "artwork": "/cards/E6.webp",
     "source": {
@@ -363,7 +363,7 @@
     "id": "C1",
     "category": "C",
     "title": "Penganalisis Kewangan",
-    "description": null,
+    "description": "Penganalisis kewangan meneliti maklumat kewangan untuk membantu organisasi memahami prestasi dan merancang keputusan. Mereka membandingkan pendapatan, perbelanjaan serta trend dan membina unjuran berdasarkan andaian tertentu. Mereka juga mengenal pasti risiko dan menerangkan bagaimana perubahan keadaan boleh mempengaruhi hasil kewangan. Kerjaya ini memerlukan kemahiran mengendalikan data, pemikiran kritis, ketelitian dan komunikasi yang jelas supaya analisis dapat difahami oleh pembuat keputusan.",
     "originalContent": "KONVENSIONAL\nFINANCIAL ANALYST\nPENGANALISIS\nKEWANGAN\n",
     "artwork": "/cards/C1.webp",
     "source": {
@@ -375,7 +375,7 @@
     "id": "C2",
     "category": "C",
     "title": "Akauntan",
-    "description": null,
+    "description": "Akauntan mengurus dan menyediakan maklumat kewangan supaya transaksi dapat direkod serta dilaporkan dengan tepat. Mereka menyemak dokumen, menyelaraskan rekod, menyediakan penyata kewangan dan membantu mengenal pasti perbezaan atau kesilapan. Bergantung pada peranan, mereka turut terlibat dalam belanjawan, percukaian atau kawalan kewangan dalaman. Kerjaya ini memerlukan integriti, kemahiran nombor, pengurusan masa dan pematuhan kepada piawaian yang berkaitan.",
     "originalContent": "KONVENSIONAL\nACCOUNTANT\nAKAUNTAN\n",
     "artwork": "/cards/C2.webp",
     "source": {
@@ -387,7 +387,7 @@
     "id": "C3",
     "category": "C",
     "title": "Penasihat",
-    "description": null,
+    "description": "Penasihat membantu individu atau organisasi memahami sesuatu isu dan mempertimbangkan pilihan dalam bidang kepakarannya. Mereka mengumpulkan maklumat, mengenal pasti matlamat serta kekangan dan menilai kelebihan serta risiko setiap pilihan. Cadangan yang diberikan perlu diterangkan dengan jelas supaya penerima dapat membuat keputusan yang bermaklumat. Tugas khusus bergantung pada bidang nasihat, tetapi kemahiran mendengar, analisis, komunikasi dan integriti merupakan asas penting.",
     "originalContent": "KONVENSIONAL\nPENASIHAT\nADVISOR\n",
     "artwork": "/cards/C3.webp",
     "source": {
@@ -399,7 +399,7 @@
     "id": "C4",
     "category": "C",
     "title": "Pustakawan",
-    "description": null,
+    "description": "Pustakawan mengurus sumber maklumat dan membantu pengguna mendapatkan bahan yang sesuai dengan keperluan mereka. Mereka menyusun serta mengkatalog buku, bahan digital dan koleksi lain supaya mudah dicari. Selain mengendalikan pinjaman, mereka boleh membimbing carian maklumat, mengajar penilaian sumber dan menganjurkan aktiviti membaca atau pembelajaran. Kerjaya ini memerlukan pengurusan maklumat, ketelitian, kemahiran teknologi dan minat membantu orang lain belajar.",
     "originalContent": "KONVENSIONAL\nLIBRARIAN\nPUSTAKAWAN\n",
     "artwork": "/cards/C4.webp",
     "source": {
@@ -411,7 +411,7 @@
     "id": "C5",
     "category": "C",
     "title": "Juruwang",
-    "description": null,
+    "description": "Juruwang mengendalikan transaksi bayaran dengan tepat dan memberikan layanan yang baik kepada pelanggan. Mereka menyemak harga, memproses pembayaran, mengeluarkan resit dan mengurus baki wang apabila berkenaan. Pada penghujung tugas, mereka mungkin perlu menyemak rekod transaksi serta melaporkan sebarang perbezaan mengikut prosedur. Kerjaya ini memerlukan kejujuran, ketelitian, kemahiran asas nombor dan kebolehan kekal tenang ketika barisan pelanggan panjang.",
     "originalContent": "KONVENSIONAL\nCASHIER\nJURUWANG\n",
     "artwork": "/cards/C5.webp",
     "source": {
@@ -423,7 +423,7 @@
     "id": "C6",
     "category": "C",
     "title": "Operator",
-    "description": null,
+    "description": "Operator mengendalikan mesin, peralatan atau sistem untuk memastikan sesuatu proses berjalan mengikut arahan kerja. Mereka membuat pemeriksaan asas, memantau petunjuk operasi dan merekod maklumat yang diperlukan. Jika berlaku gangguan atau keadaan luar biasa, mereka mengambil tindakan dalam bidang tugas atau melaporkannya kepada pihak yang bertanggungjawab. Tugas sebenar bergantung pada jenis operasi, tetapi fokus, ketelitian, pematuhan prosedur dan kesedaran keselamatan sangat penting.",
     "originalContent": "KONVENSIONAL\nOPERATOR\nOPERATOR\n",
     "artwork": "/cards/C6.webp",
     "source": {

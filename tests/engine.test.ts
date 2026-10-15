@@ -65,7 +65,7 @@ test("dataset: 36 unique cards, six per category, traceable source", () => {
     assert.equal(cards.filter((c) => c.category === code).length, 6);
   for (const c of cards) {
     assert.ok(c.source.page > 0);
-    assert.equal(c.description, null);
+    assert.ok(c.description.trim().length > 0, `${c.id} needs a career description`);
   }
 });
 test("shuffle preserves complete deck without mutating input", () => {

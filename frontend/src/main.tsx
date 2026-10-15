@@ -1204,6 +1204,9 @@ function App() {
             </button>
             <Card id={detail} />
             <h2>{cardById[detail].title}</h2>
+            <p className="career-description" data-testid="career-description">
+              {cardById[detail].description}
+            </p>
             <p>
               {t("Keluarga")}{" "}
               {

@@ -108,6 +108,7 @@ try {
       .filter((item) => item.category === family)
       .entries()) {
       await host.locator(".learning-cards .career-card").nth(cardIndex).click();
+      await expect(host.getByTestId("career-description")).toHaveText(card.description);
       await expect(host.getByTestId("salary-band")).toContainText(
         salaryText(card.id),
       );
