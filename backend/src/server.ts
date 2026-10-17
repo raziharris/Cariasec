@@ -14,8 +14,12 @@ import {
 } from "@colyseus/core";
 import { WebSocketTransport } from "@colyseus/ws-transport";
 import { commandSchema } from "../../shared/schemas.js";
-import { CHAT_HISTORY_LIMIT, type ChatMessage, type ChatReply } from '../../shared/chat.js';
-import { chatSchema } from '../../shared/chatSchema.js';
+import {
+  CHAT_HISTORY_LIMIT,
+  type ChatMessage,
+  type ChatReply,
+} from "../../shared/chat.js";
+import { chatSchema } from "../../shared/chatSchema.js";
 import type {
   Command,
   Player,
@@ -36,6 +40,11 @@ import {
   startGame,
   timeoutTurn,
   viewFor,
+  playCards,
+  passTurn,
+  withdraw,
+  disconnectPlayer,
+  reconnectPlayer,
 } from "./game/engine.js";
 
 const digest = (value: string) =>
@@ -94,6 +103,7 @@ interface Runtime {
 function freshRoom(code: string, settings: GameRoom["settings"]): GameRoom {
   const now = Date.now();
   return {
+    schemaVersion: 2,
     code,
     host: "",
     phase: "lobby",
@@ -152,14 +162,12 @@ function maintainRoom(
   );
   let changed = false;
 
-  if (expired.length && room.phase === "playing") {
-    cancel(
-      room,
-      "Pemain tidak kembali dalam 90 saat. Pusingan dibatalkan tanpa pemenang.",
-    );
+  if (expired.some((p) => !p.withdrawn) && room.phase === "playing") {
+    for (const player of expired) withdraw(room, player.id, now);
     changed = true;
   }
   if (expired.length && room.phase === "lobby") {
+    for (const player of expired) withdraw(room, player.id, now);
     room.players = room.players.filter((player) => !expired.includes(player));
     if (!room.players.some((player) => player.id === room.host))
       room.host = room.players[0]?.id ?? "";
@@ -251,6 +259,10 @@ function createRoomClass(runtime: Runtime) {
 
         limitAddress(runtime, context.ip);
         ensure(room.phase === "lobby", "Permainan sudah bermula.");
+        ensure(
+          !room.rentak || room.rentak.matchOver,
+          "Perlawanan sedang berlangsung. Tunggu perlawanan seterusnya.",
+        );
         ensure(room.players.length < 6, "Bilik penuh (6 pemain).");
         ensure(
           !room.players.some(
@@ -330,11 +342,13 @@ function createRoomClass(runtime: Runtime) {
 
       this.onMessage("sync", (client: GameClient) => this.view(client));
       this.chat = runtime.store.loadChat(code);
-      this.onMessage('chat-sync', (client: GameClient) => {
+      this.onMessage("chat-sync", (client: GameClient) => {
         this.chatPlayer(client);
         return this.chat;
       });
-      this.onMessage('chat-send', (client: GameClient, raw: unknown) => this.sendChat(client, raw));
+      this.onMessage("chat-send", (client: GameClient, raw: unknown) =>
+        this.sendChat(client, raw),
+      );
       this.onMessage("session", (client: GameClient): Session => ({
         code: this.game.code,
         token: client.userData!.token,
@@ -370,14 +384,14 @@ function createRoomClass(runtime: Runtime) {
         player.connected = true;
         player.disconnectedAt = null;
         log(room, `${player.name} telah kembali.`, "connection");
-        if (
-          room.phase === "playing" &&
-          room.players.every((item) => item.connected)
-        )
-          room.deadline = Date.now() + room.settings.turnSeconds * 1000;
+        reconnectPlayer(room, player.id);
       } else {
         ensure(auth.player, "Pemain tidak sah.");
         ensure(room.phase === "lobby", "Permainan sudah bermula.");
+        ensure(
+          !room.rentak || room.rentak.matchOver,
+          "Perlawanan sedang berlangsung.",
+        );
         ensure(room.players.length < 6, "Bilik penuh (6 pemain).");
         ensure(
           !room.players.some(
@@ -413,15 +427,11 @@ function createRoomClass(runtime: Runtime) {
       this.connections.set(data.playerId, client);
       const room = structuredClone(this.game);
       const player = room.players.find((item) => item.id === data.playerId);
-      if (!player) return;
+      if (!player || player.withdrawn) return;
       player.connected = true;
       player.disconnectedAt = null;
       log(room, `${player.name} telah kembali.`, "connection");
-      if (
-        room.phase === "playing" &&
-        room.players.every((item) => item.connected)
-      )
-        room.deadline = Date.now() + room.settings.turnSeconds * 1000;
+      reconnectPlayer(room, player.id);
       this.commit(room);
     }
 
@@ -488,6 +498,7 @@ function createRoomClass(runtime: Runtime) {
         if (!player.connected) continue;
         player.connected = false;
         player.disconnectedAt = Date.now();
+        disconnectPlayer(room, player.id);
         changed = true;
       }
       if (changed) this.commit(room);
@@ -508,8 +519,17 @@ function createRoomClass(runtime: Runtime) {
 
     private chatPlayer(client: GameClient): Player {
       const data = client.userData;
-      const player = this.game.players.find(item => item.id === data?.playerId);
-      ensure(player && player.connected && !data?.leaving && !data?.superseded && this.connections.get(player.id) === client, 'Sesi tidak sah.');
+      const player = this.game.players.find(
+        (item) => item.id === data?.playerId,
+      );
+      ensure(
+        player &&
+          player.connected &&
+          !data?.leaving &&
+          !data?.superseded &&
+          this.connections.get(player.id) === client,
+        "Sesi tidak sah.",
+      );
       return player;
     }
 
@@ -517,22 +537,46 @@ function createRoomClass(runtime: Runtime) {
       try {
         const player = this.chatPlayer(client);
         const parsed = chatSchema.safeParse(raw);
-        ensure(parsed.success, 'Mesej mesti antara 1 hingga 240 aksara.');
-        const existing = this.chat.find(message => message.id === parsed.data.id);
+        ensure(parsed.success, "Mesej mesti antara 1 hingga 240 aksara.");
+        const existing = this.chat.find(
+          (message) => message.id === parsed.data.id,
+        );
         if (existing) {
-          ensure(existing.playerId === player.id && existing.text === parsed.data.text, 'Mesej tidak sah.');
+          ensure(
+            existing.playerId === player.id &&
+              existing.text === parsed.data.text,
+            "Mesej tidak sah.",
+          );
           return { ok: true, message: existing };
         }
         const now = Date.now();
-        const message: ChatMessage = { id: parsed.data.id, playerId: player.id, name: player.name, text: parsed.data.text, sentAt: now, sequence: (this.chat.at(-1)?.sequence ?? 0) + 1 };
+        const message: ChatMessage = {
+          id: parsed.data.id,
+          playerId: player.id,
+          name: player.name,
+          text: parsed.data.text,
+          sentAt: now,
+          sequence: (this.chat.at(-1)?.sequence ?? 0) + 1,
+        };
         const history = [...this.chat, message].slice(-CHAT_HISTORY_LIMIT);
         runtime.store.saveChat(this.game.code, history);
         this.chat = history;
-        for (const [id, recipient] of this.connections) if (recipient.state === 1 && this.game.players.some(item => item.id === id)) recipient.send('chat-message', message);
+        for (const [id, recipient] of this.connections)
+          if (
+            recipient.state === 1 &&
+            this.game.players.some((item) => item.id === id)
+          )
+            recipient.send("chat-message", message);
         return { ok: true, message };
       } catch (error) {
-        if (!(error instanceof GameError)) console.error('chat_failure', error);
-        return { ok: false, error: error instanceof GameError ? error.message : 'Mesej belum dihantar. Cuba lagi.' };
+        if (!(error instanceof GameError)) console.error("chat_failure", error);
+        return {
+          ok: false,
+          error:
+            error instanceof GameError
+              ? error.message
+              : "Mesej belum dihantar. Cuba lagi.",
+        };
       }
     }
 
@@ -562,6 +606,7 @@ function createRoomClass(runtime: Runtime) {
       if (!player || !player.connected) return;
       player.connected = false;
       player.disconnectedAt = Date.now();
+      disconnectPlayer(room, player.id);
       log(
         room,
         `${player.name} terputus. Menunggu sambungan semula.`,
@@ -599,6 +644,45 @@ function createRoomClass(runtime: Runtime) {
         const room = structuredClone(this.game);
         const player = room.players.find((item) => item.id === data.playerId);
         ensure(player, "Sesi tidak sah.");
+        ensure(
+          !player.withdrawn &&
+            !data.leaving &&
+            !data.superseded &&
+            this.connections.get(player.id) === client,
+          "Sesi tidak aktif.",
+        );
+
+        if (command.type === "settings") {
+          ensure(
+            room.phase === "lobby" &&
+              room.host === player.id &&
+              (!room.rentak || room.rentak.matchOver),
+            "Tetapan hanya boleh diubah sebelum perlawanan.",
+          );
+          room.settings = command.settings;
+          for (const item of room.players) item.ready = false;
+        }
+        if (command.type === "play")
+          playCards(
+            room,
+            player.id,
+            command.cardIds,
+            command.chosenSuit,
+            command.version,
+            command.actionId,
+          );
+        if (command.type === "pass")
+          passTurn(room, player.id, command.version, command.actionId);
+        if (command.type === "decider") {
+          ensure(
+            room.host === player.id &&
+              room.phase === "finished" &&
+              room.rentak?.matchOver &&
+              room.rentak.matchWinners.length > 1,
+            "Pusingan penentu hanya untuk keputusan seri.",
+          );
+          room.rentak.matchOver = false;
+        }
 
         if (command.type === "ready") {
           ensure(room.phase === "lobby", "Permainan sudah bermula.");
@@ -616,7 +700,7 @@ function createRoomClass(runtime: Runtime) {
           );
         if (command.type === "draw")
           drawWithoutTarget(room, player.id, command.version, command.actionId);
-        if (command.type === "again") {
+        if (command.type === "again" || command.type === "decider") {
           ensure(
             room.host === player.id,
             "Hanya hos boleh membuka pusingan baharu.",
@@ -626,7 +710,8 @@ function createRoomClass(runtime: Runtime) {
             "Pusingan belum tamat.",
           );
           room.phase = "lobby";
-          room.players = room.players.filter((item) => item.connected);
+          room.players = room.players.filter((item) => !item.withdrawn);
+          if (room.rentak?.matchOver) room.rentak = undefined;
           room.deck = [];
           room.turn = null;
           room.actions = 0;
@@ -642,11 +727,8 @@ function createRoomClass(runtime: Runtime) {
           }
         }
         if (command.type === "leave") {
-          if (room.phase === "playing")
-            cancel(
-              room,
-              `${player.name} meninggalkan permainan. Pusingan dibatalkan tanpa pemenang.`,
-            );
+          if (room.phase !== "lobby" || (room.rentak && !room.rentak.matchOver))
+            withdraw(room, player.id);
           if (room.phase === "lobby") {
             room.players = room.players.filter((item) => item.id !== player.id);
             if (room.host === player.id) room.host = room.players[0]?.id ?? "";
@@ -712,6 +794,8 @@ export function createApp(options: Options = {}) {
   const disconnectMs = options.disconnectMs ?? 90_000;
   const roomTtlMs = options.roomTtlMs ?? 2 * 3600_000;
   for (const room of store.load()) {
+    // Old snapshots stay in SQLite for rollback/history, never as playable Rentak rooms.
+    if (room.schemaVersion !== 2) continue;
     if (Date.now() - room.updatedAt > roomTtlMs) {
       store.delete(room.code);
       continue;
@@ -719,6 +803,7 @@ export function createApp(options: Options = {}) {
     for (const player of room.players) {
       player.connected = false;
       player.disconnectedAt = Date.now();
+      disconnectPlayer(room, player.id);
     }
     rooms.set(room.code, room);
   }

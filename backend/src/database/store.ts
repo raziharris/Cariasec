@@ -2,7 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import type { Room } from "../../../shared/game.js";
-import { CHAT_HISTORY_LIMIT, type ChatMessage } from '../../../shared/chat.js';
+import { CHAT_HISTORY_LIMIT, type ChatMessage } from "../../../shared/chat.js";
 export class Store {
   db: DatabaseSync;
   constructor(path: string) {
@@ -26,22 +26,24 @@ export class Store {
         )
         .run(r.code, JSON.stringify(r), r.updatedAt);
       if (r.phase === "finished")
-        this.db
-          .prepare("INSERT OR REPLACE INTO results VALUES(?,?,?)")
-          .run(
-            `${r.code}:${r.createdAt}`,
-            JSON.stringify({
-              winners: r.winners,
-              reason: r.reason,
-              actions: r.actions,
-              players: r.players.map((p) => ({
-                name: p.name,
-                families: p.families,
-                cards: p.hand.length,
-              })),
-            }),
-            r.updatedAt,
-          );
+        this.db.prepare("INSERT OR REPLACE INTO results VALUES(?,?,?)").run(
+          `${r.code}:${r.createdAt}:${r.rentak?.roundNumber ?? 0}`,
+          JSON.stringify({
+            schemaVersion: r.schemaVersion ?? 1,
+            rulesVersion: r.rentak?.rulesVersion ?? "family-v1",
+            scores: r.rentak?.scores,
+            outcome: r.rentak?.outcome,
+            winners: r.winners,
+            reason: r.reason,
+            actions: r.actions,
+            players: r.players.map((p) => ({
+              name: p.name,
+              families: p.families,
+              cards: p.hand.length,
+            })),
+          }),
+          r.updatedAt,
+        );
       this.db.exec("COMMIT");
     } catch (e) {
       this.db.exec("ROLLBACK");
@@ -55,15 +57,24 @@ export class Store {
       .map((row) => JSON.parse(row.snapshot as string));
   }
   delete(code: string) {
-    this.db.prepare('DELETE FROM room_chat WHERE code=?').run(code);
+    this.db.prepare("DELETE FROM room_chat WHERE code=?").run(code);
     this.db.prepare("DELETE FROM rooms WHERE code=?").run(code);
   }
   loadChat(code: string): ChatMessage[] {
-    const row = this.db.prepare('SELECT messages FROM room_chat WHERE code=?').get(code);
-    return row ? (JSON.parse(row.messages as string) as ChatMessage[]).slice(-CHAT_HISTORY_LIMIT) : [];
+    const row = this.db
+      .prepare("SELECT messages FROM room_chat WHERE code=?")
+      .get(code);
+    return row
+      ? (JSON.parse(row.messages as string) as ChatMessage[]).slice(
+          -CHAT_HISTORY_LIMIT,
+        )
+      : [];
   }
   saveChat(code: string, messages: ChatMessage[]) {
-    this.db.prepare('INSERT INTO room_chat VALUES(?,?) ON CONFLICT(code) DO UPDATE SET messages=excluded.messages')
+    this.db
+      .prepare(
+        "INSERT INTO room_chat VALUES(?,?) ON CONFLICT(code) DO UPDATE SET messages=excluded.messages",
+      )
       .run(code, JSON.stringify(messages.slice(-CHAT_HISTORY_LIMIT)));
   }
   prune(now: number) {

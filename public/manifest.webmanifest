@@ -1,14 +1,14 @@
 {
   "id": "./",
-  "name": "Cariasec",
-  "short_name": "Cariasec",
-  "description": "Permainan kad kerjaya bersama rakan.",
+  "name": "CARIASEC: RENTAK",
+  "short_name": "Rentak",
+  "description": "Cari padanan. Cetus Rentak. Permainan parti kad 2-6 pemain.",
   "lang": "ms",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f4eee3",
-  "theme_color": "#f4eee3",
+  "background_color": "#10182b",
+  "theme_color": "#10182b",
   "icons": [
     {
       "src": "icons/cariasec-careers-192.png",

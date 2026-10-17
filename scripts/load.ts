@@ -12,6 +12,7 @@ import {
   type Reply,
   type Session,
 } from "../shared/game.js";
+import { deckById, matches } from "../shared/rentak.js";
 const players = Number(process.env.PLAYERS ?? 8);
 if (![8, 20, 40, 100].includes(players))
   throw new Error("PLAYERS mestilah 8, 20, 40 atau 100.");
@@ -129,28 +130,31 @@ try {
         const target = actor === a ? b : a;
         const v = actor.view!;
         if (v.phase !== "playing") break;
-        const options = cards.filter(
-          (c) =>
-            !v.hand.includes(c.id) &&
-            v.hand.some((id) => cardById[id].category === c.category),
+        const s = v.rentak!;
+        const playable = v.hand.find(
+          (id) =>
+            (!s.drawn || s.drawn === id) &&
+            (s.penalty
+              ? deckById[id].kind === "teduh"
+              : matches(deckById[id], deckById[s.top], s.activeSuit)),
         );
-        if (!target.view!.hand.length) {
-          await actor.send({
-            type: "draw",
-            version: v.version,
-            actionId: randomUUID(),
-          });
-          turns++;
-          continue;
-        }
-        if (!options.length) throw new Error("No valid card request");
-        await actor.send({
-          type: "request",
-          target: target.view!.you,
-          card: options[turns % options.length].id,
-          version: v.version,
-          actionId: randomUUID(),
-        });
+        await actor.send(
+          playable
+            ? {
+                type: "play",
+                cardIds: [playable],
+                ...(deckById[playable].kind === "prisma"
+                  ? { chosenSuit: "I" as const }
+                  : {}),
+                version: v.version,
+                actionId: randomUUID(),
+              }
+            : {
+                type: s.drawn ? "pass" : "draw",
+                version: v.version,
+                actionId: randomUUID(),
+              },
+        );
         turns++;
         await sleep(10);
         const av = a.view!,
@@ -160,17 +164,13 @@ try {
           av.actions !== bv.actions ||
           av.turn !== bv.turn ||
           av.hand.some((id) => bv.hand.includes(id)) ||
-          av.hand.length +
-            bv.hand.length +
-            av.deckCount +
-            av.players.reduce((n, p) => n + p.families.length * 6, 0) !==
-            36
+          av.rentak!.top !== bv.rentak!.top
         ) {
           failures++;
           throw new Error("Multiplayer consistency failed");
         }
         consistencyChecks++;
-        if (turns > 60) throw new Error("Round did not terminate");
+        if (turns > 2000) throw new Error("Round did not terminate");
       }
       if (
         a.view?.phase !== "finished" ||

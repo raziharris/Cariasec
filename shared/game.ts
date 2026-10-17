@@ -15,6 +15,7 @@ export type { Settings, Command } from "./schemas";
 import type { Settings, Command } from "./schemas";
 export type Phase = "lobby" | "playing" | "finished" | "cancelled";
 export interface Player {
+  withdrawn?: boolean;
   id: string;
   name: string;
   tokenHash: string;
@@ -34,6 +35,9 @@ export interface LogEntry {
   card?: string;
 }
 export interface Room {
+  eventCounter?: number;
+  schemaVersion?: 2;
+  rentak?: import("./rentak").RentakState;
   code: string;
   host: string;
   phase: Phase;
@@ -52,6 +56,7 @@ export interface Room {
   processed: string[];
 }
 export interface PublicPlayer {
+  withdrawn?: boolean;
   id: string;
   name: string;
   connected: boolean;
@@ -60,6 +65,7 @@ export interface PublicPlayer {
   families: Category[];
 }
 export interface View {
+  rentak?: import("./rentak").RentakView;
   code: string;
   host: string;
   phase: Phase;

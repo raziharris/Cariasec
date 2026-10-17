@@ -1,3 +1,9 @@
+# CARIASEC: RENTAK
+
+Gameplay semasa ialah Rentak: padanan kad, aksi dan habiskan tangan. Lihat [peraturan, seni bina dan pelepasan Rentak](docs/RENTAK.md). Kandungan koleksi keluarga di bawah ialah dokumentasi versi terdahulu; ia bukan peraturan permainan aktif.
+
+---
+
 # CARIASEC
 
 GitHub: https://github.com/raziharris/Cariasec

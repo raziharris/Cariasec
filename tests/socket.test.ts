@@ -15,7 +15,8 @@ import {
   type Reply,
   type Session,
 } from "../shared/game.js";
-import type { ChatMessage, ChatReply } from '../shared/chat';
+import type { ChatMessage, ChatReply } from "../shared/chat";
+import { deckById, matches } from "../shared/rentak";
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 async function until(check: () => boolean) {
   for (let i = 0; i < 100; i++) {
@@ -67,7 +68,9 @@ async function harness(options: Options = {}) {
             room.reconnection.enabled = false;
             room.onMessage<View>("state", (view) => (c.view = view));
             room.onMessage<string>("removed", () => undefined);
-            room.onMessage<ChatMessage>('chat-message', message => c.chat.push(message));
+            room.onMessage<ChatMessage>("chat-message", (message) =>
+              c.chat.push(message),
+            );
             c.session = await room.request<never, Session>("session");
             c.view = await room.request<never, View>("sync");
             return { ok: true, session: c.session };
@@ -106,92 +109,291 @@ async function harness(options: Options = {}) {
   };
 }
 const settings = { turnSeconds: 60, maxActions: 60 } as const;
-test('room chat is authenticated, isolated, deduplicated, unrestricted by new cooldowns and independent of gameplay', async () => {
+test("2–6 connected clients see consistent Rentak turns, private hands, settings and withdrawal", async () => {
+  for (let count = 2; count <= 6; count++) {
+    const h = await harness();
+    try {
+      const peers = await Promise.all(
+        Array.from({ length: count }, () => h.client()),
+      );
+      const host = peers[0];
+      assert.equal(
+        (
+          await host.send({
+            type: "create",
+            nickname: "Host",
+            settings: { ...settings, mode: "normal", format: "three-round" },
+          })
+        ).ok,
+        true,
+      );
+      for (let i = 1; i < count; i++)
+        assert.equal(
+          (
+            await peers[i].send({
+              type: "join",
+              nickname: `Guest ${i}`,
+              code: host.session!.code,
+            })
+          ).ok,
+          true,
+        );
+      for (const peer of peers) await peer.send({ type: "ready", ready: true });
+      await host.send({
+        type: "settings",
+        settings: { ...settings, mode: "normal", format: "three-round" },
+      });
+      await until(() => host.view!.players.every((p) => !p.ready));
+      assert.equal((await host.send({ type: "start" })).ok, false);
+      for (const peer of peers) await peer.send({ type: "ready", ready: true });
+      assert.equal((await host.send({ type: "start" })).ok, true);
+      await until(() => peers.every((peer) => peer.view!.phase === "playing"));
+      const allHands = peers.flatMap((peer) => peer.view!.hand);
+      assert.equal(new Set(allHands).size, 7 * count);
+      for (const peer of peers) {
+        assert.equal(peer.view!.hand.length, 7);
+        assert.equal("discard" in peer.view!.rentak!, false);
+        assert.equal("deck" in peer.view!, false);
+        assert.equal("pauseGrants" in peer.view!.rentak!, false);
+      }
+      for (let turn = 0; turn < count; turn++) {
+        const actor = peers.find((peer) => peer.view!.you === host.view!.turn)!;
+        const v = actor.view!,
+          s = v.rentak!;
+        const playable = v.hand.find(
+          (id) =>
+            (!s.drawn || s.drawn === id) &&
+            (s.penalty
+              ? deckById[id].kind === "teduh"
+              : matches(deckById[id], deckById[s.top], s.activeSuit)),
+        );
+        const command: Command = playable
+          ? {
+              type: "play",
+              cardIds: [playable],
+              ...(deckById[playable].kind === "prisma"
+                ? { chosenSuit: "I" as const }
+                : {}),
+              version: v.version,
+              actionId: randomUUID(),
+            }
+          : {
+              type: s.drawn ? "pass" : "draw",
+              version: v.version,
+              actionId: randomUUID(),
+            };
+        assert.equal((await actor.send(command)).ok, true);
+        await until(() =>
+          peers.every((peer) => peer.view!.version === actor.view!.version),
+        );
+        assert.ok(
+          peers.every(
+            (peer) =>
+              peer.view!.rentak!.top === actor.view!.rentak!.top &&
+              peer.view!.turn === actor.view!.turn,
+          ),
+        );
+      }
+      await host.send({ type: "leave" });
+      await until(() => peers[1].view!.players[0].withdrawn === true);
+      assert.equal(peers[1].view!.phase, count === 2 ? "finished" : "playing");
+      if (count > 2) assert.equal(peers[1].view!.players[0].count, 0);
+    } finally {
+      await h.dispose();
+    }
+  }
+});
+test("room chat is authenticated, isolated, deduplicated, unrestricted by new cooldowns and independent of gameplay", async () => {
   const h = await harness();
   try {
-    const host = await h.client(), guest = await h.client(), outsider = await h.client();
-    await host.send({ type: 'create', nickname: 'Aina', settings });
-    await guest.send({ type: 'join', nickname: 'Razi', code: host.session!.code });
-    await outsider.send({ type: 'create', nickname: 'Other', settings });
+    const host = await h.client(),
+      guest = await h.client(),
+      outsider = await h.client();
+    await host.send({ type: "create", nickname: "Aina", settings });
+    await guest.send({
+      type: "join",
+      nickname: "Razi",
+      code: host.session!.code,
+    });
+    await outsider.send({ type: "create", nickname: "Other", settings });
     const baseline = structuredClone(h.rooms.get(host.session!.code)!);
-    const input = { id: randomUUID(), text: '  Hai 👋  ' };
-    const reply = await host.room!.request<unknown, ChatReply>('chat-send', input);
+    const input = { id: randomUUID(), text: "  Hai 👋  " };
+    const reply = await host.room!.request<unknown, ChatReply>(
+      "chat-send",
+      input,
+    );
     assert.ok(reply.ok);
-    if (reply.ok) { assert.equal(reply.message.name, 'Aina'); assert.equal(reply.message.playerId, host.view!.you); assert.equal(reply.message.text, 'Hai 👋'); }
+    if (reply.ok) {
+      assert.equal(reply.message.name, "Aina");
+      assert.equal(reply.message.playerId, host.view!.you);
+      assert.equal(reply.message.text, "Hai 👋");
+    }
     await until(() => guest.chat.length === 1 && host.chat.length === 1);
-    await host.room!.request('chat-send', input);
+    await host.room!.request("chat-send", input);
     await delay(40);
     assert.equal(guest.chat.length, 1);
     assert.equal(outsider.chat.length, 0);
-    assert.deepEqual(await outsider.room!.request('chat-sync'), []);
-    for (const text of ['', '   ', 'x'.repeat(241), 'bad\u0000text', 'bad\u202Etext']) assert.equal((await host.room!.request<unknown, ChatReply>('chat-send', { id: randomUUID(), text })).ok, false);
-    assert.equal((await guest.room!.request<unknown, ChatReply>('chat-send', input)).ok, false);
-    assert.equal((await guest.room!.request<unknown, ChatReply>('chat-send', { id: randomUUID(), text: 'spoof', name: 'Aina' })).ok, false);
+    assert.deepEqual(await outsider.room!.request("chat-sync"), []);
+    for (const text of [
+      "",
+      "   ",
+      "x".repeat(241),
+      "bad\u0000text",
+      "bad\u202Etext",
+    ])
+      assert.equal(
+        (
+          await host.room!.request<unknown, ChatReply>("chat-send", {
+            id: randomUUID(),
+            text,
+          })
+        ).ok,
+        false,
+      );
+    assert.equal(
+      (await guest.room!.request<unknown, ChatReply>("chat-send", input)).ok,
+      false,
+    );
+    assert.equal(
+      (
+        await guest.room!.request<unknown, ChatReply>("chat-send", {
+          id: randomUUID(),
+          text: "spoof",
+          name: "Aina",
+        })
+      ).ok,
+      false,
+    );
     await delay(1100); // Existing transport-wide messages/sec guard is unchanged.
-    for (let i = 0; i < 8; i++) assert.equal((await guest.room!.request<unknown, ChatReply>('chat-send', { id: randomUUID(), text: `Spam ${i}` })).ok, true);
+    for (let i = 0; i < 8; i++)
+      assert.equal(
+        (
+          await guest.room!.request<unknown, ChatReply>("chat-send", {
+            id: randomUUID(),
+            text: `Spam ${i}`,
+          })
+        ).ok,
+        true,
+      );
     await until(() => host.chat.length === 9);
     assert.deepEqual(h.rooms.get(host.session!.code), baseline);
-    assert.equal((await host.room!.request<never, ChatMessage[]>('chat-sync')).length, 9);
+    assert.equal(
+      (await host.room!.request<never, ChatMessage[]>("chat-sync")).length,
+      9,
+    );
     const session = guest.session!;
     guest.socket.disconnect();
-    await until(() => !host.view!.players.find(player => player.name === 'Razi')!.connected);
+    await until(
+      () =>
+        !host.view!.players.find((player) => player.name === "Razi")!.connected,
+    );
     const resumed = await h.client();
-    await resumed.send({ type: 'resume', ...session });
-    assert.equal((await resumed.room!.request<never, ChatMessage[]>('chat-sync')).length, 9);
-  } finally { await h.dispose(); }
+    await resumed.send({ type: "resume", ...session });
+    assert.equal(
+      (await resumed.room!.request<never, ChatMessage[]>("chat-sync")).length,
+      9,
+    );
+  } finally {
+    await h.dispose();
+  }
 });
 
-test('chat history is bounded, survives server restart and is removed with its room', async () => {
-  const directory = mkdtempSync(join(tmpdir(), 'cariasec-chat-'));
-  const dbPath = join(directory, 'chat.sqlite');
+test("chat history is bounded, survives server restart and is removed with its room", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "cariasec-chat-"));
+  const dbPath = join(directory, "chat.sqlite");
   const first = await harness({ dbPath });
   let session: Session;
   try {
     const host = await first.client();
-    await host.send({ type: 'create', nickname: 'Aina', settings });
+    await host.send({ type: "create", nickname: "Aina", settings });
     session = host.session!;
-    const history = Array.from({ length: 60 }, (_, sequence) => ({ id: randomUUID(), playerId: host.view!.you, name: 'Aina', text: `Mesej ${sequence}`, sequence: sequence + 1, sentAt: Date.now() }));
+    const history = Array.from({ length: 60 }, (_, sequence) => ({
+      id: randomUUID(),
+      playerId: host.view!.you,
+      name: "Aina",
+      text: `Mesej ${sequence}`,
+      sequence: sequence + 1,
+      sentAt: Date.now(),
+    }));
     first.store.saveChat(session.code, history);
     assert.equal(first.store.loadChat(session.code).length, 50);
-  } finally { await first.dispose(); }
+  } finally {
+    await first.dispose();
+  }
   const second = await harness({ dbPath });
   try {
     const resumed = await second.client();
-    await resumed.send({ type: 'resume', ...session! });
-    const history = await resumed.room!.request<never, ChatMessage[]>('chat-sync');
+    await resumed.send({ type: "resume", ...session! });
+    const history = await resumed.room!.request<never, ChatMessage[]>(
+      "chat-sync",
+    );
     assert.equal(history.length, 50);
-    assert.equal(history[0].text, 'Mesej 10');
-    const reply = await resumed.room!.request<unknown, ChatReply>('chat-send', { id: randomUUID(), text: 'Selepas restart' });
+    assert.equal(history[0].text, "Mesej 10");
+    const reply = await resumed.room!.request<unknown, ChatReply>("chat-send", {
+      id: randomUUID(),
+      text: "Selepas restart",
+    });
     assert.ok(reply.ok);
     if (reply.ok) assert.equal(reply.message.sequence, 61);
     assert.equal(second.store.loadChat(session!.code).length, 50);
     second.store.delete(session!.code);
     assert.deepEqual(second.store.loadChat(session!.code), []);
-  } finally { await second.dispose(); rmSync(directory, { recursive: true, force: true }); }
+  } finally {
+    await second.dispose();
+    rmSync(directory, { recursive: true, force: true });
+  }
 });
-test('legacy character metadata is ignored and player identity survives authenticated resume', async () => {
+test("legacy character metadata is ignored and player identity survives authenticated resume", async () => {
   const h = await harness();
   try {
-    const host = await h.client(), guest = await h.client();
-    assert.equal((await host.send({ type: 'create', nickname: 'Aina', avatar: 'student-girl', settings } as unknown as Command)).ok, true);
+    const host = await h.client(),
+      guest = await h.client();
+    assert.equal(
+      (
+        await host.send({
+          type: "create",
+          nickname: "Aina",
+          avatar: "student-girl",
+          settings,
+        } as unknown as Command)
+      ).ok,
+      true,
+    );
     const code = host.session!.code;
-    assert.equal((await guest.send({ type: 'join', nickname: 'Razi', avatar: 'robot', code } as unknown as Command)).ok, true);
+    assert.equal(
+      (
+        await guest.send({
+          type: "join",
+          nickname: "Razi",
+          avatar: "robot",
+          code,
+        } as unknown as Command)
+      ).ok,
+      true,
+    );
     await until(() => host.view!.players.length === 2);
-    assert.deepEqual(host.view!.players.map(p => p.name), ['Aina', 'Razi']);
-    assert.ok(host.view!.players.every(p => !('avatar' in p)));
-    assert.ok(guest.view!.players.every(p => !('avatar' in p)));
+    assert.deepEqual(
+      host.view!.players.map((p) => p.name),
+      ["Aina", "Razi"],
+    );
+    assert.ok(host.view!.players.every((p) => !("avatar" in p)));
+    assert.ok(guest.view!.players.every((p) => !("avatar" in p)));
     assert.equal(host.view!.players.length, 2);
     const session = host.session!;
     const playerId = host.view!.you;
     host.socket.disconnect();
     await until(() => !guest.view!.players[0].connected);
     const resumed = await h.client();
-    assert.equal((await resumed.send({ type: 'resume', ...session })).ok, true);
-    const player = resumed.view!.players.find(p => p.id === resumed.view!.you)!;
-    assert.equal(player.name, 'Aina');
+    assert.equal((await resumed.send({ type: "resume", ...session })).ok, true);
+    const player = resumed.view!.players.find(
+      (p) => p.id === resumed.view!.you,
+    )!;
+    assert.equal(player.name, "Aina");
     assert.equal(player.id, playerId);
-    assert.ok(!('avatar' in player));
-  } finally { await h.dispose(); }
+    assert.ok(!("avatar" in player));
+  } finally {
+    await h.dispose();
+  }
 });
 test("custom base path scopes health and Colyseus", async () => {
   const h = await harness({ basePath: "/Cariasec/" });
@@ -279,21 +481,16 @@ test("room lifecycle, private hands, valid/invalid action, resume and independen
     assert.ok(!("deck" in a.view!));
     assert.ok(!("hand" in a.view!.players[1]));
     assert.ok(!JSON.stringify(a.view).includes("tokenHash"));
-    const available = cards.filter(
-      (c) =>
-        !a.view!.hand.includes(c.id) &&
-        a.view!.hand.some((id) => cardById[id].category === c.category),
-    );
+    const actor = a.view!.turn === a.view!.you ? a : b;
+    const other = actor === a ? b : a;
     const action = {
-      type: "request",
-      target: b.view!.you,
-      card: available[0].id,
-      version: a.view!.version,
+      type: "draw",
+      version: actor.view!.version,
       actionId: randomUUID(),
     } as const;
-    assert.equal((await b.send({ ...action, target: a.view!.you })).ok, false);
-    assert.equal((await a.send(action)).ok, true);
-    assert.equal((await a.send(action)).ok, false);
+    assert.equal((await other.send(action)).ok, false);
+    assert.equal((await actor.send(action)).ok, true);
+    assert.equal((await actor.send(action)).ok, false);
     await until(() => b.view?.version === a.view?.version);
     assert.equal(b.view!.actions, 1);
     const hand = [...b.view!.hand],
@@ -310,8 +507,9 @@ test("room lifecycle, private hands, valid/invalid action, resume and independen
     await until(() => !a.view!.paused);
     assert.equal(intruder.view!.phase, "lobby");
     assert.equal((await reconnect.send({ type: "leave" })).ok, true);
-    await until(() => a.view!.phase === "cancelled");
-    assert.deepEqual(a.view!.winners, []);
+    await until(() => a.view!.phase === "finished");
+    assert.deepEqual(a.view!.winners, [a.view!.you]);
+    assert.equal(a.view!.rentak!.outcome, "withdrawal");
     await a.send({ type: "again" });
     assert.equal(a.view!.phase, "lobby");
     assert.equal(a.view!.players.length, 1);
@@ -335,7 +533,8 @@ test("restart restores exact private hands using hashed reconnect credentials", 
     const sa = a.session!,
       sb = b.session!,
       handA = [...a.view!.hand],
-      handB = [...b.view!.hand];
+      handB = [...b.view!.hand],
+      originalTurn = a.view!.turn;
     const rows = h.store.db.prepare("SELECT snapshot FROM rooms").all();
     assert.ok(!(rows[0].snapshot as string).includes(sa.token));
     await h.dispose();
@@ -347,7 +546,7 @@ test("restart restores exact private hands using hashed reconnect credentials", 
     assert.deepEqual(aa.view!.hand, handA);
     assert.deepEqual(bb.view!.hand, handB);
     await until(() => !aa.view!.paused);
-    assert.equal(aa.view!.turn, aa.view!.you);
+    assert.equal(aa.view!.turn, originalTurn);
   } finally {
     await h.dispose();
     assert.equal(dirname(resolve(dir)), resolve(tmpdir()));
@@ -355,7 +554,7 @@ test("restart restores exact private hands using hashed reconnect credentials", 
     rmSync(dir, { recursive: true, force: true });
   }
 });
-test("disconnect timeout cancels active game; lobby expiry transfers host; empty rooms expire", async () => {
+test("disconnect timeout awards withdrawal win; lobby expiry transfers host; empty rooms expire", async () => {
   const h = await harness({ disconnectMs: 100, roomTtlMs: 400 });
   try {
     const a = await h.client(),
@@ -372,8 +571,8 @@ test("disconnect timeout cancels active game; lobby expiry transfers host; empty
     await c.send({ type: "ready", ready: true });
     await b.send({ type: "start" });
     c.socket.disconnect();
-    await until(() => b.view!.phase === "cancelled");
-    assert.equal(b.view!.winners.length, 0);
+    await until(() => b.view!.phase === "finished");
+    assert.deepEqual(b.view!.winners, [b.view!.you]);
     await until(() => !h.rooms.has(code));
   } finally {
     await h.dispose();

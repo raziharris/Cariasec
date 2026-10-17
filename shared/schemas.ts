@@ -3,12 +3,37 @@ import { nicknamePattern } from "./nickname";
 export const nickname = z.string().trim().min(2).max(20).regex(nicknamePattern);
 export const settingsSchema = z
   .object({
-    turnSeconds: z.union([z.literal(30), z.literal(60), z.literal(90)]),
+    turnSeconds: z.union([
+      z.literal(30),
+      z.literal(45),
+      z.literal(60),
+      z.literal(90),
+    ]),
     maxActions: z.union([z.literal(60), z.literal(120), z.literal(180)]),
+    mode: z.enum(["beginner", "normal"]).optional(),
+    format: z.enum(["quick", "three-round"]).optional(),
   })
   .strict();
 export type Settings = z.infer<typeof settingsSchema>;
 export const commandSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("settings"), settings: settingsSchema }).strict(),
+  z
+    .object({
+      type: z.literal("play"),
+      cardIds: z.array(z.string().max(24)).min(1).max(2),
+      chosenSuit: z.enum(["R", "I", "A", "S", "E", "C"]).optional(),
+      version: z.number().int().nonnegative(),
+      actionId: z.string().uuid(),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("pass"),
+      version: z.number().int().nonnegative(),
+      actionId: z.string().uuid(),
+    })
+    .strict(),
+  z.object({ type: z.literal("decider") }).strict(),
   z.object({
     type: z.literal("create"),
     nickname,

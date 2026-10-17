@@ -1,198 +1,121 @@
-import { LanguageProvider, useI18n } from "./i18n";
-import { createActionId } from "./actionId";
-import { copyText } from './clipboard';
-import { mergeChat, type ChatMessage, type ChatInput, type ChatReply } from '../../shared/chat';
-import { RoomChat } from './components/RoomChat';
-import { Welcome } from "./components/Welcome";
-import { RulesPage } from "./pages/RulesPage";
-import { LearnPage } from "./pages/LearnPage";
-import { HomePage } from "./pages/HomePage";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Client, MatchMakeError } from "@colyseus/sdk";
-import type { Room as ColyseusRoom } from "@colyseus/sdk";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
-  ArrowRight,
-  ArrowLeft,
-  Copy,
-  Check,
-  Users,
-  Sparkles,
-  BookOpen,
-  X,
-  Crown,
-  Wifi,
-  WifiOff,
-  Trophy,
-  Layers,
-  CircleHelp,
-  LogOut,
-  RotateCcw,
-  Clock3,
-  ChevronRight,
+  Volume2,
+  VolumeX,
   Settings,
-  MoreHorizontal,
+  X,
+  ArrowRight,
+  Copy,
+  BookOpen,
+  LogOut,
+  Crown,
 } from "lucide-react";
+import { LanguageProvider, useI18n } from "./i18n";
+import { SoundProvider, useSound } from "./audio/SoundProvider";
+import { SoundSettings } from "./audio/SoundSettings";
+import { RoomChat } from "./components/RoomChat";
+import { useRoomSession } from "./features/rentak/useRoomSession";
+import { CardFace, Mascot } from "./features/rentak/CardFace";
+import { GameScreen } from "./features/rentak/GameScreen";
+import { Tutorial } from "./features/rentak/Tutorial";
 import {
-  type Category,
-  type View,
-  type Command,
-  type Session,
-  type Reply,
-} from "../../shared/game";
+  identities,
+  suits,
+  type Mode,
+  type Format,
+  type Suit,
+} from "../../shared/rentak";
+import { copyText } from "./clipboard";
+import { salaryFor, salaryRange } from "./salary";
 import "@fontsource/nunito-sans/latin-400.css";
 import "@fontsource/nunito-sans/latin-600.css";
 import "@fontsource/nunito-sans/latin-700.css";
 import "@fontsource/nunito-sans/latin-800.css";
 import "@fontsource/nunito-sans/latin-900.css";
-import "./styles.css";
-import "./game.css";
-import "./polish.css";
-const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
-const endpoint =
-  import.meta.env.VITE_COLYSEUS_URL ??
-  (import.meta.env.DEV
-    ? `${location.protocol}//${location.hostname}:3001`
-    : `${location.origin}${basePath}`);
-const multiplayer = new Client(endpoint);
-let activeRoom: ColyseusRoom | null = null;
-import { assetUrl, colors } from "./cards/presentation";
-import { salaryFor, salaryRange } from "./salary";
-import { SalaryLevels } from "./components/SalaryLevels";
-import { lockIPhoneZoom } from "./iphoneZoom";
-const short = (s: string) =>
-  s
-    .split(" ")
-    .map((x) => x[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-function saved(): Session | null {
-  try {
-    return JSON.parse(sessionStorage.getItem("cariasec-session") ?? "null");
-  } catch {
-    return null;
-  }
-}
-import { Card } from "./components/Card";
-import type { BoardState } from "./game/boardTypes";
-import { SoundProvider, useSound } from "./audio/SoundProvider";
-import { SoundSettings } from "./audio/SoundSettings";
-import { useGameSound } from "./audio/useGameSound";
-import { LoadingCards } from './components/LoadingCards';
-import { GameControls } from './components/GameControls';
-import { GameHud } from './components/GameHud';
-import { Celebration } from './components/Celebration';
-import { BoardBoundary } from './components/BoardBoundary';
-import './ui-upgrade.css';
-import './focus-game.css';
-import './party-cards.css';
-const PhaserBoard = React.lazy(async () => {
-  for (let attempt = 0; ; attempt++) {
-    try {
-      const module = await import('./components/PhaserBoard');
-      return { default: module.PhaserBoard };
-    } catch (error) {
-      if (navigator.onLine && attempt >= 5) throw error;
-      await new Promise<void>(resolve => {
-        const done = () => { clearTimeout(timer); window.removeEventListener('online', done); resolve(); };
-        const timer = window.setTimeout(done, 600);
-        window.addEventListener('online', done, { once: true });
-      });
-    }
-  }
-});
+import "./features/rentak/rentak.css";
+
 function App() {
-  const { playSound } = useSound();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [gameMenuOpen, setGameMenuOpen] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [chatHistoryError, setChatHistoryError] = useState('');
+  const session = useRoomSession(),
+    { room, busy, online, error, send } = session;
   const {
-    t,
-    cards,
-    categories,
-    cardById,
-    profile,
     language,
     setLanguage,
+    profile,
     rememberName,
     setReducedMotion,
-    message,
-    logText,
+    cards,
+    categories,
   } = useI18n();
+  const en = language === "en",
+    tr = (ms: string, english: string) => (en ? english : ms);
+  const sound = useSound();
   const [page, setPage] = useState("home"),
-    [room, setRoom] = useState<View | null>(null),
-    [online, setOnline] = useState(false),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(false),
-    [modal, setModal] = useState<"create" | "join" | null>(null),
-    [detail, setDetail] = useState<string | null>(null),
-    [nickname, setNickname] = useState(profile.name),
+    [dialog, setDialog] = useState<"create" | "join" | "settings" | null>(null);
+  const [name, setName] = useState(profile.name),
     [code, setCode] = useState(
       new URLSearchParams(location.search).get("bilik") ?? "",
-    ),
-    [seconds, setSeconds] = useState<30 | 60 | 90>(60),
-    [limit, setLimit] = useState<60 | 120 | 180>(120),
-    [target, setTarget] = useState(""),
-    [requested, setRequested] = useState(""),
-    [family, setFamily] = useState<Category>("R"),
-    [copied, setCopied] = useState(false),
-    [manualCopyCode, setManualCopyCode] = useState<string | null>(null),
-    [now, setNow] = useState(Date.now());
-  const copyTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const menuTrigger = React.useRef<HTMLButtonElement>(null);
-  const copying = React.useRef(false);
-  const currentRoomCode = React.useRef(room?.code);
-  currentRoomCode.current = room?.code;
+    );
+  const [mode, setMode] = useState<Mode>("normal"),
+    [format, setFormat] = useState<Format>("quick"),
+    [learnSuit, setLearnSuit] = useState<Suit>("R");
+  const [countdown, setCountdown] = useState(() => {
+    try {
+      return localStorage.getItem("rentak-countdown") !== "false";
+    } catch {
+      return true;
+    }
+  });
+  const [copied, setCopied] = useState("");
+  const modalRef = useRef<HTMLElement>(null);
+  const previousPhase = useRef(room?.phase);
   useEffect(() => {
-    setCopied(false);
-    setManualCopyCode(null);
-    return () => { if (copyTimer.current) clearTimeout(copyTimer.current); };
-  }, [room?.code]);
-  const osReduced = useReducedMotion();
-  const reduced = Boolean(osReduced || profile.reducedMotion);
-  const [roomConnected, setRoomConnected] = useState(true);
-  const connected = online && (!room || roomConnected);
-  useEffect(() => {
-    document.documentElement.dataset.motion = reduced ? 'reduced' : 'full';
-  }, [reduced]);
-  const soundCue = useGameSound(room);
-  useEffect(() => { if (error) playSound("error"); }, [error, playSound]);
-  useEffect(() => {
-    if (!modal && !detail && !settingsOpen && !gameMenuOpen) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    // Safari does not focus a button on pointer click, so retain the explicit
-    // menu trigger instead of relying on document.activeElement there.
-    const previous = gameMenuOpen ? menuTrigger.current : document.activeElement as HTMLElement;
-    const dialog = document.querySelector<HTMLElement>("[role=dialog]")!;
-    const focusable = () =>
-      Array.from(
-        dialog.querySelectorAll<HTMLElement>(
-          'button:not(:disabled),input,select,[tabindex="0"]',
-        ),
+    if (previousPhase.current === "playing" && room?.phase === "finished")
+      sound.playSound(
+        "win",
+        `${room.code}:${room.rentak?.events.at(-1)?.id}:win`,
       );
-    (dialog.querySelector<HTMLElement>("input") ?? focusable()[0])?.focus();
-    const key = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setModal(null);
-        setDetail(null);
-        setSettingsOpen(false);
-        setGameMenuOpen(false);
-        playSound("back");
-      }
-      if (e.key === "Tab") {
-        const items = focusable();
-        const first = items[0],
+    previousPhase.current = room?.phase;
+  }, [room?.phase, room?.code, room?.rentak?.roundNumber, sound.playSound]);
+  const reduced =
+    profile.reducedMotion ||
+    matchMedia("(prefers-reduced-motion: reduce)").matches;
+  useEffect(() => {
+    document.documentElement.dataset.motion = reduced ? "reduced" : "full";
+  }, [reduced]);
+  useEffect(() => {
+    if (room) {
+      setDialog(null);
+      setPage("room");
+    }
+  }, [room?.code]);
+  useEffect(() => {
+    if (!room && code) setDialog("join");
+  }, []);
+  useEffect(() => {
+    if (!dialog) return;
+    const before = document.activeElement as HTMLElement,
+      previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusable = () => [
+      ...(modalRef.current?.querySelectorAll<HTMLElement>(
+        "button:not(:disabled), input, select",
+      ) ?? []),
+    ];
+    (
+      modalRef.current?.querySelector<HTMLElement>("input") ?? focusable()[0]
+    )?.focus();
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDialog(null);
+      if (event.key === "Tab") {
+        const items = focusable(),
+          first = items[0],
           last = items.at(-1);
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
           last?.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
           first?.focus();
         }
       }
@@ -201,1057 +124,733 @@ function App() {
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", key);
-      previous?.focus();
+      before?.focus();
     };
-  }, [modal, detail, settingsOpen, gameMenuOpen]);
-  useEffect(() => {
-    let cancelled = false;
-    const checkHealth = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.BASE_URL}api/health`, {
-          cache: "no-store",
-        });
-        if (!cancelled) setOnline(response.ok);
-      } catch {
-        if (!cancelled) setOnline(false);
-      }
-    };
-    void checkHealth();
-    const session = saved();
-    if (session)
-      void joinRoom({ type: "resume", ...session }).then((ok) => {
-        if (!ok) sessionStorage.removeItem("cariasec-session");
-      });
-    const health = setInterval(checkHealth, 5000);
-    const clock = setInterval(() => setNow(Date.now()), 1000);
-    return () => {
-      cancelled = true;
-      clearInterval(health);
-      clearInterval(clock);
-      activeRoom?.removeAllListeners();
-    };
-  }, []);
-  useEffect(() => {
-    if (!room || page !== "room" || room.phase !== "playing") return;
-    const opponents = room.players.filter(
-      (p) => p.id !== room.you && p.count > 0,
-    );
-    if (!opponents.some((p) => p.id === target))
-      setTarget(opponents[0]?.id ?? "");
-    const have = room.hand.map((id) => cardById[id].category);
-    if (!have.includes(family)) setFamily(have[0] ?? "R");
-  }, [room, target, family, page]);
-  const available = cards.filter(
-    (c) => c.category === family && !room?.hand.includes(c.id),
-  );
-  useEffect(() => {
-    if (!available.some((c) => c.id === requested))
-      setRequested(available[0]?.id ?? "");
-  }, [room?.hand.join(","), family]);
-
-  function attach(joined: ColyseusRoom) {
-    setRoomConnected(true);
-    activeRoom?.removeAllListeners();
-    activeRoom = joined;
-    setChatMessages([]);
-    setChatHistoryError('');
-    joined.onMessage<ChatMessage>('chat-message', item => {
-      if (activeRoom === joined) setChatMessages(previous => mergeChat(previous, [item]));
-    });
-    void syncChat(joined);
-    joined.reconnection.minUptime = 0;
-    joined.onMessage<View>("state", (view) => {
-      setRoom(view);
-      setPage("room");
-      setModal(null);
-    });
-    joined.onMessage<string>("removed", (text) => {
-      sessionStorage.removeItem("cariasec-session");
-      if (activeRoom === joined) activeRoom = null;
-      setRoom(null);
-      setPage("home");
-      setError(text);
-    });
-    joined.onDrop(() => { setOnline(false); setRoomConnected(false); });
-    joined.onReconnect(() => {
-      setRoomConnected(true);
-      setOnline(true);
-      void syncChat(joined);
-      void joined
-        .request<never, View>("sync")
-        .then((view) => setRoom(view))
-        .catch(() => undefined);
-    });
-    joined.onLeave((_code, reason) => {
-      if (activeRoom !== joined) return;
-      activeRoom = null;
-      setRoomConnected(false);
-      setOnline(false);
-      if (reason) setError(reason);
-    });
-  }
-
-  async function syncChat(joined: ColyseusRoom) {
+  }, [dialog]);
+  const settings = (m = mode, f = format) => ({
+    mode: m,
+    format: f,
+    turnSeconds: (m === "beginner" ? 45 : 30) as 45 | 30,
+    maxActions: 120 as const,
+  });
+  async function invite() {
+    if (!room) return;
+    const url = `${location.origin}${import.meta.env.BASE_URL}?bilik=${room.code}`;
     try {
-      const history = await joined.request<never, ChatMessage[]>('chat-sync', undefined, { timeout: 7000 });
-      if (activeRoom === joined) { setChatMessages(previous => mergeChat(history, previous)); setChatHistoryError(''); }
-    } catch {
-      if (activeRoom === joined) setChatHistoryError('Chat belum dimuatkan. Cuba lagi.');
-    }
-  }
-
-  async function sendChat(input: ChatInput): Promise<ChatReply> {
-    const joined = activeRoom;
-    if (!joined || !connected) return { ok: false, error: 'Mesej belum dihantar. Cuba lagi.' };
-    try {
-      const reply = await joined.request<ChatInput, ChatReply>('chat-send', input, { timeout: 7000 });
-      if (activeRoom !== joined) return { ok: false, error: 'Sesi tidak sah.' };
-      if (reply.ok) setChatMessages(previous => mergeChat(previous, [reply.message]));
-      return reply;
-    } catch { return { ok: false, error: 'Mesej belum dihantar. Cuba lagi.' }; }
-  }
-
-  async function joinRoom(
-    command: Extract<Command, { type: "create" | "join" | "resume" }>,
-  ) {
-    try {
-      let joined: ColyseusRoom;
-      if (command.type === "create") {
-        joined = await multiplayer.create("cariasec", command);
-      } else {
-        try {
-          joined = await multiplayer.joinById(command.code, command);
-        } catch (error) {
-          if (!(error instanceof MatchMakeError) || error.code !== 522)
-            throw error;
-          const exists = await fetch(
-            `${import.meta.env.BASE_URL}api/rooms/${command.code}`,
-            { cache: "no-store" },
-          );
-          if (!exists.ok) throw error;
-          joined = await multiplayer.joinOrCreate("cariasec", command);
-        }
-      }
-      attach(joined);
-      const session = await joined.request<never, Session>("session");
-      const view = await joined.request<never, View>("sync");
-      sessionStorage.setItem("cariasec-session", JSON.stringify(session));
-      if (command.type !== "resume") rememberName(command.nickname);
-      setRoom(view);
-      setPage("room");
-      setModal(null);
-      setOnline(true);
-      if (command.type !== "resume") playSound("confirm");
-      return true;
-    } catch (cause) {
-      setRoom(null);
-      setError(
-        cause instanceof Error
-          ? cause.message
-          : "Sambungan bilik tidak berjaya.",
+      setCopied(
+        (await copyText(url)) ? tr("Pautan disalin", "Link copied") : url,
       );
-      return false;
-    }
-  }
-
-  async function command(c: Command) {
-    setError("");
-    setBusy(true);
-    try {
-      if (c.type === "create" || c.type === "join" || c.type === "resume")
-        return await joinRoom(c);
-      if (!activeRoom) {
-        setError("Sila sertai bilik terlebih dahulu.");
-        return false;
-      }
-      const reply = await activeRoom.request<Command, Reply>("command", c, {
-        timeout: 7000,
-      });
-      if (!reply.ok) setError(reply.error);
-      else if (c.type === "leave") {
-        sessionStorage.removeItem("cariasec-session");
-        activeRoom = null;
-        setRoom(null);
-        setPage("home");
-      }
-      if (reply.ok && (c.type === "ready" || c.type === "again")) playSound("confirm");
-      if (reply.ok && c.type === "leave") playSound("back");
-      return reply.ok;
     } catch {
-      setError("Sambungan terganggu. Menyegerakkan semula papan…");
-      if (activeRoom)
-        void activeRoom
-          .request<never, View>("sync")
-          .then((view) => setRoom(view))
-          .catch(() => undefined);
-      return false;
-    } finally {
-      setBusy(false);
+      setCopied(url);
     }
   }
-  async function copyCode() {
-    const text = room?.code;
-    if (!text || copying.current) return;
-    copying.current = true;
-    const success = await copyText(text);
-    copying.current = false;
-    if (currentRoomCode.current !== text) return;
-    if (copyTimer.current) clearTimeout(copyTimer.current);
-    setCopied(success);
-    setManualCopyCode(success ? null : text);
-    if (success) {
-      playSound("confirm");
-      copyTimer.current = setTimeout(() => setCopied(false), 2000);
-    } else {
-      playSound('error');
-    }
+  function options(
+    m: Mode,
+    f: Format,
+    change: (m: Mode, f: Format) => void,
+    disabled = false,
+  ) {
+    return (
+      <div className="rt-options">
+        <label>
+          {tr("Mod permainan", "Game mode")}
+          <select
+            aria-label={tr("Mod permainan", "Game mode")}
+            disabled={disabled}
+            value={m}
+            onChange={(e) => change(e.target.value as Mode, f)}
+          >
+            <option value="normal">
+              Normal · 102 {tr("kad", "cards")} · 30s
+            </option>
+            <option value="beginner">
+              Beginner · 90 {tr("kad", "cards")} · 45s
+            </option>
+          </select>
+        </label>
+        <label>
+          {tr("Format", "Format")}
+          <select
+            aria-label={tr("Format", "Format")}
+            disabled={disabled}
+            value={f}
+            onChange={(e) => change(m, e.target.value as Format)}
+          >
+            <option value="quick">
+              Quick Round · 1 {tr("pusingan", "round")}
+            </option>
+            <option value="three-round">
+              Party Match · 3 {tr("pusingan", "rounds")}
+            </option>
+          </select>
+        </label>
+      </div>
+    );
   }
-  const me = room?.players.find((p) => p.id === room.you),
-    myTurn = room?.turn === room?.you;
-  const current = room?.players.find((p) => p.id === room.turn);
-  const latest = room?.log.at(-1);
-  const boardState = React.useMemo<BoardState | null>(
-    () =>
-      room?.phase === "playing"
-        ? {
-          you: room.you,
-          turn: room.turn,
-          paused: room.paused,
-          deadline: room.deadline,
-          turnSeconds: room.settings.turnSeconds,
-          actions: room.actions,
-          maxActions: room.settings.maxActions,
-          deckCount: room.deckCount,
-          hand: room.hand.map((id) => ({
-            id,
-            title: cardById[id].title,
-            category: cardById[id].category,
-            categoryName:
-              categories.find((item) => item.code === cardById[id].category)
-                ?.name ?? cardById[id].category,
-            artwork: assetUrl(cardById[id].artwork),
-          })),
-          players: room.players,
-          selectedFamily: family,
-          selectedTarget: target,
-          latest,
-          soundCue,
-          latestText: logText(latest, room),
-          reducedMotion: Boolean(reduced),
-          labels: {
-            activeRound: t("PUSINGAN AKTIF"),
-            paused: t("DIJEDA"),
-            waiting: t("MENUNGGU"),
-            yourTurn: t("Giliran anda!"),
-            friendTurn: t("Giliran {name}", { name: "{name}" }),
-            chooseCard: target ? t("Pilih rakan dan kad.") : t("Ambil satu kad."),
-            planMove: t("Rancang langkah anda."),
-            waitingFriend: t("Menunggu rakan."),
-            seconds: t("{count} saat", { count: "{count}" }),
-            cards: t("kad"),
-            complete: t("lengkap"),
-            deck: t("Baki dek"),
-          },
-          }
-        : null,
-    [room, family, target, reduced, language, soundCue],
-  );
-  function enter(type: "create" | "join") {
-    setError("");
-    setModal(type);
-  }
-  const focusGame = page === 'room' && room?.phase === 'playing';
   return (
-    <>
-      {focusGame ? <header className="focus-header">
-        <span className="focus-brand" role="img" aria-label="CARIASEC"><span className="brand-mark"><Layers size={19} /></span><span>cariasec</span></span>
-        <button className="room-code focus-code" data-sound="none" onClick={copyCode} aria-label={t('Salin kod bilik')}><span><small>{t('KOD BILIK')}</small><b data-testid="room-code">{room.code}</b></span>{copied ? <Check size={16} /> : <Copy size={16} />}</button>
-        <div className="focus-header-tools"><span className="chat-slot" aria-hidden="true" /><button ref={menuTrigger} className="game-menu-trigger" aria-label={t('Menu permainan')} aria-haspopup="dialog" onClick={() => setGameMenuOpen(true)}><MoreHorizontal size={23} /></button></div>
-      </header> : <header className="site-header">
+    <div className="rt-app">
+      <header className="rt-header">
         <button
-          className="brand"
-          data-sound="back"
-          onClick={() => setPage("home")}
-          aria-label={t("Laman utama CARIASEC")}
+          className="rt-brand"
+          onClick={() => setPage(room ? "room" : "home")}
+          aria-label="CARIASEC RENTAK"
         >
-          <span className="brand-mark">
-            <Layers size={23} />
+          <span className="rt-logo">✦</span>
+          <span>
+            <small>CARIASEC</small>
+            <b>
+              RENTAK<span>.</span>
+            </b>
           </span>
-          cariasec
         </button>
-        <nav aria-label={t("Navigasi utama")}>
-          <button className="nav-settings" aria-label={t("Tetapan")}
-            data-sound="back" onClick={() => setSettingsOpen(true)}>
+        <nav aria-label={tr("Navigasi", "Navigation")}>
+          <button className="rt-learn-nav" onClick={() => setPage("learn")}>
+            <BookOpen size={17} />
+            {tr("Kenali RIASEC", "Explore RIASEC")}
+          </button>
+          <button
+            aria-label={tr("Tetapan", "Settings")}
+            onClick={() => setDialog("settings")}
+          >
             <Settings size={20} />
           </button>
-          <select
-            className="language-switch"
-            aria-label={t("Bahasa")}
-            value={language}
-            onChange={(event) => setLanguage(event.target.value as "ms" | "en")}
-          >
-            <option value="ms">BM</option>
-            <option value="en">EN</option>
-          </select>
           <button
-            className={page === "learn" ? "active" : ""}
-            data-sound="back"
-            onClick={() => setPage("learn")}
+            aria-label={
+              sound.muted
+                ? tr("Hidupkan bunyi", "Unmute")
+                : tr("Senyapkan bunyi", "Mute")
+            }
+            aria-pressed={sound.muted}
+            data-sound="none"
+            onClick={() => sound.setMuted(!sound.muted)}
           >
-            RIASEC
+            {sound.muted ? <VolumeX size={20} /> : <Volume2 size={20} />}
           </button>
-          <button
-            className={`nav-rules ${page === "rules" ? "active" : ""}`}
-            aria-label={t("Cara main")}
-            data-sound="back"
-            onClick={() => setPage("rules")}
-          >
-            <CircleHelp size={20} />
-            <span>{t("Cara main")}</span>
-          </button>
-          {room ? (
-            <button className="nav-play" data-sound="back" onClick={() => setPage("room")}>
-              {t("Bilik")} <ArrowRight size={16} />
-            </button>
-          ) : (
-            <button className="nav-play" data-sound="back" onClick={() => enter("join")}>
-              {t("Sertai")} <ArrowRight size={16} />
-            </button>
-          )}
         </nav>
-      </header>}
-      {!connected && (
-        <div className="connection-banner" role="status">
-          <WifiOff size={16} /> {t('Menyambung semula...')} <span>{t('Sesi anda disimpan. Kami sedang cuba semula.')}</span>
-        </div>
-      )}
-      {error && (
-        <div className="toast" role="alert">
-          <span>{message(error)}</span>
-          <button aria-label={t("Tutup mesej")} onClick={() => setError("")}>
-            <X size={18} />
-          </button>
-        </div>
-      )}
+      </header>
       <main>
-        {page === "home" && (
-          <HomePage
-            room={room}
-            setPage={setPage}
-            enter={enter}
-            setDetail={setDetail}
-            setFamily={setFamily}
-            family={family}
-          />
+        {error && (
+          <div className="rt-alert" role="alert">
+            <span>{error}</span>
+            <button
+              aria-label={tr("Tutup mesej", "Dismiss")}
+              onClick={() => session.setError("")}
+            >
+              <X size={16} />
+            </button>
+          </div>
         )}
-        {page === "learn" && (
-          <LearnPage
-            room={room}
-            setPage={setPage}
-            enter={enter}
-            setDetail={setDetail}
-            setFamily={setFamily}
-            family={family}
-          />
+        {room && !online && (
+          <div className="rt-alert" role="status">
+            {tr(
+              "Sambungan terputus. Tempat disimpan sehingga 90 saat.",
+              "Disconnected. Your seat is reserved for up to 90 seconds.",
+            )}
+            <button onClick={() => void session.retry()} disabled={busy}>
+              {tr("Cuba semula", "Reconnect")}
+            </button>
+          </div>
         )}
-        {page === "rules" && (
-          <RulesPage
-            room={room}
-            setPage={setPage}
-            enter={enter}
-            setDetail={setDetail}
-            setFamily={setFamily}
-            family={family}
-          />
-        )}
-        {page === "room" && room && (
-          <section
-            className={`room-page ${room.phase === "playing" ? "playing focus-play" : ""}`}
-            data-players={room.players.length}
-          >
-            {room.phase !== 'playing' && <div className="room-toolbar">
-              <div className="room-label">
-                <span className="live-dot" />
-                {room.phase === "lobby"
-                  ? t("LOBI")
-                  : t("KEPUTUSAN")}
-              </div>
-              <button
-                className="room-code"
-                data-sound="none"
-                onClick={copyCode}
-                aria-label={t("Salin kod bilik")}
-              >
-                <small>{t("KOD BILIK")}</small>
-                <b data-testid="room-code">{room.code}</b>
-                {copied ? <Check size={17} /> : <Copy size={17} />}
-              </button>
-              <button
-                className="text-button"
-                onClick={() => command({ type: "leave" })}
-                data-sound="none"
-              >
-                <LogOut size={17} />
-                {t("Keluar")}
-              </button>
-            </div>}
-            {copied && <p className="copy-feedback" role="status">{t('Kod disalin')}</p>}
-            {manualCopyCode === room.code && <div className="manual-copy">
-              <p role="status">{t('Browser menyekat salinan automatik. Pilih kod dan salin secara manual.')}</p>
-              <label htmlFor="manual-room-code">{t('KOD BILIK')}</label>
-              <input id="manual-room-code" value={room.code} readOnly autoFocus onFocus={e => e.currentTarget.select()} onClick={e => e.currentTarget.select()} />
-            </div>}
-            <RoomChat key={room.code} compact={focusGame} onOpenChange={setChatOpen} messages={chatMessages} you={room.you} online={connected} historyError={chatHistoryError}
-              onSend={sendChat} onRefresh={() => { if (activeRoom) void syncChat(activeRoom); }} />
-            {room.phase === "lobby" && (
-              <div className="lobby">
-                <div className="lobby-intro">
-                  <div className="eyebrow">
-                    <Users size={16} /> {t("LOBI")}
-                  </div>
-                  <h1>{t("Jom main!")}</h1>
-                  <p>{t("Jemput rakan dengan kod bilik.")}</p>
-                  <button className="secondary" data-sound="none" onClick={copyCode}>
-                    {copied ? <Check size={18} /> : <Copy size={18} />}{" "}
-                    {copied ? t("Kod disalin") : t("Salin kod bilik")}
-                  </button>
-                  <div className="lobby-card-fan">
-                    <Card id="A3" small onClick={() => setDetail("A3")} />
-                    <Card id="E2" small onClick={() => setDetail("E2")} />
-                  </div>
-                </div>
-                <div className="lobby-panel">
-                  <div className="panel-heading">
-                    <h2>{t("Pemain")}</h2>
-                    <span>{room.players.length}/6</span>
-                  </div>
-                  <div className="lobby-players">
-                    {room.players.map((p, i) => (
-                      <div className="lobby-player" key={p.id}>
-                        <span className={`avatar avatar-${i}`} aria-hidden="true">{short(p.name)}</span>
-                        <div>
-                          <b>
-                            {p.name}{" "}
-                            {p.id === room.you && <small>{t("(Anda)")}</small>}
-                          </b>
-                          <small>
-                            {p.id === room.host ? t("Hos") : t("Pemain")}
-                            {p.id === room.host && <Crown size={12} />}
-                          </small>
-                        </div>
-                        <span
-                          className={`ready-label ${p.ready && p.connected ? "ready" : ""}`}
-                        >
-                          {!p.connected
-                            ? t("Terputus")
-                            : p.ready
-                              ? t("Bersedia")
-                              : t("Menunggu")}
-                        </span>
-                      </div>
-                    ))}
-                    {Array.from(
-                      { length: Math.max(0, 2 - room.players.length) },
-                      (_, i) => (
-                        <div key={i} className="empty-player">
-                          <Users size={22} />
-                          {t("Menunggu…")}
-                        </div>
-                      ),
-                    )}
-                  </div>
-                  <div className="lobby-settings">
-                    <span>
-                      <Clock3 size={16} />
-                      {room.settings.turnSeconds} {t("saat / giliran")}
-                    </span>
-                    <span>
-                      <Layers size={16} />
-                      {room.settings.maxActions} {t("tindakan")}
-                    </span>
-                  </div>
+        {(page === "home" || (page === "room" && !room)) && (
+          <>
+            <section className="rt-hero">
+              <div className="rt-hero-copy">
+                <p className="rt-eyebrow">
+                  <span />{" "}
+                  {tr(
+                    "SATU MEJA. ENAM IDENTITI.",
+                    "ONE TABLE. SIX IDENTITIES.",
+                  )}
+                </p>
+                <h1>
+                  {tr("Cari padanan.", "Find your match.")}
+                  <br />
+                  <em>{tr("Cetus Rentak.", "Make your move.")}</em>
+                </h1>
+                <p className="rt-intro">
+                  {tr(
+                    "Kad di tangan. Rakan di meja. Padankan warna, gunakan aksi dan habiskan kad anda dahulu.",
+                    "Cards in hand. Friends at the table. Match suits, play your actions and be first to empty your hand.",
+                  )}
+                </p>
+                <div className="rt-hero-actions">
                   <button
-                    className={me?.ready ? "secondary full" : "primary full"}
-                    data-sound="none"
-                    disabled={busy || !online}
-                    onClick={() =>
-                      command({ type: "ready", ready: !me?.ready })
+                    className="rt-primary"
+                    onClick={() => setDialog("create")}
+                  >
+                    {tr("Cipta bilik", "Create room")}
+                    <ArrowRight size={20} />
+                  </button>
+                  <button onClick={() => setDialog("join")}>
+                    {tr("Masuk bilik", "Join room")} ↗
+                  </button>
+                </div>
+                <div className="rt-meta">
+                  <span>2–6 {tr("pemain", "players")}</span>
+                  <span>{tr("Main di telefon", "Play on mobile")}</span>
+                  <span>
+                    {tr("Percuma bersama rakan", "Free with friends")}
+                  </span>
+                </div>
+              </div>
+              <div
+                className="rt-hero-art"
+                aria-label={tr(
+                  "Kad Rentak Peneroka 3 dan 4",
+                  "Rentak Explorers 3 and 4",
+                )}
+              >
+                <div className="rt-orbit rt-orbit-one" />
+                <div className="rt-orbit rt-orbit-two" />
+                <span className="rt-star">✦</span>
+                <div className="rt-hero-card one">
+                  <CardFace id="R-beban" en={en} />
+                </div>
+                <div className="rt-hero-card two">
+                  <CardFace id="I-3-1" en={en} />
+                </div>
+                <div className="rt-hero-card three">
+                  <CardFace id="I-4-1" en={en} />
+                </div>
+                <span className="rt-art-note">
+                  3 → 4 <b>RENTAK!</b>
+                </span>
+              </div>
+            </section>
+            <section className="rt-start-strip">
+              <div>
+                <span>01</span>
+                <b>{tr("Padankan kad", "Match a card")}</b>
+                <small>
+                  {tr(
+                    "Warna, nombor atau aksi sama.",
+                    "Same suit, number or action.",
+                  )}
+                </small>
+              </div>
+              <div>
+                <span>02</span>
+                <b>{tr("Cetus kejutan", "Surprise the table")}</b>
+                <small>
+                  {tr(
+                    "Gunakan aksi dan peluang Rentak.",
+                    "Play an action or your Rentak pair.",
+                  )}
+                </small>
+              </div>
+              <div>
+                <span>03</span>
+                <b>{tr("Kosongkan tangan", "Empty your hand")}</b>
+                <small>
+                  {tr("Kad habis? Anda menang!", "No cards left? You win!")}
+                </small>
+              </div>
+              <button className="rt-text" onClick={() => setPage("tutorial")}>
+                {tr("Cuba tutorial", "Try the tutorial")} ↗
+              </button>
+            </section>
+            <section className="rt-identities">
+              <div className="rt-section-heading">
+                <div>
+                  <p className="rt-eyebrow">
+                    {tr("ENAM WARNA. SATU RENTAK.", "SIX SUITS. ONE RHYTHM.")}
+                  </p>
+                  <h2>{tr("Kenali kumpulan anda.", "Meet the six groups.")}</h2>
+                </div>
+                <button className="rt-text" onClick={() => setPage("learn")}>
+                  {tr("Terokai RIASEC", "Explore RIASEC")} →
+                </button>
+              </div>
+              <div className="rt-identity-grid">
+                {suits.map((suit) => (
+                  <button
+                    key={suit}
+                    onClick={() => {
+                      setLearnSuit(suit);
+                      setPage("learn");
+                    }}
+                    style={
+                      {
+                        "--identity-color": identities[suit].color,
+                      } as React.CSSProperties
                     }
                   >
-                    {me?.ready ? (
-                      <>
-                        <Check size={18} />
-                        {t("Bersedia")}
-                      </>
-                    ) : (
-                      t("Saya sedia")
-                    )}
+                    <Mascot suit={suit} />
+                    <b>{en ? identities[suit].en : identities[suit].name}</b>
+                    <small>
+                      {suit} · {identities[suit].symbol}
+                    </small>
                   </button>
-                  {room.host === room.you ? (
+                ))}
+              </div>
+            </section>
+          </>
+        )}
+        {page === "tutorial" && (
+          <Tutorial en={en} done={() => setPage(room ? "room" : "home")} />
+        )}
+        {page === "learn" && (
+          <section className="rt-learn">
+            <button
+              className="rt-text"
+              onClick={() => setPage(room ? "room" : "home")}
+            >
+              ← {tr("Kembali", "Back")}
+            </button>
+            <p className="rt-eyebrow">RIASEC</p>
+            <h1>
+              {tr(
+                "Enam cara meneroka dunia.",
+                "Six ways to explore the world.",
+              )}
+            </h1>
+            <p>
+              {tr(
+                "Kenali kerjaya mengikut minat. Warna kad yang anda mainkan tidak menentukan personaliti anda.",
+                "Explore careers by interest. The suits you play do not determine your personality.",
+              )}
+            </p>
+            <div className="rt-suit-tabs">
+              {suits.map((suit) => (
+                <button
+                  key={suit}
+                  aria-pressed={learnSuit === suit}
+                  onClick={() => setLearnSuit(suit)}
+                >
+                  {identities[suit].symbol}{" "}
+                  {en ? identities[suit].en : identities[suit].name}
+                </button>
+              ))}
+            </div>
+            <p>{categories.find((c) => c.code === learnSuit)?.description}</p>
+            <div className="rt-careers">
+              {cards
+                .filter((c) => c.category === learnSuit)
+                .map((c) => (
+                  <article key={c.id}>
+                    <img
+                      src={`${import.meta.env.BASE_URL}cards/${c.id}.webp`}
+                      alt=""
+                      loading="lazy"
+                    />
+                    <h2>{c.title}</h2>
+                    <p>{c.description}</p>
+                    <small>
+                      {tr(
+                        "Anggaran pendapatan bulanan",
+                        "Reference monthly income",
+                      )}
+                    </small>
+                    <b>{salaryRange(salaryFor(c.id))}</b>
+                  </article>
+                ))}
+            </div>
+          </section>
+        )}
+        {page === "room" && room && (
+          <>
+            <div className="rt-room-bar">
+              <div>
+                <small>{tr("BILIK", "ROOM")}</small>
+                <b data-testid="room-code">{room.code}</b>
+              </div>
+              <button onClick={() => void invite()}>
+                <Copy size={16} />
+                {tr("Jemput", "Invite")}
+              </button>
+              <button onClick={() => setPage("tutorial")}>
+                {tr("Cara main", "How to play")}
+              </button>
+              <button
+                aria-label={tr("Keluar bilik", "Leave room")}
+                onClick={() => void send({ type: "leave" })}
+              >
+                <LogOut size={18} />
+              </button>
+            </div>
+            {copied && (
+              <p className="rt-copy" role="status">
+                {copied}
+              </p>
+            )}
+            {room.phase === "lobby" && (
+              <section className="rt-lobby rt-panel">
+                <p className="rt-eyebrow">
+                  {tr("KUMPULKAN RAKAN ANDA", "GATHER YOUR FRIENDS")}
+                </p>
+                <h1>{tr("Meja sudah tersedia.", "Your table is ready.")}</h1>
+                <p>
+                  {tr(
+                    "Semua pemain perlu bersedia sebelum hos mula.",
+                    "Everyone must be ready before the host starts.",
+                  )}
+                </p>
+                {options(
+                  room.settings.mode ?? "normal",
+                  room.settings.format ?? "quick",
+                  (m, f) =>
+                    void send({ type: "settings", settings: settings(m, f) }),
+                  busy ||
+                    room.host !== room.you ||
+                    (!!room.rentak && !room.rentak.matchOver),
+                )}
+                <div className="rt-rule-summary">
+                  {room.settings.mode === "beginner"
+                    ? tr(
+                        "Beginner: nombor, Pintas, Beban dan Prisma. Tiada Rentak.",
+                        "Beginner: numbers, Pintas, Beban and Prisma. No Rentak.",
+                      )
+                    : tr(
+                        "Normal: semua aksi + Rentak sekali setiap pusingan.",
+                        "Normal: all actions + one Rentak per round.",
+                      )}{" "}
+                  {tr(
+                    "7 kad seorang. Habiskan tangan untuk menang. Tiada stacking.",
+                    "7 cards each. Empty your hand to win. No stacking.",
+                  )}
+                </div>
+                <div className="rt-seats">
+                  {Array.from({ length: 6 }, (_, index) => {
+                    const p = room.players.filter((p) => !p.withdrawn)[index];
+                    return (
+                      <div key={index} className={p ? "occupied" : ""}>
+                        {p ? (
+                          <>
+                            <Mascot suit={suits[index]} />
+                            <b>
+                              {p.name}{" "}
+                              {p.id === room.host && <Crown size={15} />}
+                            </b>
+                            <span>
+                              {!p.connected
+                                ? tr("Terputus", "Disconnected")
+                                : p.ready
+                                  ? tr("✓ Bersedia", "✓ Ready")
+                                  : tr("Belum bersedia", "Not ready")}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="rt-empty-seat">+</span>
+                            <small>{tr("Tempat kosong", "Open seat")}</small>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="rt-lobby-actions">
+                  <button
+                    disabled={busy || !online}
+                    aria-pressed={
+                      room.players.find((p) => p.id === room.you)?.ready
+                    }
+                    onClick={() =>
+                      void send({
+                        type: "ready",
+                        ready: !room.players.find((p) => p.id === room.you)
+                          ?.ready,
+                      })
+                    }
+                  >
+                    {room.players.find((p) => p.id === room.you)?.ready
+                      ? tr("Batalkan bersedia", "Not ready")
+                      : tr("Saya bersedia", "I am ready")}
+                  </button>
+                  {room.host === room.you && (
                     <button
-                      className="primary full"
+                      className="rt-primary"
                       disabled={
                         busy ||
-                        room.players.length < 2 ||
-                        room.players.some((p) => !p.ready || !p.connected)
+                        !online ||
+                        room.players.filter((p) => !p.withdrawn).length < 2 ||
+                        room.players.some(
+                          (p) => !p.withdrawn && (!p.ready || !p.connected),
+                        )
                       }
-                      onClick={() => command({ type: "start" })}
-                      data-sound="none"
+                      onClick={() => void send({ type: "start" })}
                     >
-                      {t("Mula")}
-                      <ArrowRight size={18} />
+                      {tr("Mulakan permainan", "Start game")} →
                     </button>
-                  ) : (
-                    <p className="muted centered">{t("Menunggu hos.")}</p>
                   )}
                 </div>
-              </div>
+              </section>
             )}
-            {room.phase === "playing" && (
-              <>
-                <GameHud room={room} now={now} reduced={reduced} />
-                {boardState && (
-                  <div className="game-table phaser-game-table">
-                    <BoardBoundary title={t('Papan belum berjaya dimuatkan. Sesi anda masih disimpan.')} button={t('Muat semula halaman')}>
-                    <React.Suspense
-                      fallback={
-                        <LoadingCards />
-                      }
-                    >
-                      <PhaserBoard
-                        state={boardState}
-                        interactionDisabled={settingsOpen || gameMenuOpen || chatOpen || !!modal || !!detail}
-                        onSelectFamily={setFamily}
-                        onSelectTarget={setTarget}
-                        onInspectCard={setDetail}
-                      />
-                    </React.Suspense>
-                    </BoardBoundary>
-                  </div>
-                )}
-                <div className="opponents">
-                  {room.players
-                    .filter((p) => p.id !== room.you)
-                    .map((p, i) => (
-                      <button
-                        key={p.id}
-                        className={`opponent ${target === p.id ? "target" : ""} ${room.turn === p.id ? "is-turn" : ""}`}
-                        onClick={() => setTarget(p.id)}
-                        disabled={!p.count}
-                        aria-label={t("Pilih {name}", { name: p.name })}
-                      >
-                        <span className={`avatar avatar-${i + 1}`}>
-                          {short(p.name)}
-                        </span>
-                        <span className="opponent-info">
-                          <b>{p.name}</b>
-                          <small>
-                            {p.count} {t("kad ·")} {p.families.length}{" "}
-                            {t("keluarga")}{" "}
-                            {p.connected ? (
-                              <Wifi size={12} />
-                            ) : (
-                              <WifiOff size={12} />
-                            )}
-                          </small>
-                          <span className="family-dots">
-                            {categories.map((c) => (
-                              <i
-                                key={c.code}
-                                className={
-                                  p.families.includes(c.code) ? "complete" : ""
-                                }
-                                style={{
-                                  background: p.families.includes(c.code)
-                                    ? colors[c.code]
-                                    : undefined,
-                                }}
-                              >
-                                {c.code}
-                              </i>
-                            ))}
-                          </span>
-                        </span>
-                        {room.turn === p.id && (
-                          <span className="turn-chip">{t("Giliran")}</span>
-                        )}
-                      </button>
-                    ))}
-                </div>
-                <div className="legacy-game-table" aria-hidden="true">
-                  <div className="table-ring" />
-                  <div className="legacy-table-top">
-                    <span>
-                      <span className="live-dot" />{" "}
-                      {room.paused ? t("DIJEDA") : t("PUSINGAN AKTIF")}
-                    </span>
-                    <span>
-                      {room.actions} / {room.settings.maxActions}{" "}
-                      {t("tindakan")}
-                    </span>
-                  </div>
-                  <div className="table-center">
-                    <motion.div
-                      className="deck-stack"
-                      initial={false}
-                      animate={
-                        reduced
-                          ? {}
-                          : {
-                              rotate:
-                                latest?.kind === "start" ||
-                                latest?.kind === "draw"
-                                  ? [0, -5, 5, 0]
-                                  : 0,
-                            }
-                      }
-                      transition={{ duration: 0.45 }}
-                    >
-                      <div className="card-back">
-                        <Layers size={36} />
-                        <b>cariasec</b>
-
-                        <span>✦</span>
-                      </div>
-                      <span>
-                        {room.deckCount} {t("kad")}
-                      </span>
-                    </motion.div>
-                    <motion.div
-                      key={room.turn}
-                      className="legacy-turn-message"
-                      initial={reduced ? false : { opacity: 0.4, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                    />
-                    {!reduced && latest?.kind === "transfer" && latest.card && (
-                      <motion.div
-                        key={latest.id}
-                        className="transfer-card"
-                        aria-hidden="true"
-                        initial={{ opacity: 0, y: -45, scale: 0.65 }}
-                        animate={{
-                          opacity: [0, 1, 1, 0],
-                          y: [-45, 0, 20, 70],
-                          scale: [0.65, 1, 1, 0.85],
-                        }}
-                        transition={{ duration: 1.2 }}
-                      >
-                        <img
-                          src={assetUrl(cardById[latest.card].artwork)}
-                          alt=""
-                        />
-                        <span>{cardById[latest.card].title}</span>
-                      </motion.div>
-                    )}
-                  </div>
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={latest?.id}
-                      className={`table-event event-${latest?.kind}`}
-                      initial={reduced ? false : { opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      role="status"
-                    >
-                      {latest?.kind === "family" ? (
-                        <Trophy size={18} />
-                      ) : (
-                        <Sparkles size={16} />
-                      )}{" "}
-                      {logText(latest, room)}
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-                <section className="hand-area">
-                  <div className="hand-header">
-                    <div>
-                      <span className="eyebrow">
-                        {room.hand.length} {t("KAD")}
-                      </span>
-                      <h2>{t("Kad anda")}</h2>
-                    </div>
-                    <div className="score-badge">
-                      <Trophy size={19} />
-                      <b>{me?.families.length}</b> {t("lengkap")}
-                    </div>
-                  </div>
-                  <div className="hand-scroll phaser-hand-mirror">
-                    {room.hand.map((id) => (
-                      <motion.div
-                        key={id}
-                        layout={!reduced}
-                        initial={
-                          reduced ? false : { opacity: 0, y: 25, rotateY: 90 }
-                        }
-                        animate={{ opacity: 1, y: 0, rotateY: 0 }}
-                      >
-                        <Card
-                          id={id}
-                          small
-                          selected={family === cardById[id].category}
-                          onClick={() => {
-                            setFamily(cardById[id].category);
-                            setDetail(id);
-                          }}
-                        />
-                      </motion.div>
-                    ))}
-                    {!room.hand.length && (
-                      <p className="muted">
-                        {t("Tangan kosong. Ambil kad pada giliran anda.")}
-                      </p>
-                    )}
-                  </div>
-                  <GameControls room={room} target={target} family={family} requested={requested}
-                    busy={busy} online={connected} onTarget={setTarget} onFamily={setFamily} onCard={setRequested} onPreview={setDetail}
-                    onSubmit={() => command(target ? { type: 'request', target, card: requested, version: room.version, actionId: createActionId() } : { type: 'draw', version: room.version, actionId: createActionId() })} />
-                  <div className="your-families">
-                    {me?.families.map((code) => (
-                      <span key={code} style={{ borderColor: colors[code] }}>
-                        <Trophy size={14} />
-                        {categories.find((c) => c.code === code)!.name} ·{" "}
-                        {t("Lengkap")}
-                      </span>
-                    ))}
-                  </div>
-                </section>
-                <details className="activity">
-                  <summary>
-                    {t("Aktiviti ·")} {room.log.length}
-                  </summary>
-                  <ol>
-                    {[...room.log].reverse().map((entry) => (
-                      <li key={entry.id}>{logText(entry, room)}</li>
-                    ))}
-                  </ol>
-                </details>
-              </>
+            {room.phase === "playing" && room.rentak && (
+              <GameScreen
+                key={`${room.code}:${room.rentak.roundNumber}`}
+                room={room}
+                busy={busy}
+                online={online}
+                send={send}
+                en={en}
+                reduced={reduced}
+                countdown={countdown}
+              />
             )}
             {(room.phase === "finished" || room.phase === "cancelled") && (
-              <motion.div
-                className="results"
-                initial={reduced ? false : { opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                {room.phase === 'finished' && <Celebration key={`${room.code}:${room.version}`} reduced={reduced} />}
-                <span className="result-icon">
-                  {room.phase === "finished" ? (
-                    <Trophy size={44} />
-                  ) : (
-                    <Users size={44} />
-                  )}
-                </span>
-                <div className="eyebrow">
-                  {room.phase === "finished"
-                    ? t("PERMAINAN TAMAT")
-                    : t("PUSINGAN DIBATALKAN")}
-                </div>
+              <section className="rt-results rt-panel">
+                <span className="rt-result-star">✦</span>
+                <p className="rt-eyebrow">
+                  {room.rentak?.matchOver
+                    ? tr("KEPUTUSAN PERLAWANAN", "MATCH RESULTS")
+                    : tr("KEPUTUSAN PUSINGAN", "ROUND RESULTS")}
+                </p>
                 <h1>
-                  {room.phase === "cancelled"
-                    ? t("Jumpa di pusingan baharu.")
-                    : room.winners.length > 1
-                      ? t("Kemenangan dikongsi!")
-                      : t("Tahniah, {name}!", {
-                          name:
-                            room.players.find((p) => p.id === room.winners[0])
-                              ?.name ?? "",
-                        })}
+                  {room.winners.length
+                    ? room.players.find((p) => p.id === room.winners[0])?.name
+                    : tr("Seri!", "A draw!")}
                 </h1>
-                <p>{message(room.reason)}</p>
-                <div className="result-list">
+                <p>{room.reason}</p>
+                {room.rentak?.matchOver && (
+                  <p>
+                    {tr("Pemenang perlawanan", "Match winners")}:{" "}
+                    <b>
+                      {room.players
+                        .filter((p) => room.rentak!.matchWinners.includes(p.id))
+                        .map((p) => p.name)
+                        .join(" & ")}
+                    </b>
+                  </p>
+                )}
+                <div className="rt-scoreboard">
                   {[...room.players]
                     .sort(
                       (a, b) =>
-                        b.families.length - a.families.length ||
-                        b.count - a.count,
+                        (room.rentak?.scores[b.id] ?? 0) -
+                        (room.rentak?.scores[a.id] ?? 0),
                     )
                     .map((p) => (
-                      <div
-                        key={p.id}
-                        className={room.winners.includes(p.id) ? "winner" : ""}
-                      >
-                        <span className="avatar" aria-hidden="true">{short(p.name)}</span>
-                        <div>
-                          <b>
-                            {p.name}{" "}
-                            {room.winners.includes(p.id) && <Crown size={16} />}
-                          </b>
-                          <small>
-                            {p.families
-                              .map(
-                                (code) =>
-                                  categories.find((c) => c.code === code)!.name,
-                              )
-                              .join(", ") || t("Belum ada keluarga lengkap")}
-                          </small>
-                        </div>
-                        <strong>
-                          {p.families.length} <small>{t("mata")}</small>
-                        </strong>
+                      <div key={p.id}>
                         <span>
-                          {p.count} {t("kad")}
+                          {p.name}
+                          {p.withdrawn
+                            ? ` · ${tr("menarik diri", "withdrawn")}`
+                            : ""}
                         </span>
+                        <b>
+                          {room.rentak?.scores[p.id] ?? 0}{" "}
+                          {tr("mata", "points")}
+                        </b>
                       </div>
                     ))}
                 </div>
-                <p className="muted">
-                  {room.actions} {t("tindakan · Kad tangan memecah seri.")}
-                </p>
-                <div className="hero-actions">
-                  {room.host === room.you && (
+                {room.host === room.you ? (
+                  <div className="rt-lobby-actions">
                     <button
-                      className="primary"
+                      className="rt-primary"
                       disabled={busy}
-                      onClick={() => command({ type: "again" })}
-                      data-sound="none"
+                      onClick={() => void send({ type: "again" })}
                     >
-                      <RotateCcw size={18} />
-                      {t("Main lagi")}
+                      {room.rentak?.matchOver
+                        ? tr("Main lagi", "Play again")
+                        : tr("Pusingan seterusnya", "Next round")}{" "}
+                      →
                     </button>
+                    {room.rentak?.matchOver &&
+                      room.rentak.matchWinners.length > 1 && (
+                        <button
+                          disabled={busy}
+                          onClick={() => void send({ type: "decider" })}
+                        >
+                          {tr("Pusingan penentu", "Tiebreak round")}
+                        </button>
+                      )}
+                  </div>
+                ) : (
+                  <p>
+                    {tr(
+                      "Menunggu hos membuka lobi.",
+                      "Waiting for the host to reopen the lobby.",
+                    )}
+                  </p>
+                )}
+                <small>
+                  {tr(
+                    "Semua pemain perlu bersedia semula.",
+                    "Everyone must ready up again.",
                   )}
-                  <button
-                    className="secondary"
-                    onClick={() => setPage("learn")}
-                    data-sound="back"
-                  >
-                    <BookOpen size={18} />
-                    {t("Lihat kerjaya")}
-                  </button>
-                  <button
-                    className="text-button"
-                    onClick={() => command({ type: "leave" })}
-                    data-sound="none"
-                  >
-                    {t("Laman utama")}
-                  </button>
-                </div>
-              </motion.div>
+                </small>
+              </section>
             )}
-          </section>
+            <RoomChat
+              messages={session.messages}
+              you={room.you}
+              online={online}
+              historyError={session.chatError}
+              onRefresh={() => void session.syncChat()}
+              onSend={session.sendChat}
+              compact
+            />
+          </>
         )}
       </main>
-      <footer>
-        <span className="footer-brand">cariasec</span>
-        <small>{t("RIASEC · Main & kenali minat")}</small>
+      <footer className="rt-footer">
+        <b>CARIASEC: RENTAK</b>
+        <span>
+          {tr(
+            "Rakan, kad dan satu lagi pusingan.",
+            "Friends, cards and one more round.",
+          )}
+        </span>
+        <button className="rt-text" onClick={() => setPage("tutorial")}>
+          {tr("Cara bermain", "How to play")}
+        </button>
       </footer>
-      {gameMenuOpen && <div className="modal-backdrop game-menu-backdrop">
-        <section className="modal game-menu" role="dialog" aria-modal="true" aria-labelledby="game-menu-title">
-          <button className="close" aria-label={t('Tutup menu')} onClick={() => setGameMenuOpen(false)}><X size={20} /></button>
-          <span className="eyebrow">CARIASEC</span><h2 id="game-menu-title">{t('Menu permainan')}</h2>
-          <button onClick={() => { setGameMenuOpen(false); setSettingsOpen(true); }}><Settings size={18} />{t('Tetapan')}<ArrowRight size={16} /></button>
-          <label className="game-menu-language"><span>{t('Bahasa')}</span><select className="language-switch" aria-label={t('Bahasa')} value={language} onChange={e => setLanguage(e.target.value as 'ms' | 'en')}><option value="ms">BM</option><option value="en">EN</option></select></label>
-          <button onClick={() => { setGameMenuOpen(false); setPage('rules'); }}><CircleHelp size={18} />{t('Cara main')}<ArrowRight size={16} /></button>
-          <button onClick={() => { setGameMenuOpen(false); setPage('learn'); }}><BookOpen size={18} />RIASEC<ArrowRight size={16} /></button>
-          <button className="game-menu-leave" data-sound="none" onClick={() => { setGameMenuOpen(false); void command({ type: 'leave' }); }}><LogOut size={18} />{t('Keluar')}</button>
-        </section>
-      </div>}
-      {settingsOpen && (
-        <div className="modal-backdrop">
-          <section className="modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-            <button className="close" aria-label={t("Tutup")} data-sound="back"
-              onClick={() => setSettingsOpen(false)}><X /></button>
-            <span className="modal-icon"><Settings size={26} /></span>
-            <h2 id="settings-title">{t("Tetapan")}</h2>
-            <SoundSettings />
-            <label className="motion-setting"><input type="checkbox" checked={profile.reducedMotion} onChange={e => setReducedMotion(e.target.checked)} />{t('Kurangkan animasi')}</label>
-          </section>
-        </div>
-      )}
-      <AnimatePresence>
-        {modal && (
-          <motion.div
-            className="modal-backdrop"
-            initial={reduced ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reduced ? {} : { opacity: 0 }}
+      {dialog && (
+        <div className="rt-modal-backdrop">
+          <section
+            className="rt-modal"
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="rt-dialog-title"
           >
-            <section
-              className="modal"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="room-modal-title"
+            <button
+              className="rt-close"
+              aria-label={tr("Tutup", "Close")}
+              onClick={() => setDialog(null)}
             >
-              <button
-                className="close"
-                aria-label={t("Tutup")}
-                data-sound="back"
-                onClick={() => setModal(null)}
-              >
-                <X />
-              </button>
-              <span className="modal-icon">
-                <Users size={26} />
-              </span>
-
-              <h2 id="room-modal-title">
-                {modal === "create" ? t("Cipta bilik.") : t("Sertai bilik.")}
-              </h2>
-
+              <X />
+            </button>
+            <p className="rt-eyebrow">CARIASEC: RENTAK</p>
+            <h2 id="rt-dialog-title">
+              {dialog === "settings"
+                ? tr("Ikut rentak anda.", "Make it yours.")
+                : dialog === "create"
+                  ? tr("Buka meja baharu.", "Start a new table.")
+                  : tr("Jom masuk meja.", "Join the table.")}
+            </h2>
+            {dialog === "settings" ? (
+              <>
+                <label>
+                  {tr("Bahasa", "Language")}
+                  <select
+                    aria-label={tr("Bahasa", "Language")}
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value as "ms" | "en")}
+                  >
+                    <option value="ms">Bahasa Melayu</option>
+                    <option value="en">English</option>
+                  </select>
+                </label>
+                <SoundSettings />
+                <label className="rt-check">
+                  <input
+                    type="checkbox"
+                    checked={profile.reducedMotion}
+                    onChange={(e) => setReducedMotion(e.target.checked)}
+                  />
+                  {tr("Kurangkan animasi", "Reduced motion")}
+                </label>
+                <label className="rt-check">
+                  <input
+                    type="checkbox"
+                    checked={countdown}
+                    onChange={(e) => {
+                      setCountdown(e.target.checked);
+                      try {
+                        localStorage.setItem(
+                          "rentak-countdown",
+                          String(e.target.checked),
+                        );
+                      } catch {}
+                    }}
+                  />
+                  {tr(
+                    "Bunyi lima saat terakhir",
+                    "Last five seconds countdown sound",
+                  )}
+                </label>
+              </>
+            ) : (
               <form
                 onSubmit={async (e) => {
                   e.preventDefault();
-                  await command(
-                    modal === "create"
+                  const ok = await send(
+                    dialog === "create"
                       ? {
                           type: "create",
-                          nickname,
-                          settings: { turnSeconds: seconds, maxActions: limit },
+                          nickname: name.trim(),
+                          settings: settings(),
                         }
                       : {
                           type: "join",
-                          nickname,
-                          code: code.toUpperCase().trim(),
+                          nickname: name.trim(),
+                          code: code.trim().toUpperCase(),
                         },
                   );
+                  if (ok) {
+                    rememberName(name);
+                    setDialog(null);
+                    setPage("room");
+                  }
                 }}
               >
-                <label htmlFor="nickname">{t("Nama panggilan")}</label>
+                <label htmlFor="nickname">
+                  {tr("Nama panggilan", "Nickname")}
+                </label>
                 <input
                   id="nickname"
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
+                  autoComplete="nickname"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   minLength={2}
                   maxLength={20}
                   required
-                  placeholder={t("Contoh: Aina")}
-                  autoComplete="nickname"
+                  placeholder="Aina"
                 />
-                {modal === "join" ? (
+                {dialog === "join" ? (
                   <>
-                    <label htmlFor="room-input">{t("Kod bilik")}</label>
+                    <label htmlFor="room-input">
+                      {tr("Kod bilik", "Room code")}
+                    </label>
                     <input
                       id="room-input"
                       value={code}
                       onChange={(e) => setCode(e.target.value.toUpperCase())}
-                      maxLength={6}
                       minLength={6}
+                      maxLength={6}
                       required
                       placeholder="ABC234"
                       autoCapitalize="characters"
                     />
                   </>
                 ) : (
-                  <div className="settings-row">
-                    <div>
-                      <label htmlFor="seconds">{t("Masa giliran")}</label>
-                      <select
-                        id="seconds"
-                        value={seconds}
-                        onChange={(e) =>
-                          setSeconds(Number(e.target.value) as 30 | 60 | 90)
-                        }
-                      >
-                        <option value={30}>{t("30 saat")}</option>
-                        <option value={60}>{t("60 saat")}</option>
-                        <option value={90}>{t("90 saat")}</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label htmlFor="limit">{t("Had tindakan")}</label>
-                      <select
-                        id="limit"
-                        value={limit}
-                        onChange={(e) =>
-                          setLimit(Number(e.target.value) as 60 | 120 | 180)
-                        }
-                      >
-                        <option value={60}>{t("60 tindakan")}</option>
-                        <option value={120}>{t("120 tindakan")}</option>
-                        <option value={180}>{t("180 tindakan")}</option>
-                      </select>
-                    </div>
-                  </div>
+                  options(mode, format, (m, f) => {
+                    setMode(m);
+                    setFormat(f);
+                  })
+                )}
+                {error && (
+                  <p className="rt-form-error" role="alert">
+                    {error}
+                  </p>
                 )}
                 <button
-                  className="primary full"
-                  disabled={busy || !online}
+                  className="rt-primary rt-full"
                   type="submit"
-                  data-sound="none"
+                  disabled={busy}
                 >
                   {busy
-                    ? t("Sebentar…")
-                    : modal === "create"
-                      ? t("Cipta bilik")
-                      : t("Masuk bilik")}
+                    ? tr("Sebentar…", "One moment…")
+                    : dialog === "create"
+                      ? tr("Cipta bilik", "Create room")
+                      : tr("Masuk bilik", "Join room")}
                   <ArrowRight size={18} />
                 </button>
               </form>
-              <button
-                className="text-button centered"
-                onClick={() => setModal(modal === "create" ? "join" : "create")}
-              >
-                {modal === "create"
-                  ? t("Ada kod? Sertai")
-                  : t("Tiada bilik? Cipta")}
-              </button>
-            </section>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      {detail && (
-        <div className="modal-backdrop">
-          <section
-            className="modal card-detail"
-            role="dialog"
-            aria-modal="true"
-            aria-label={t("Butiran kad")}
-          >
-            <button
-              className="close"
-              aria-label={t("Tutup butiran kad")}
-              data-sound="back"
-              onClick={() => setDetail(null)}
-            >
-              <X />
-            </button>
-            <Card id={detail} />
-            <h2>{cardById[detail].title}</h2>
-            <ul className="career-description" data-testid="career-description">
-              {cardById[detail].description.split(/(?<=[.!?])\s+/).map((point) => (
-                <li key={point}>{point}</li>
-              ))}
-            </ul>
-            <p>
-              {t("Keluarga")}{" "}
-              {
-                categories.find((c) => c.code === cardById[detail].category)!
-                  .name
-              }{" "}
-              {t("· Kad")} {detail}
-            </p>
-            <p>
-              {
-                categories.find((c) => c.code === cardById[detail].category)!
-                  .description
-              }
-            </p>
-            <div className="salary-band" data-testid="salary-band">
-              <span>
-                {salaryFor(detail).kind === "allowance"
-                  ? t("Contoh elaun Ahli Parlimen")
-                  : t("Anggaran gaji bulanan")}
-              </span>
-              <strong>{salaryRange(salaryFor(detail))}</strong>
-              <span>{t("Malaysia · sebulan")}</span>
-              <span>{t("Julat rujukan asal")}</span>
-            </div>
-            <SalaryLevels id={detail} />
-            <button className="primary full" onClick={() => setDetail(null)}>
-              {t("Faham")} <Check size={17} />
-            </button>
+            )}
           </section>
         </div>
       )}
-    </>
+    </div>
   );
 }
-function AppEntry() {
-  const { ready } = useI18n();
-  return ready ? <App /> : <Welcome />;
-}
-lockIPhoneZoom();
 createRoot(document.getElementById("root")!).render(
   <LanguageProvider>
-    <SoundProvider><AppEntry /></SoundProvider>
+    <SoundProvider>
+      <App />
+    </SoundProvider>
   </LanguageProvider>,
 );
