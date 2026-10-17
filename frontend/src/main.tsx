@@ -87,6 +87,7 @@ import { Celebration } from './components/Celebration';
 import { BoardBoundary } from './components/BoardBoundary';
 import './ui-upgrade.css';
 import './focus-game.css';
+import './party-cards.css';
 const PhaserBoard = React.lazy(async () => {
   for (let attempt = 0; ; attempt++) {
     try {

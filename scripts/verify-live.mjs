@@ -95,7 +95,7 @@ try {
     ),
   );
   await host.locator(".hero-art .career-card").first().click();
-  await expect(host.locator(".card-detail small")).toHaveCount(0);
+  await expect(host.locator(".card-detail > small")).toHaveCount(0);
   await expect(host.getByTestId("salary-band")).toContainText(
     "Anggaran gaji bulanan",
   );

@@ -27,12 +27,15 @@ export function Card({
         {categories.find((x) => x.code === c.category)!.name}
         <span>✦</span>
       </span>
+      <span className="card-sweep" aria-hidden="true" />
+      <span className="card-corner" aria-hidden="true">{c.category}<small>{c.id.slice(1)}</small></span>
       <img
         src={assetUrl(c.artwork)}
         alt={t("Ilustrasi {title}", { title: c.title })}
         loading="lazy"
       />
       <span className="card-title">{c.title}</span>
+      <span className="card-corner card-corner-bottom" aria-hidden="true">{c.category}<small>{c.id.slice(1)}</small></span>
       <span className="card-source">
         {c.id} <span>CARIASEC</span>
       </span>

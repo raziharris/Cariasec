@@ -140,11 +140,12 @@ export class CardTableScene extends Scene {
 
   private drawTable(width: number, height: number) {
     const g = this.add.graphics();
-    g.fillGradientStyle(0x123b31, 0x123b31, 0x0b2822, 0x0b2822, 1);
+    g.fillStyle(0x202e59, 1);
+    g.fillGradientStyle(0x253369, 0x263d73, 0x101935, 0x151e42, 1);
     g.fillRoundedRect(0, 0, width, height, Math.min(32, width * 0.05));
     g.lineStyle(2, 0xffffff, 0.1);
     g.strokeRoundedRect(12, 12, width - 24, height - 24, 24);
-    g.lineStyle(1, 0xf5d99f, 0.14);
+    g.lineStyle(3, 0x91a8ff, 0.22);
     g.strokeEllipse(width / 2, height * 0.48, width * 0.72, height * 0.55);
     this.layer!.add(g);
   }
@@ -165,7 +166,7 @@ export class CardTableScene extends Scene {
       const active = state.turn === player.id;
       const selected = state.selectedTarget === player.id;
       const panel = this.add.graphics();
-      panel.fillStyle(selected ? 0xf3d39a : 0x173f35, 0.96);
+      panel.fillStyle(selected ? 0xffdf69 : 0x253660, 0.96);
       panel.fillRoundedRect(x, y, cardWidth, compact ? 53 : 76, 14);
       panel.lineStyle(active ? 3 : 1, active ? 0xf5c768 : 0xffffff, active ? 1 : 0.16);
       panel.strokeRoundedRect(x, y, cardWidth, compact ? 53 : 76, 14);
@@ -215,7 +216,7 @@ export class CardTableScene extends Scene {
     const y = compact ? (state.players.length > 4 ? 150 : 94) : 112;
     const back = this.add.graphics();
     back.fillStyle(0xe2c28b, 1).fillRoundedRect(26, y - 21, 28, 36, 6);
-    back.fillStyle(0x285c4c, 1).fillRoundedRect(22, y - 18, 28, 36, 6);
+    back.fillStyle(0xc93243, 1).fillRoundedRect(22, y - 18, 28, 36, 6);
     back.lineStyle(1, 0xd9c18c).strokeRoundedRect(22, y - 18, 28, 36, 6);
     const brand = this.add.text(36, y, 'C', { fontFamily: 'Georgia, serif', fontSize: '17px', color: '#f2d69c' }).setOrigin(0.5);
     const count = this.add.text(66, y - 12, `${state.deckCount} ${state.labels.cards}`, { fontFamily: 'Nunito Sans, Arial', fontSize: '13px', fontStyle: 'bold', color: '#fff8ec' });
@@ -307,15 +308,18 @@ export class CardTableScene extends Scene {
     shadow.fillStyle(0x000000, 0.24);
     shadow.fillRoundedRect(-width / 2 + 4, -height / 2 + 7, width, height, 11);
     const frame = this.add.graphics();
-    frame.fillStyle(0xfffbf2, 1);
+    frame.fillStyle(0xffffff, 1);
     frame.fillRoundedRect(-width / 2, -height / 2, width, height, 11);
-    frame.lineStyle(selected ? 4 : 2, selected ? 0xf1c15f : hex(colors[card.category]), 1);
+    frame.lineStyle(selected ? 4 : 2, selected ? 0xffdb57 : 0xffffff, 1);
     frame.strokeRoundedRect(-width / 2, -height / 2, width, height, 11);
     frame.fillStyle(hex(colors[card.category]), 1);
-    frame.fillRoundedRect(-width / 2 + 5, -height / 2 + 5, width - 10, 26, 7);
+    frame.fillRoundedRect(-width / 2 + 5, -height / 2 + 5, width - 10, height - 10, 7);
+    frame.fillStyle(0xffffff, 1);
+    frame.fillEllipse(0, -height * 0.02, width * 0.82, height * 0.65);
+    frame.fillRoundedRect(-width * 0.44, height * 0.25, width * 0.88, height * 0.17, 5);
     const art = this.add.image(0, -height * 0.025, card.id);
-    const maxArtW = width * 0.86;
-    const maxArtH = height * 0.60;
+    const maxArtW = width * 0.68;
+    const maxArtH = height * 0.52;
     art.setScale(Math.min(maxArtW / art.width, maxArtH / art.height));
     const family = this.add
       .text(-width / 2 + 11, -height / 2 + 10, card.category, {
@@ -326,7 +330,7 @@ export class CardTableScene extends Scene {
       })
       .setOrigin(0, 0);
     const title = this.add
-      .text(0, height * 0.34, card.title, {
+      .text(0, height * 0.335, card.title, {
         fontFamily: "Nunito Sans, Arial",
         fontSize: `${width < 130 ? 12 : 14}px`,
         fontStyle: "bold",
@@ -335,7 +339,10 @@ export class CardTableScene extends Scene {
         wordWrap: { width: width * 0.88 },
       })
       .setOrigin(0.5);
-    container.add([shadow, frame, art, family, title]);
+    const corner = this.add.text(width / 2 - 11, height / 2 - 10, card.category, {
+      fontFamily: 'Nunito Sans, Arial', fontSize: '13px', fontStyle: 'bold', color: '#ffffff',
+    }).setOrigin(0, 0).setAngle(180);
+    container.add([shadow, frame, art, family, title, corner]);
     return container;
   }
 

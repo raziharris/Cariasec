@@ -1,0 +1,82 @@
+/* Shared party-card identity across React pages and the Phaser table. */
+:root { color:#182446; background:#f4f5fd; --green:#263b83; --cream:#f4f5fd; }
+body { background:radial-gradient(ellipse at 90% 0,#e1e7ff 0,transparent 48%),#f4f5fd; }
+h1,h2,h3,.brand,.focus-brand { font-family:'Nunito Sans',sans-serif; font-weight:900; }
+.site-header { border-bottom:2px solid #18244612; }
+.brand,.focus-brand { color:#182446; }
+.brand-mark { background:#e43f51; color:white; border:2px solid white; box-shadow:3px 4px 0 #182446; border-radius:8px; }
+.brand-dot { color:#e43f51; }
+.primary,.nav-play { background:#263b83; color:white; border:2px solid #182446; border-radius:14px; box-shadow:0 4px 0 #182446; font-weight:900; min-height:48px; }
+.primary:hover:not(:disabled),.nav-play:hover:not(:disabled) { transform:translateY(-2px); background:#334da5; }
+.primary:active:not(:disabled) { transform:translateY(3px); box-shadow:0 1px 0 #182446; }
+.secondary { background:white; color:#263b83; border:2px solid #263b83; border-radius:14px; min-height:48px; }
+.hero { position:relative; background:radial-gradient(ellipse at 80% 45%,#dce3ff 0,transparent 56%); }
+.hero h1 { font-size:clamp(48px,6.8vw,90px); font-weight:900; line-height:.96; letter-spacing:-.06em; color:#182446; }
+.hero h1 em { color:#d32e46; text-shadow:2px 3px 0 white; }
+.hero .eyebrow { color:#364b83; letter-spacing:2px; }
+.hero-meta span { color:#364464; background:white; border:1px solid #d0d8ee; border-radius:99px; padding:7px 12px; }
+.hero-meta { gap:10px; }
+.orbit { border-color:#8095d244; }
+.game-token { border:3px solid white; background:#ffda56; color:#182446; box-shadow:4px 5px 0 #182446; }
+.art-caption { background:#182446; color:white; border-radius:99px; padding:8px 18px; }
+.career-card { position:relative; isolation:isolate; overflow:hidden; background:var(--category); color:white; border:6px solid white; border-radius:18px; box-shadow:0 0 0 2px #182446,4px 7px 0 #182446,0 18px 28px #18244620; padding:12px 10px 10px; }
+.career-card .card-sweep { position:absolute; z-index:-1; width:83%; height:67%; top:13%; left:9%; border-radius:50%; transform:rotate(22deg); background:#fffdf5; box-shadow:inset -6px -4px 0 #1824460c; }
+.career-card .card-category { position:relative; z-index:2; color:white; background:transparent; min-height:24px; padding:0 0 0 28px; font-size:10px; justify-content:flex-end; gap:5px; }
+.career-card .card-category > b,.career-card .card-category > span { display:none; }
+.career-card .card-corner { position:absolute; top:7px; left:7px; display:flex; flex-direction:column; align-items:center; color:white; font-size:25px; line-height:.85; font-weight:900; text-shadow:1px 2px 0 #0003; }
+.career-card .card-corner small { font-size:11px; margin-top:5px; }
+.career-card .card-corner-bottom { top:auto; left:auto; bottom:5px; right:5px; transform:rotate(180deg); font-size:19px; }
+.career-card > img { position:relative; width:78%; margin:5px auto 0; object-fit:contain; mix-blend-mode:multiply; }
+.career-card .card-title { position:relative; z-index:2; background:#fffdf5; color:#182446; border-radius:7px; margin:5px 5px 0; padding:7px 3px; font-weight:900; line-height:1.15; }
+.career-card .card-source { color:white; padding:8px 25px 0 4px; font-weight:900; font-size:9px; }
+.career-card.selected { outline:4px solid #ffce3a; outline-offset:4px; }
+.category-tile { background:white; border:2px solid #182446; border-bottom:6px solid var(--category); border-radius:18px; box-shadow:0 4px 0 #18244614; }
+.category-tile > span { color:white; background:var(--category); border-radius:9px; font-weight:900; }
+.family-tabs button.active,.family-tabs button[aria-selected=true] { background:#263b83; color:white; }
+.welcome-screen { background:radial-gradient(circle at 15% 25%,#49599c,transparent 45%),radial-gradient(circle at 90% 90%,#9a355e,transparent 45%),#182446; min-height:100dvh; }
+.welcome-card { background:#fffdf7; border:3px solid white; border-radius:28px; box-shadow:8px 10px 0 #0b1436,0 24px 80px #070d3333; }
+.welcome-logo { border:4px solid white; border-radius:24px; box-shadow:0 4px 0 #182446; transform:rotate(-3deg); }
+.welcome-card h1 { color:#182446; font-weight:900; }
+.language-options label.chosen { background:#e8edff; border-color:#263b83; color:#182446; }
+input,select,textarea { border-radius:12px; }
+.modal,.lobby-panel,.rules-panel,.result-panel,.learn-panel { background:#fffdf7; border:2px solid #d0d8ee; border-radius:24px; }
+.modal h2,.room-page h1 { color:#182446; font-weight:900; }
+.modal-backdrop { background:#101735ad; }
+.room-code { background:#e8edff; color:#263b83; border:2px dashed #7287c4; }
+.player-card { border:2px solid #d0d8ee; border-radius:18px; background:white; }
+.player-card.ready { border-color:#177649; background:#edfaf3; }
+.focus-header { background:#f4f5fdf5; border-bottom:2px solid #d7dff3; }
+.focus-code,.game-menu-trigger,.compact-chat .chat-toggle { background:white; border-color:#c7d1ed; color:#182446; }
+.focus-play .game-hud { background:white; color:#182446; border:2px solid #c7d1ed; }
+.focus-play .game-hud.my-turn { background:#fff1b7; border-color:#e4af25; box-shadow:0 3px 0 #e4af25; }
+.focus-play .game-table.phaser-game-table { border-color:#182446; box-shadow:0 6px 0 #0c1330,0 15px 28px #18244620; }
+.focus-controls .tap-selection { border:2px solid #d0d8ee; background:white; }
+.request-steps { background:#edf0fc; }
+.focus-controls .request-steps button { color:#334775; }
+.request-steps button[aria-current=step] { background:#263b83; color:white; }
+.request-steps i { background:#d8e2ff; color:#182446; }
+.focus-controls .target-choice { background:#f4f6ff; border:2px solid #d0d8ee; }
+.focus-controls .target-choice.selected { background:#fff1b7; border-color:#bd8b12; }
+.focus-controls .family-choices button { border:2px solid var(--family-color); background:white; }
+.focus-controls .family-choices button.selected { box-shadow:0 3px 0 var(--family-color); }
+.focus-controls .collection-badge { background:white; border:2px solid var(--family-color); }
+.focus-controls .collection-badge > b { background:var(--family-color); color:white; border-radius:6px; }
+.request-card { background:var(--family-color); border:4px solid white; box-shadow:0 0 0 2px var(--family-color),0 5px 0 #182446; border-radius:13px; color:white; overflow:hidden; }
+.request-card > img { width:85%; margin:4px auto; background:white; border-radius:50%; object-fit:contain; }
+.request-card > b { background:white; color:#182446; border-radius:6px; margin:5px; padding:5px; }
+.request-card.selected { outline:3px solid #e7b222; outline-offset:3px; }
+.request-family { color:white; }
+.request-dock { background:#f4f5fdf5; border-color:#d0d8ee; }
+.game-menu > button:not(.close),.game-menu-language { color:#182446; background:#edf0fc; }
+.site-footer { color:#43547c; border-color:#d0d8ee; }
+@media(max-width:720px) {
+ .hero h1 { font-size:clamp(48px,13vw,68px); }
+ .career-card { border-width:4px; border-radius:13px; padding:8px 6px; }
+ .career-card .card-corner { font-size:21px; }
+ .career-card .card-category { font-size:8px; }
+ .career-card .card-title { padding:6px 2px; }
+ .hero-meta span { padding:6px 9px; }
+ .welcome-card { box-shadow:4px 6px 0 #0b1436; }
+ .focus-controls .collection-badge { border-radius:10px; }
+}
+@media(prefers-reduced-motion:reduce) { .primary:hover:not(:disabled),.nav-play:hover:not(:disabled) { transform:none; } }
