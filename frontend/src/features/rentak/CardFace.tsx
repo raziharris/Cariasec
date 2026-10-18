@@ -1,10 +1,5 @@
-import type { CSSProperties } from "react";
-import {
-  deckById,
-  cardMark,
-  identities,
-  type Suit,
-} from "../../../../shared/rentak";
+import { cardArtworkKey } from "../../../../shared/card-artwork";
+import { deckById, identities, type Suit } from "../../../../shared/rentak";
 export function Mascot({ suit }: { suit: Suit }) {
   const color = identities[suit].color;
   return (
@@ -73,50 +68,15 @@ export function CardFace({
   back?: boolean;
   en?: boolean;
 }) {
-  const c = id ? deckById[id] : null;
-  if (back || !c)
-    return (
-      <div className="rt-card rt-card-back">
-        <div className="rt-back-symbols">
-          {Object.entries(identities).map(([key, value]) => (
-            <span key={key} style={{ color: value.color }}>
-              {value.symbol}
-            </span>
-          ))}
-        </div>
-        <b>REΝTAK</b>
-        <small>CARIASEC</small>
-      </div>
-    );
-  const identity = c.kind === "prisma" ? null : identities[c.suit],
-    mark = cardMark(c);
   return (
-    <div
-      className={`rt-card ${c.kind === "prisma" ? "rt-prisma" : ""}`}
-      style={
-        {
-          "--card-color": identity?.color ?? "#5869b8",
-          "--card-ink":
-            c.kind !== "prisma" && ["R", "E"].includes(c.suit)
-              ? "#172239"
-              : "#fff",
-        } as CSSProperties
-      }
-    >
-      <span className="rt-corner">
-        {mark}
-        <small>{identity?.symbol ?? "✦"}</small>
-      </span>
-      <span className="rt-card-mark">{mark}</span>
-      <span className="rt-card-label">
-        {c.kind === "number"
-          ? en
-            ? identity?.en
-            : identity?.name
-          : c.kind.toUpperCase()}
-      </span>
-      <span className="rt-corner rt-corner-bottom">{mark}</span>
-      {c.kind !== "prisma" && <Mascot suit={c.suit} />}
+    <div className="rt-card rt-card-illustrated">
+      <img
+        src={`${import.meta.env.BASE_URL}rentak-cards/${cardArtworkKey(back ? undefined : id)}.svg`}
+        alt={
+          back || !id ? (en ? "Card back" : "Belakang kad") : cardLabel(id, en)
+        }
+        draggable={false}
+      />
     </div>
   );
 }

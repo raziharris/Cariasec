@@ -6,12 +6,12 @@ export const identities: Record<
   Suit,
   { name: string; en: string; color: string; symbol: string }
 > = {
-  R: { name: "Pembina", en: "Builders", color: "#D97824", symbol: "⬡" },
-  I: { name: "Peneroka", en: "Explorers", color: "#2865CC", symbol: "◎" },
-  A: { name: "Pencipta", en: "Creators", color: "#8554C7", symbol: "★" },
-  S: { name: "Penghubung", en: "Connectors", color: "#C84572", symbol: "●●" },
-  E: { name: "Penggerak", en: "Leaders", color: "#D4A51D", symbol: "ϟ" },
-  C: { name: "Penyusun", en: "Organizers", color: "#167C77", symbol: "▦" },
+  R: { name: "Pembina", en: "Builders", color: "#9C701F", symbol: "⬡" },
+  I: { name: "Peneroka", en: "Explorers", color: "#367A38", symbol: "◎" },
+  A: { name: "Pencipta", en: "Creators", color: "#B54617", symbol: "★" },
+  S: { name: "Penghubung", en: "Connectors", color: "#73278F", symbol: "●●" },
+  E: { name: "Penggerak", en: "Leaders", color: "#245AA0", symbol: "ϟ" },
+  C: { name: "Penyusun", en: "Organizers", color: "#575C5A", symbol: "▦" },
 };
 export type Card = { id: string } & (
   | { kind: "number"; suit: Suit; rank: number }

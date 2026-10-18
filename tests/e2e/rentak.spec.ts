@@ -1,5 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { makeDeck } from "../../shared/rentak";
+import { cardArtworkKey } from "../../shared/card-artwork";
 const base = process.env.LIVE_URL ?? "http://127.0.0.1:5173/";
 async function noOverflow(page: Page) {
   await expect
@@ -12,6 +14,30 @@ async function noOverflow(page: Page) {
 }
 async function create(page: Page, name: string, beginner = false) {
   await page.goto(base);
+  const artwork = [
+    ...new Set(["back", ...makeDeck().map((c) => cardArtworkKey(c.id))]),
+  ];
+  const broken = await page.evaluate(
+    async ({ artwork, base }) => {
+      const results = await Promise.all(
+        artwork.map(async (key) => {
+          const image = new Image();
+          image.src = new URL(`rentak-cards/${key}.svg`, base).href;
+          try {
+            await image.decode();
+            return null;
+          } catch {
+            return key;
+          }
+        }),
+      );
+      return results.filter(Boolean);
+    },
+    { artwork, base },
+  );
+  expect(broken, "All shared React and Phaser card assets must decode").toEqual(
+    [],
+  );
   await page.getByRole("button", { name: "Cipta bilik", exact: true }).click();
   await page.getByLabel("Nama panggilan").fill(name);
   if (beginner) await page.getByLabel("Mod permainan").selectOption("beginner");
@@ -156,10 +182,18 @@ for (const beginner of [false, true])
       await a
         .getByRole("button", { name: "Hantar mesej", exact: true })
         .click();
-      await expect(a.getByText("Jom Rentak!", { exact: true })).toBeVisible();
+      await expect(
+        a
+          .getByRole("log", { name: "Mesej bilik" })
+          .getByText("Jom Rentak!", { exact: true }),
+      ).toBeVisible();
       await a.getByRole("button", { name: "Tutup chat", exact: true }).click();
       await b.getByRole("button", { name: /Chat bilik/ }).click();
-      await expect(b.getByText("Jom Rentak!", { exact: true })).toBeVisible();
+      await expect(
+        b
+          .getByRole("log", { name: "Mesej bilik" })
+          .getByText("Jom Rentak!", { exact: true }),
+      ).toBeVisible();
       await b.getByRole("button", { name: "Tutup chat", exact: true }).click();
       let actions = 0,
         pairs = 0;

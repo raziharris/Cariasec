@@ -313,115 +313,18 @@ button.rt-text {
 }
 .rt-card {
   position: relative;
-  aspect-ratio: 2/3;
-  border: 6px solid #fff4df;
-  border-radius: 16px;
-  background: var(--card-color, #2865cc);
-  color: #fff;
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  border-radius: 8%;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: inset 0 0 0 1px #ffffff30;
+  background: #073e46;
+  box-shadow: 0 3px 9px #0005;
+}
+.rt-card > img {
+  display: block;
   width: 100%;
-  container-type: inline-size;
-}
-.rt-card:before {
-  content: "";
-  position: absolute;
-  width: 120%;
-  aspect-ratio: 1;
-  border: 1px solid #ffffff30;
-  border-radius: 30%;
-  transform: rotate(30deg);
-  background: #ffffff08;
-}
-.rt-card:after {
-  content: "";
-  position: absolute;
-  inset: 9px;
-  border: 1px solid #ffffff25;
-  border-radius: 7px;
-}
-.rt-card-mark {
-  font-size: 55cqw;
-  font-weight: 900;
-  line-height: 1;
-  z-index: 1;
-  text-shadow: 0 3px 0 #00000020;
-  transform: translateY(-5%);
-}
-.rt-corner {
-  position: absolute;
-  top: 5px;
-  left: 7px;
-  z-index: 1;
-  display: grid;
-  text-align: center;
-  font-weight: 900;
-  font-size: 13cqw;
-  line-height: 1;
-}
-.rt-corner small {
-  font-size: 8cqw;
-  color: white;
-  margin-top: 3px;
-}
-.rt-corner-bottom {
-  top: auto;
-  bottom: 7px;
-  left: auto;
-  right: 7px;
-  transform: rotate(180deg);
-}
-.rt-card-label {
-  position: absolute;
-  bottom: 19%;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  font-weight: 900;
-  font-size: 9cqw;
-  letter-spacing: 0.2px;
-  z-index: 2;
-}
-.rt-card .rt-mascot {
-  position: absolute;
-  width: 30%;
-  bottom: -2px;
-  left: 4px;
-  z-index: 1;
-  opacity: 0.96;
-}
-.rt-prisma {
-  background: conic-gradient(
-    from 20deg,
-    #8554c7,
-    #c84572,
-    #d4a51d,
-    #167c77,
-    #2865cc,
-    #8554c7
-  );
-}
-.rt-card-back {
-  background: #253450;
-  flex-direction: column;
-}
-.rt-card-back b {
-  font-size: 13cqw;
-  letter-spacing: 1px;
-}
-.rt-card-back small {
-  font-size: 7cqw;
-  letter-spacing: 1px;
-}
-.rt-back-symbols {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  font-size: 20cqw;
-  margin-bottom: 14px;
+  height: 100%;
+  object-fit: contain;
 }
 .rt-start-strip {
   display: grid;
@@ -1474,19 +1377,6 @@ button.rt-text {
 .chat-toggle small {
   display: none;
 }
-.rt-card {
-  color: var(--card-ink, #fff);
-}
-.rt-corner small {
-  color: inherit;
-}
-.rt-prisma .rt-card-label {
-  background: #172239d9;
-  padding: 3px 0;
-}
 .rt-phaser {
   overflow: hidden;
-}
-.rt-card-mark {
-  text-shadow: none;
 }
