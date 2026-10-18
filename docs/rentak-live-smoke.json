@@ -1,14 +1,14 @@
 {
-  "date": "2026-10-18T01:11:34.541Z",
+  "date": "2026-10-18T01:29:21.858Z",
   "url": "https://cariasec.site/Cariasec/",
   "health": {
     "status": "ok",
-    "rooms": 0,
+    "rooms": 1,
     "transport": "colyseus"
   },
   "stats": {
-    "startTime": "2026-10-18T01:07:17.693Z",
-    "duration": 256819.845,
+    "startTime": "2026-10-18T01:26:49.196Z",
+    "duration": 152629.984,
     "expected": 3,
     "skipped": 0,
     "unexpected": 0,
