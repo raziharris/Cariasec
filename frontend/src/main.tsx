@@ -17,6 +17,7 @@ import { SoundSettings } from "./audio/SoundSettings";
 import { RoomChat } from "./components/RoomChat";
 import { useRoomSession } from "./features/rentak/useRoomSession";
 import { CardFace, Mascot } from "./features/rentak/CardFace";
+import { IdentityCards } from "./features/rentak/IdentityCards";
 import { GameScreen } from "./features/rentak/GameScreen";
 import { Tutorial } from "./features/rentak/Tutorial";
 import {
@@ -361,28 +362,13 @@ function App() {
                   {tr("Terokai RIASEC", "Explore RIASEC")} →
                 </button>
               </div>
-              <div className="rt-identity-grid">
-                {suits.map((suit) => (
-                  <button
-                    key={suit}
-                    onClick={() => {
-                      setLearnSuit(suit);
-                      setPage("learn");
-                    }}
-                    style={
-                      {
-                        "--identity-color": identities[suit].color,
-                      } as React.CSSProperties
-                    }
-                  >
-                    <Mascot suit={suit} />
-                    <b>{en ? identities[suit].en : identities[suit].name}</b>
-                    <small>
-                      {suit} · {identities[suit].symbol}
-                    </small>
-                  </button>
-                ))}
-              </div>
+              <IdentityCards
+                en={en}
+                onSelect={(suit) => {
+                  setLearnSuit(suit);
+                  setPage("learn");
+                }}
+              />
             </section>
           </>
         )}
