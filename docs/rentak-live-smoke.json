@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-18T01:11:34.541Z",
+  "url": "https://cariasec.site/Cariasec/",
+  "health": {
+    "status": "ok",
+    "rooms": 0,
+    "transport": "colyseus"
+  },
+  "stats": {
+    "startTime": "2026-10-18T01:07:17.693Z",
+    "duration": 256819.845,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "passed": true,
+  "scope": "Chromium browser contexts on one machine, not physical iPhones or separate networks. Mobile viewports 320/375/390/430; tutorial, settings, learning, accessibility, Normal three-round Party Match, Beginner Quick Round, private hands, refresh/reconnect, chat, rematch.",
+  "errors": []
+}
