@@ -16,7 +16,7 @@ import { SoundProvider, useSound } from "./audio/SoundProvider";
 import { SoundSettings } from "./audio/SoundSettings";
 import { RoomChat } from "./components/RoomChat";
 import { useRoomSession } from "./features/rentak/useRoomSession";
-import { CardFace, Mascot } from "./features/rentak/CardFace";
+import { CardFace } from "./features/rentak/CardFace";
 import { IdentityCards } from "./features/rentak/IdentityCards";
 import { GameScreen } from "./features/rentak/GameScreen";
 import { Tutorial } from "./features/rentak/Tutorial";
@@ -471,94 +471,188 @@ function App() {
                     "Everyone must be ready before the host starts.",
                   )}
                 </p>
-                {options(
-                  room.settings.mode ?? "normal",
-                  room.settings.format ?? "quick",
-                  (m, f) =>
-                    void send({ type: "settings", settings: settings(m, f) }),
-                  busy ||
-                    room.host !== room.you ||
-                    (!!room.rentak && !room.rentak.matchOver),
-                )}
-                <div className="rt-rule-summary">
-                  {room.settings.mode === "beginner"
-                    ? tr(
-                        "Beginner: nombor, Pintas, Beban dan Prisma. Tiada Rentak.",
-                        "Beginner: numbers, Pintas, Beban and Prisma. No Rentak.",
-                      )
-                    : tr(
-                        "Normal: semua aksi + Rentak sekali setiap pusingan.",
-                        "Normal: all actions + one Rentak per round.",
-                      )}{" "}
-                  {tr(
-                    "7 kad seorang. Habiskan tangan untuk menang. Tiada stacking.",
-                    "7 cards each. Empty your hand to win. No stacking.",
-                  )}
-                </div>
-                <div className="rt-seats">
-                  {Array.from({ length: 6 }, (_, index) => {
-                    const p = room.players.filter((p) => !p.withdrawn)[index];
-                    return (
-                      <div key={index} className={p ? "occupied" : ""}>
-                        {p ? (
-                          <>
-                            <Mascot suit={suits[index]} />
-                            <b>
-                              {p.name}{" "}
-                              {p.id === room.host && <Crown size={15} />}
-                            </b>
-                            <span>
-                              {!p.connected
-                                ? tr("Terputus", "Disconnected")
-                                : p.ready
-                                  ? tr("✓ Bersedia", "✓ Ready")
-                                  : tr("Belum bersedia", "Not ready")}
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="rt-empty-seat">+</span>
-                            <small>{tr("Tempat kosong", "Open seat")}</small>
-                          </>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="rt-lobby-actions">
-                  <button
-                    disabled={busy || !online}
-                    aria-pressed={
-                      room.players.find((p) => p.id === room.you)?.ready
-                    }
-                    onClick={() =>
-                      void send({
-                        type: "ready",
-                        ready: !room.players.find((p) => p.id === room.you)
-                          ?.ready,
-                      })
-                    }
-                  >
-                    {room.players.find((p) => p.id === room.you)?.ready
-                      ? tr("Batalkan bersedia", "Not ready")
-                      : tr("Saya bersedia", "I am ready")}
-                  </button>
-                  {room.host === room.you && (
+                <div className="rt-lobby-layout">
+                  <aside className="rt-lobby-config">
+                    <h2>
+                      <Settings size={17} />
+                      {tr("Tetapan meja", "Table settings")}
+                    </h2>
+                    <p>
+                      {room.host === room.you
+                        ? tr(
+                            "Anda hos. Pilih cara bermain.",
+                            "You're the host. Set up your game.",
+                          )
+                        : tr(
+                            "Tetapan dipilih oleh hos.",
+                            "Your host chooses the settings.",
+                          )}
+                    </p>
+                    {options(
+                      room.settings.mode ?? "normal",
+                      room.settings.format ?? "quick",
+                      (m, f) =>
+                        void send({
+                          type: "settings",
+                          settings: settings(m, f),
+                        }),
+                      busy ||
+                        room.host !== room.you ||
+                        (!!room.rentak && !room.rentak.matchOver),
+                    )}
+                    <div className="rt-rule-summary">
+                      {room.settings.mode === "beginner"
+                        ? tr(
+                            "Beginner: nombor, Pintas, Beban dan Prisma. Tiada Rentak.",
+                            "Beginner: numbers, Pintas, Beban and Prisma. No Rentak.",
+                          )
+                        : tr(
+                            "Normal: semua aksi + Rentak sekali setiap pusingan.",
+                            "Normal: all actions + one Rentak per round.",
+                          )}{" "}
+                      {tr(
+                        "7 kad seorang. Habiskan tangan untuk menang. Tiada stacking.",
+                        "7 cards each. Empty your hand to win. No stacking.",
+                      )}
+                    </div>
+                  </aside>
+                  <div className="rt-lobby-players">
+                    <div className="rt-lobby-player-heading">
+                      <h2>{tr("Rakan semeja", "Around the table")}</h2>
+                      <span>
+                        {room.players.filter((p) => !p.withdrawn).length} / 6{" "}
+                        {tr("pemain", "players")}
+                      </span>
+                    </div>
+                    <div className="rt-player-seats">
+                      {Array.from({ length: 6 }, (_, index) => {
+                        const p = room.players.filter((p) => !p.withdrawn)[
+                          index
+                        ];
+                        return (
+                          <div
+                            key={index}
+                            className={`rt-player-seat ${p ? "occupied" : "vacant"} ${p?.ready && p.connected ? "is-ready" : ""} ${p?.id === room.you ? "is-you" : ""}`}
+                          >
+                            {p ? (
+                              <>
+                                <img
+                                  className="rt-seat-portrait"
+                                  src={`${import.meta.env.BASE_URL}cards/${["R1", "I3", "A2", "S2", "E3", "C2"][index]}.webp`}
+                                  alt=""
+                                />
+                                <div className="rt-seat-details">
+                                  <small className="rt-seat-role">
+                                    {p.id === room.host ? (
+                                      <>
+                                        <Crown size={12} /> {tr("Hos", "Host")}
+                                      </>
+                                    ) : (
+                                      tr("Pemain", "Player")
+                                    )}
+                                    {p.id === room.you && (
+                                      <> · {tr("Anda", "You")}</>
+                                    )}
+                                  </small>
+                                  <b title={p.name}>{p.name} </b>
+                                  <span className="rt-seat-status">
+                                    <i aria-hidden="true" />
+                                    {!p.connected
+                                      ? tr("Terputus", "Disconnected")
+                                      : p.ready
+                                        ? tr("✓ Bersedia", "✓ Ready")
+                                        : tr("Belum bersedia", "Not ready")}
+                                  </span>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <span className="rt-seat-number">
+                                  0{index + 1}
+                                </span>
+                                <div>
+                                  <b>{tr("Tempat kosong", "Open seat")}</b>
+                                  <small>
+                                    {tr(
+                                      "Menanti rakan anda",
+                                      "Waiting for a friend",
+                                    )}
+                                  </small>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                     <button
-                      className="rt-primary"
-                      disabled={
-                        busy ||
-                        !online ||
-                        room.players.filter((p) => !p.withdrawn).length < 2 ||
-                        room.players.some(
-                          (p) => !p.withdrawn && (!p.ready || !p.connected),
-                        )
-                      }
-                      onClick={() => void send({ type: "start" })}
+                      className="rt-seat-invite"
+                      onClick={() => void invite()}
                     >
-                      {tr("Mulakan permainan", "Start game")} →
+                      <Copy size={16} />
+                      {tr("Salin pautan jemputan", "Copy invite link")}
+                      <ArrowRight size={16} />
                     </button>
-                  )}
+                  </div>
+                </div>
+                <div className="rt-lobby-footer">
+                  <div className="rt-ready-summary" role="status">
+                    <strong>
+                      {
+                        room.players.filter(
+                          (p) => !p.withdrawn && p.ready && p.connected,
+                        ).length
+                      }{" "}
+                      / {room.players.filter((p) => !p.withdrawn).length}{" "}
+                      {tr("bersedia", "ready")}
+                    </strong>
+                    <span>
+                      {room.players.filter((p) => !p.withdrawn).length < 2
+                        ? tr(
+                            "Jemput seorang rakan untuk mula.",
+                            "Invite a friend to get started.",
+                          )
+                        : tr(
+                            "Semua pemain perlu tekan bersedia.",
+                            "Every player needs to mark ready.",
+                          )}
+                    </span>
+                  </div>
+                  <div className="rt-lobby-actions">
+                    <button
+                      disabled={busy || !online}
+                      aria-pressed={
+                        room.players.find((p) => p.id === room.you)?.ready
+                      }
+                      onClick={() =>
+                        void send({
+                          type: "ready",
+                          ready: !room.players.find((p) => p.id === room.you)
+                            ?.ready,
+                        })
+                      }
+                    >
+                      {room.players.find((p) => p.id === room.you)?.ready
+                        ? tr("Batalkan bersedia", "Not ready")
+                        : tr("Saya bersedia", "I am ready")}
+                    </button>
+                    {room.host === room.you && (
+                      <button
+                        className="rt-primary"
+                        disabled={
+                          busy ||
+                          !online ||
+                          room.players.filter((p) => !p.withdrawn).length < 2 ||
+                          room.players.some(
+                            (p) => !p.withdrawn && (!p.ready || !p.connected),
+                          )
+                        }
+                        onClick={() => void send({ type: "start" })}
+                      >
+                        {tr("Mulakan permainan", "Start game")} →
+                      </button>
+                    )}
+                  </div>
                 </div>
               </section>
             )}

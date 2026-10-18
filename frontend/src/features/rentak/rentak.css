@@ -1381,6 +1381,296 @@ button.rt-text {
   overflow: hidden;
 }
 
+.rt-lobby.rt-panel {
+  max-width: 1120px;
+  padding: 32px;
+  background: linear-gradient(145deg, #1b2940, #141e31 65%);
+  border-radius: 26px;
+}
+.rt-lobby > h1 {
+  margin-bottom: 8px;
+}
+.rt-lobby > p:not(.rt-eyebrow) {
+  color: #b8c8df;
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+.rt-lobby-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 28px;
+}
+.rt-lobby h2 {
+  font-size: 16px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.rt-lobby-config {
+  background: #0d1729;
+  border: 1px solid #ffffff12;
+  border-radius: 18px;
+  padding: 20px;
+}
+.rt-lobby-config > p {
+  font-size: 12px;
+  color: #aabbd5;
+  margin: 9px 0 24px;
+  line-height: 1.6;
+}
+.rt-lobby-config .rt-options {
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+.rt-lobby-config .rt-options label {
+  margin: 0;
+  font-size: 12px;
+  color: #b8c8df;
+}
+.rt-lobby-config select {
+  font-size: 13px;
+  background: #1b2940;
+  border-color: #43536f;
+  padding: 13px 10px;
+}
+.rt-lobby-config .rt-rule-summary {
+  border-top: 1px solid #34425a;
+  border-radius: 0;
+  padding: 18px 0 0;
+  margin-top: 24px;
+  background: transparent;
+  font-size: 12px;
+}
+.rt-lobby-player-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 5px 0 18px;
+}
+.rt-lobby-player-heading > span {
+  color: #b8c8df;
+  font-size: 12px;
+  background: #273650;
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+.rt-player-seats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.rt-player-seat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 104px;
+  padding: 14px;
+  border: 1px solid #394962;
+  border-radius: 16px;
+  background: #202d43;
+  min-width: 0;
+}
+.rt-player-seat.is-you {
+  border-color: #dab66d;
+  background: linear-gradient(120deg, #3b3540, #202d43);
+}
+.rt-seat-portrait {
+  width: 58px;
+  height: 70px;
+  object-fit: cover;
+  border: 2px solid #d4b36c;
+  border-radius: 30px 30px 10px 10px;
+  flex-shrink: 0;
+}
+.rt-seat-details {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.rt-seat-role {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #f1ce87;
+}
+.rt-seat-details b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 16px;
+  color: #fff6e8;
+}
+.rt-seat-status {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 11px;
+  color: #c1cde0;
+}
+.rt-seat-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #95a4bb;
+  flex-shrink: 0;
+}
+.is-ready .rt-seat-status {
+  color: #9ee7bb;
+}
+.is-ready .rt-seat-status i {
+  background: #9ee7bb;
+}
+.rt-player-seat.is-ready {
+  border-color: #5d9f7c;
+}
+.rt-player-seat.vacant {
+  background: #101a2b55;
+  border: 1px dashed #3a4b65;
+}
+.rt-seat-number {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #43516b;
+  border-radius: 50%;
+  color: #92a4bf;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.vacant > div {
+  display: grid;
+  gap: 5px;
+}
+.vacant b {
+  font-size: 12px;
+  color: #b9c8df;
+}
+.vacant small {
+  font-size: 10px;
+  color: #a3b4cf;
+}
+.rt-lobby .rt-seat-invite {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+  padding: 12px;
+  margin-top: 16px;
+  border: 1px solid #42536f;
+  background: #22334b;
+  color: #e2eafa;
+  font-size: 12px;
+}
+.rt-lobby-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  border-top: 1px solid #39465a;
+  margin-top: 28px;
+  padding-top: 24px;
+}
+.rt-ready-summary {
+  display: grid;
+  gap: 5px;
+}
+.rt-ready-summary strong {
+  color: #f4d491;
+  font-size: 14px;
+}
+.rt-ready-summary span {
+  color: #b6c5dd;
+  font-size: 12px;
+}
+.rt-lobby-footer .rt-lobby-actions {
+  margin: 0;
+  gap: 10px;
+}
+.rt-lobby-actions button[aria-pressed="true"] {
+  background: #214635;
+  border-color: #69b38c;
+  color: #b8f3cf;
+}
+@media (max-width: 900px) {
+  .rt-lobby-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .rt-lobby-config .rt-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rt-lobby-config > p {
+    margin-bottom: 16px;
+  }
+  .rt-lobby-config .rt-rule-summary {
+    margin-top: 16px;
+    padding-top: 14px;
+  }
+}
+@media (max-width: 550px) {
+  .rt-lobby.rt-panel {
+    padding: 20px 14px;
+    border-radius: 20px;
+  }
+  .rt-lobby > h1 {
+    font-size: 29px;
+  }
+  .rt-lobby-config {
+    padding: 16px;
+  }
+  .rt-lobby-config .rt-options {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .rt-player-seats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+  .rt-player-seat.occupied {
+    grid-column: 1 / -1;
+  }
+  .rt-player-seat {
+    min-height: 78px;
+    padding: 12px 14px;
+  }
+  .rt-player-seat.vacant {
+    min-height: 64px;
+    gap: 8px;
+    padding: 12px 8px;
+  }
+  .rt-player-seat.vacant .rt-seat-number {
+    width: 26px;
+    height: 26px;
+    font-size: 10px;
+  }
+  .rt-player-seat.vacant b {
+    font-size: 10px;
+  }
+  .rt-player-seat.vacant small {
+    display: none;
+  }
+  .rt-seat-portrait {
+    width: 48px;
+    height: 58px;
+  }
+  .rt-lobby-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+  .rt-lobby-footer .rt-lobby-actions {
+    flex-direction: column;
+  }
+  .rt-lobby-player-heading > span {
+    font-size: 10px;
+  }
+}
+
 .rt-profile-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
